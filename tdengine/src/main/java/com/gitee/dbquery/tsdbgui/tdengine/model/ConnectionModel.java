@@ -18,6 +18,8 @@ import java.util.List;
 public class ConnectionModel {
     private String name;
     private String ip;
-    private Integer port;
+    private String port;
+    private String username;
+    private String password;
     private List<DatabaseModel> dbList;
 }

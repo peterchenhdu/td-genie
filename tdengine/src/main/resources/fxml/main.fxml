@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.jfoenix.controls.JFXTabPane?>
-<?import com.jfoenix.controls.JFXTreeView?>
+<?import com.jfoenix.controls.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <StackPane fx:id="rootPane" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
     <VBox>
         <MenuBar>
             <menus>
-                <Menu mnemonicParsing="false" text="File">
+                <Menu mnemonicParsing="false" text="文件">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Close"/>
+                        <MenuItem fx:id="createConnectionMenuItem" mnemonicParsing="false" text="新建连接"/>
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Edit">
@@ -31,4 +31,29 @@
             <JFXTabPane fx:id="tabPane"/>
         </SplitPane>
     </VBox>
+    <JFXDialog fx:id="dialog" overlayClose="false">
+        <JFXDialogLayout>
+            <heading>
+                <Label fx:id="dialogTitle">新增连接</Label>
+            </heading>
+            <body>
+                <GridPane>
+                    <children>
+                        <JFXTextField fx:id="nameTextField"  promptText="*连接名称"  GridPane.rowIndex="1"/>
+                    <JFXTextField fx:id="ipTextField"  promptText="*IP地址"  GridPane.rowIndex="2"/>
+                    <JFXTextField fx:id="portTextField"  promptText="*RESTFul端口" GridPane.rowIndex="3"/>
+                    <JFXTextField fx:id="usernameTextField"  promptText="*用户名" GridPane.rowIndex="4"/>
+                    <JFXTextField fx:id="passwordTextField"  promptText="*密码" GridPane.rowIndex="5"/>
+                    </children>
+                </GridPane>
+            </body>
+            <actions>
+                <JFXProgressBar fx:id="elementProgressBar" managed="false" maxWidth="1.7976931348623157E308"
+                                prefWidth="320" visible="false">
+                </JFXProgressBar>
+                <JFXButton fx:id="saveButton" buttonType="RAISED" text="保存"/>
+                <JFXButton fx:id="cancelButton" buttonType="RAISED" text="取消"/>
+            </actions>
+        </JFXDialogLayout>
+    </JFXDialog>
 </StackPane>
