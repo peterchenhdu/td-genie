@@ -17,5 +17,10 @@ import lombok.NoArgsConstructor;
 @Data
 public class TableModel {
     private StableResDTO stb;
-    private DatabaseResDTO db;
+    private DatabaseModel db;
+
+    @Override
+    public String toString() {
+        return stb.getName() + "@" + db.getName() + "@" + db.getConnectionModel().getName();
+    }
 }

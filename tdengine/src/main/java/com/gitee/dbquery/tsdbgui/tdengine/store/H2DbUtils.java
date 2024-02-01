@@ -123,38 +123,7 @@ public class H2DbUtils {
         return true;
     }
 
-    public static void main(String[] args) throws SQLException {
-        List<String> tableNameList = new ArrayList<>();
-        List<Map<String, Object>> tables = query("show tables;");
-        for (Map<String, Object> tb : tables) {
-            tableNameList.add(tb.get("TABLE_NAME").toString());
-        }
 
-        if (!tableNameList.contains("t_connection".toUpperCase())) {
-            Map<String, Object> fieldMap = new HashMap<>();
-            fieldMap.put("name", String.class);
-            fieldMap.put("ip", String.class);
-            fieldMap.put("port", String.class);
-            fieldMap.put("username", String.class);
-            fieldMap.put("password", String.class);
-            createTable("t_connection", fieldMap);
-        }
-
-//
-//        Map<String, Object> dataMap = new HashMap<>();
-//        dataMap.put("id", 1L);
-//        dataMap.put("name", "test");
-//        dataMap.put("birthday", LocalDateTime.now());
-//        dataMap.put("height", 12.6);
-//        insertByHashMap("t_user", Collections.singletonList(dataMap));
-//
-//
-//        List<Map<String, Object>> users = query("select * from  t_user;");
-//        for (Map<String, Object> user : users) {
-//            System.out.println(user);
-//        }
-
-    }
 
     public static List<Map<String, Object>> query(String sql) throws SQLException {
         // 创建List对象来存储查询结果

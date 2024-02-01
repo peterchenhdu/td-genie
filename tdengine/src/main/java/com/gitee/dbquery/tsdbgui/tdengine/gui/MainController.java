@@ -3,9 +3,11 @@ package com.gitee.dbquery.tsdbgui.tdengine.gui;
 import com.gitee.dbquery.tsdbgui.tdengine.gui.component.CommonTabController;
 import com.gitee.dbquery.tsdbgui.tdengine.model.CommonNode;
 import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
+import com.gitee.dbquery.tsdbgui.tdengine.model.DatabaseModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.TableModel;
 import com.gitee.dbquery.tsdbgui.tdengine.store.ApplicationStore;
 import com.gitee.dbquery.tsdbgui.tdengine.store.H2DbUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.store.TsdbConnectionUtils;
 import com.jfoenix.controls.*;
 import com.jfoenix.svg.SVGGlyphLoader;
 import com.zhenergy.zntsdb.common.dto.ConnectionDTO;
@@ -27,6 +29,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
@@ -36,6 +40,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * MainController
@@ -78,17 +83,14 @@ public class MainController {
     private JFXTextField passwordTextField;
 
     private TreeItem<CommonNode> root;
-
     private void onSelectItem(CommonNode item) {
         if (item.getType() == -1) {
             return;
         }
         currentNode = item;
-        System.out.println(item);
         try {
-            String tabPrefix = item.getType() == 0 ? "连接" : item.getType() == 1 ? "库" : item.getType() == 2 ? "表" : "";
             String icon = item.getType() == 0 ? "connection" : item.getType() == 1 ? "database" : item.getType() == 2 ? "stable" : "";
-            addTab(item.getName(), SVGGlyphLoader.getIcoMoonGlyph(ApplicationStore.ICON_FONT_KEY + "." + icon), CommonTabController.class, null);
+            addTab(item.getData().toString(), SVGGlyphLoader.getIcoMoonGlyph(ApplicationStore.ICON_FONT_KEY + "." + icon), CommonTabController.class, null);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -99,6 +101,7 @@ public class MainController {
         dialog.setTransitionType(JFXDialog.DialogTransition.TOP);
         dialog.show(rootPane);
     }
+
     @ActionMethod("closeDialog")
     private void closeDialog() {
         dialog.close();
@@ -131,8 +134,59 @@ public class MainController {
         dialog.close();
 
     }
+
+    public void initTable() throws SQLException {
+        List<String> tableNameList = new ArrayList<>();
+        List<Map<String, Object>> tables = H2DbUtils.query("show tables;");
+        for (Map<String, Object> tb : tables) {
+            tableNameList.add(tb.get("TABLE_NAME").toString());
+        }
+
+        if (!tableNameList.contains("t_connection".toUpperCase())) {
+            Map<String, Object> fieldMap = new HashMap<>();
+            fieldMap.put("name", String.class);
+            fieldMap.put("ip", String.class);
+            fieldMap.put("port", String.class);
+            fieldMap.put("username", String.class);
+            fieldMap.put("password", String.class);
+            H2DbUtils.createTable("t_connection", fieldMap);
+        }
+
+//
+//        Map<String, Object> dataMap = new HashMap<>();
+//        dataMap.put("id", 1L);
+//        dataMap.put("name", "test");
+//        dataMap.put("birthday", LocalDateTime.now());
+//        dataMap.put("height", 12.6);
+//        insertByHashMap("t_user", Collections.singletonList(dataMap));
+//
+//
+//        List<Map<String, Object>> users = query("select * from  t_user;");
+//        for (Map<String, Object> user : users) {
+//            System.out.println(user);
+//        }
+
+    }
+
+    private List<ConnectionModel> getConnectionList() throws SQLException {
+        List<Map<String, Object>> connectionList = H2DbUtils.query("select * from  t_connection;");
+        return connectionList.stream().map(con -> {
+            ConnectionModel connectionDTO = new ConnectionModel();
+            connectionDTO.setIp(con.get("IP").toString());
+            connectionDTO.setPort(con.get("PORT").toString());
+            connectionDTO.setUsername(con.get("USERNAME").toString());
+            connectionDTO.setPassword(con.get("PASSWORD").toString());
+            connectionDTO.setName(con.get("NAME").toString());
+            return connectionDTO;
+        }).collect(Collectors.toList());
+    }
+
     @PostConstruct
-    public void init() {
+    public void init() throws SQLException {
+        ImageView rootIcon = new ImageView("/images/app.png");
+
+        initTable();
+
         splitPane.setDividerPositions(0.25, 1);
         ApplicationContext.getInstance().register(this, MainController.class);
 
@@ -143,13 +197,11 @@ public class MainController {
         });
 
 
-
-
-        ConnectionDTO connectionDTO = new ConnectionDTO();
-        connectionDTO.setIp("10.162.201.62");
-        connectionDTO.setRestfulPort("6041");
-        connectionDTO.setUsername("root");
-        connectionDTO.setPassword("Abc123_");
+//        ConnectionDTO connectionDTO = new ConnectionDTO();
+//        connectionDTO.setIp("10.162.201.62");
+//        connectionDTO.setRestfulPort("6041");
+//        connectionDTO.setUsername("root");
+//        connectionDTO.setPassword("Abc123_");
 
 //        ConnectionDTO connectionDTO = new ConnectionDTO();
 //        connectionDTO.setIp("127.0.0.1");
@@ -158,12 +210,12 @@ public class MainController {
 //        connectionDTO.setPassword("taosdata");
 
 
-        Map<DatabaseResDTO, List<StableResDTO>> tbMap = new LinkedHashMap<>();
-        currentConnection = ConnectionUtils.getConnection(connectionDTO);
-        for (DatabaseResDTO db : DataBaseUtils.getAllDatabase(currentConnection)) {
-            List<StableResDTO> tbList = SuperTableUtils.getAllStable(currentConnection, db.getName());
-            tbMap.put(db, tbList);
-        }
+//        Map<DatabaseResDTO, List<StableResDTO>> tbMap = new LinkedHashMap<>();
+//        currentConnection = ConnectionUtils.getConnection(connectionDTO);
+//        for (DatabaseResDTO db : DataBaseUtils.getAllDatabase(currentConnection)) {
+//            List<StableResDTO> tbList = SuperTableUtils.getAllStable(currentConnection, db.getName());
+//            tbMap.put(db, tbList);
+//        }
 
         leftTreeView.setMinWidth(100);
         root = new TreeItem<>(new CommonNode("根节点", -1, null));
@@ -171,18 +223,42 @@ public class MainController {
         leftTreeView.setRoot(root);
 
 
-        TreeItem<CommonNode> tdConnectionTreeItem = new TreeItem<>(new CommonNode("TD-127.0.0.1", 0, null));
 
-        root.getChildren().add(tdConnectionTreeItem);
+        List<ConnectionModel> connectionNodeList = getConnectionList();
+        for (ConnectionModel connectionModel : connectionNodeList) {
+            TreeItem<CommonNode> connectionItem = new TreeItem<>(new CommonNode(connectionModel.getName(), 0, connectionModel), rootIcon);
+            root.getChildren().add(connectionItem);
 
-        tbMap.forEach((k, v) -> {
-            TreeItem<CommonNode> dbNode = new TreeItem<>(new CommonNode(k.getName(), 1, k));
-            for (StableResDTO tb : v) {
-                TreeItem<CommonNode> tbNode = new TreeItem<>(new CommonNode(tb.getName(), 2, new TableModel(tb, k)));
-                dbNode.getChildren().add(tbNode);
+            Connection connection = TsdbConnectionUtils.getConnection(connectionModel);
+
+            for (DatabaseResDTO db : DataBaseUtils.getAllDatabase(connection)) {
+                List<StableResDTO> tbList = SuperTableUtils.getAllStable(connection, db.getName());
+                DatabaseModel databaseModel = new DatabaseModel(db.getName(), db, connectionModel);
+                TreeItem<CommonNode> dbNode = new TreeItem<>(new CommonNode(db.getName(), 1, databaseModel));
+                connectionItem.getChildren().add(dbNode);
+
+                for (StableResDTO tb : tbList) {
+                    TreeItem<CommonNode> tbNode = new TreeItem<>(new CommonNode(tb.getName(), 2, new TableModel(tb, databaseModel)));
+                    dbNode.getChildren().add(tbNode);
+                }
             }
-            tdConnectionTreeItem.getChildren().add(dbNode);
-        });
+
+
+        }
+
+//
+//        TreeItem<CommonNode> tdConnectionTreeItem = new TreeItem<>(new CommonNode("TD-127.0.0.1", 0, null));
+//
+//        root.getChildren().add(tdConnectionTreeItem);
+//
+//        tbMap.forEach((k, v) -> {
+//            TreeItem<CommonNode> dbNode = new TreeItem<>(new CommonNode(k.getName(), 1, k));
+//            for (StableResDTO tb : v) {
+//                TreeItem<CommonNode> tbNode = new TreeItem<>(new CommonNode(tb.getName(), 2, new TableModel(tb, k)));
+//                dbNode.getChildren().add(tbNode);
+//            }
+//            tdConnectionTreeItem.getChildren().add(dbNode);
+//        });
 
 
         // 监听当前的选择
@@ -192,7 +268,6 @@ public class MainController {
         tabPane.setMinWidth(300);
 
     }
-
 
 
     public <T> void addTab(String title, Node icon, Class<T> controllerClass, Object userData) {
@@ -231,8 +306,6 @@ public class MainController {
         }
         tabPane.getSelectionModel().select(tab);
     }
-
-
 
 
     @PreDestroy

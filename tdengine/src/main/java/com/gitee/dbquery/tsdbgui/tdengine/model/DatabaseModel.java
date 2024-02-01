@@ -1,5 +1,7 @@
 package com.gitee.dbquery.tsdbgui.tdengine.model;
 
+import com.zhenergy.zntsdb.common.dto.res.DatabaseResDTO;
+import com.zhenergy.zntsdb.common.dto.res.StableResDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,5 +19,11 @@ import java.util.List;
 @Data
 public class DatabaseModel {
     private String name;
-    private List<TableModel> tbList;
+    private DatabaseResDTO databaseResDTO;
+    private ConnectionModel connectionModel;
+
+    @Override
+    public String toString() {
+        return name + "@" + connectionModel.getName();
+    }
 }

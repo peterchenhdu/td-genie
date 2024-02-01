@@ -1,8 +1,12 @@
 package com.gitee.dbquery.tsdbgui.tdengine.gui.component;
 
 import com.gitee.dbquery.tsdbgui.tdengine.gui.MainController;
+import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
+import com.gitee.dbquery.tsdbgui.tdengine.model.DatabaseModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.TableModel;
+import com.gitee.dbquery.tsdbgui.tdengine.store.TsdbConnectionUtils;
 import com.zhenergy.fire.util.ObjectUtils;
+import com.zhenergy.zntsdb.common.dto.ConnectionDTO;
 import com.zhenergy.zntsdb.common.dto.QueryRstDTO;
 import com.zhenergy.zntsdb.common.dto.res.DatabaseResDTO;
 import com.zhenergy.zntsdb.common.dto.res.StableResDTO;
@@ -22,6 +26,7 @@ import javafx.scene.control.cell.MapValueFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +91,13 @@ public class CommonTabController {
             tableView.getColumns().add(keepColumn);
             tableView.getColumns().add(cacheColumn);
 
-            List<DatabaseResDTO> dbList = DataBaseUtils.getAllDatabase(MainController.currentConnection);
+
+            ConnectionModel connectionModel = (ConnectionModel) MainController.currentNode.getData();
+
+
+
+
+            List<DatabaseResDTO> dbList = DataBaseUtils.getAllDatabase(TsdbConnectionUtils.getConnection(connectionModel));
 
             dbList.forEach(db -> {
                 Map<String, Object> testMap = new HashMap<>();
@@ -130,7 +141,11 @@ public class CommonTabController {
             tableView.getColumns().add(tagsColumn);
             tableView.getColumns().add(tablesColumn);
 
-            List<StableResDTO> stbList = SuperTableUtils.getAllStable(MainController.currentConnection, MainController.currentNode.getName());
+
+            DatabaseModel databaseModel = (DatabaseModel) MainController.currentNode.getData();
+            Connection connection = TsdbConnectionUtils.getConnection(databaseModel.getConnectionModel());
+
+            List<StableResDTO> stbList = SuperTableUtils.getAllStable(connection, MainController.currentNode.getName());
 
             stbList.forEach(db -> {
                 Map<String, Object> testMap = new HashMap<>();
@@ -143,7 +158,8 @@ public class CommonTabController {
             });
         } else if (MainController.currentNode.getType() == 2) {
             TableModel tableModel = (TableModel) MainController.currentNode.getData();
-            QueryRstDTO queryRstDTO = ConnectionUtils.executeQuery(MainController.currentConnection, "select * from " + tableModel.getDb().getName() + "." +
+            Connection connection = TsdbConnectionUtils.getConnection(tableModel.getDb().getConnectionModel());
+            QueryRstDTO queryRstDTO = ConnectionUtils.executeQuery(connection, "select * from " + tableModel.getDb().getName() + "." +
                     tableModel.getStb().getName() + " limit 1, 10");
 
             queryRstDTO.getColumnList().forEach(column -> {
@@ -183,7 +199,8 @@ public class CommonTabController {
             Integer page = (Integer) queryMap.get("page");
             int start = (page - 1) * 20;
             TableModel tableModel = (TableModel) MainController.currentNode.getData();
-            QueryRstDTO queryRstDTO = ConnectionUtils.executeQuery(MainController.currentConnection, "select * from " + tableModel.getDb().getName() + "." +
+            Connection connection = TsdbConnectionUtils.getConnection(tableModel.getDb().getConnectionModel());
+            QueryRstDTO queryRstDTO = ConnectionUtils.executeQuery(connection, "select * from " + tableModel.getDb().getName() + "." +
                     tableModel.getStb().getName() + " limit " + start + ", " + 20);
 
             tableView.getColumns().clear();
@@ -206,7 +223,7 @@ public class CommonTabController {
             });
 
 
-            QueryRstDTO countRstDTO = ConnectionUtils.executeQuery(MainController.currentConnection, "select count(*) from " + tableModel.getDb().getName() + "." +
+            QueryRstDTO countRstDTO = ConnectionUtils.executeQuery(connection, "select count(*) from " + tableModel.getDb().getName() + "." +
                     tableModel.getStb().getName());
             long total = ObjectUtils.isEmpty(countRstDTO.getDataList()) ? 0 : (long) countRstDTO.getDataList().get(0).get("count(*)");
             pageCount.setValue((total / 20) + 1);
