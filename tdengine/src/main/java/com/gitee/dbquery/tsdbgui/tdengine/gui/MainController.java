@@ -2,10 +2,11 @@ package com.gitee.dbquery.tsdbgui.tdengine.gui;
 
 import com.gitee.dbquery.tsdbgui.tdengine.gui.component.CommonTabController;
 import com.gitee.dbquery.tsdbgui.tdengine.model.CommonNode;
+import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.TableModel;
 import com.gitee.dbquery.tsdbgui.tdengine.store.ApplicationStore;
-import com.jfoenix.controls.JFXTabPane;
-import com.jfoenix.controls.JFXTreeView;
+import com.gitee.dbquery.tsdbgui.tdengine.store.H2DbUtils;
+import com.jfoenix.controls.*;
 import com.jfoenix.svg.SVGGlyphLoader;
 import com.zhenergy.zntsdb.common.dto.ConnectionDTO;
 import com.zhenergy.zntsdb.common.dto.res.DatabaseResDTO;
@@ -18,14 +19,14 @@ import io.datafx.controller.context.ApplicationContext;
 import io.datafx.controller.flow.Flow;
 import io.datafx.controller.flow.FlowException;
 import io.datafx.controller.flow.FlowHandler;
+import io.datafx.controller.flow.action.ActionMethod;
+import io.datafx.controller.flow.action.ActionTrigger;
 import io.datafx.controller.flow.container.AnimatedFlowContainer;
 import io.datafx.controller.flow.container.ContainerAnimations;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TreeItem;
+import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
@@ -33,10 +34,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.SQLException;
+import java.util.*;
 
 /**
  * MainController
@@ -50,11 +49,35 @@ public class MainController {
     public static Connection currentConnection;
     private final HashMap<String, Tab> tabsMap = new HashMap<>();
     @FXML
+    private StackPane rootPane;
+    @FXML
     private SplitPane splitPane;
     @FXML
     private JFXTreeView<CommonNode> leftTreeView;
     @FXML
     private JFXTabPane tabPane;
+    @FXML
+    private MenuItem createConnectionMenuItem;
+    @FXML
+    private JFXDialog dialog;
+    @FXML
+    @ActionTrigger("saveJob")
+    private JFXButton saveButton;
+    @FXML
+    @ActionTrigger("closeDialog")
+    private JFXButton cancelButton;
+    @FXML
+    private JFXTextField nameTextField;
+    @FXML
+    private JFXTextField ipTextField;
+    @FXML
+    private JFXTextField portTextField;
+    @FXML
+    private JFXTextField usernameTextField;
+    @FXML
+    private JFXTextField passwordTextField;
+
+    private TreeItem<CommonNode> root;
 
     private void onSelectItem(CommonNode item) {
         if (item.getType() == -1) {
@@ -72,25 +95,67 @@ public class MainController {
 
     }
 
+    private void showAddJobDialog() {
+        dialog.setTransitionType(JFXDialog.DialogTransition.TOP);
+        dialog.show(rootPane);
+    }
+    @ActionMethod("closeDialog")
+    private void closeDialog() {
+        dialog.close();
+    }
+
+    @ActionMethod("saveJob")
+    private void saveJob() throws SQLException {
+        System.out.println("save job...");
+
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("name", nameTextField.getText());
+        dataMap.put("ip", ipTextField.getText());
+        dataMap.put("port", portTextField.getText());
+        dataMap.put("username", usernameTextField.getText());
+        dataMap.put("password", passwordTextField.getText());
+
+        H2DbUtils.insertByHashMap("t_connection", Collections.singletonList(dataMap));
+
+        ConnectionModel connectionModel = new ConnectionModel();
+        connectionModel.setName(nameTextField.getText());
+        connectionModel.setIp(ipTextField.getText());
+        connectionModel.setPort(portTextField.getText());
+        connectionModel.setUsername(usernameTextField.getText());
+        connectionModel.setPassword(passwordTextField.getText());
+
+        TreeItem<CommonNode> tdConnectionTreeItem = new TreeItem<>(new CommonNode(nameTextField.getText(), 0, connectionModel));
+
+        root.getChildren().add(tdConnectionTreeItem);
+        System.out.println(ipTextField.getText());
+        dialog.close();
+
+    }
     @PostConstruct
     public void init() {
-
         splitPane.setDividerPositions(0.25, 1);
-
         ApplicationContext.getInstance().register(this, MainController.class);
 
 
-//        ConnectionDTO connectionDTO = new ConnectionDTO();
-//        connectionDTO.setIp("10.162.201.62");
-//        connectionDTO.setRestfulPort("6041");
-//        connectionDTO.setUsername("root");
-//        connectionDTO.setPassword("Abc123_");
+        createConnectionMenuItem.setOnAction((ActionEvent t) -> {
+            System.out.println("菜单点击");
+            showAddJobDialog();
+        });
+
+
+
 
         ConnectionDTO connectionDTO = new ConnectionDTO();
-        connectionDTO.setIp("127.0.0.1");
+        connectionDTO.setIp("10.162.201.62");
         connectionDTO.setRestfulPort("6041");
         connectionDTO.setUsername("root");
-        connectionDTO.setPassword("taosdata");
+        connectionDTO.setPassword("Abc123_");
+
+//        ConnectionDTO connectionDTO = new ConnectionDTO();
+//        connectionDTO.setIp("127.0.0.1");
+//        connectionDTO.setRestfulPort("6041");
+//        connectionDTO.setUsername("root");
+//        connectionDTO.setPassword("taosdata");
 
 
         Map<DatabaseResDTO, List<StableResDTO>> tbMap = new LinkedHashMap<>();
@@ -101,7 +166,7 @@ public class MainController {
         }
 
         leftTreeView.setMinWidth(100);
-        TreeItem<CommonNode> root = new TreeItem<>(new CommonNode("根节点", -1, null));
+        root = new TreeItem<>(new CommonNode("根节点", -1, null));
         root.setExpanded(true);
         leftTreeView.setRoot(root);
 
