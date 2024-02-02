@@ -598,7 +598,7 @@
     /*-fx-background-insets: 10 10 0 0;*/
     -fx-background-radius: 14px 14px 0 0;
     -fx-border-radius: 14px 14px 0 0;
-    -fx-pref-height: 49;
+    -fx-pref-height: 30;
 }
 
 /**列头行设置背景*/
@@ -628,7 +628,7 @@
 
 
 .table-column {
-    -fx-pref-height: 49;
+    -fx-pref-height: 30;
     -fx-background-color: transparent;
     -fx-alignment: center;
     -fx-border-width: 0.4;
@@ -642,9 +642,14 @@
 }
 
 .table-view .table-row-cell .table-cell {
-    -fx-pref-height: 52;
+    -fx-pref-height: 30;
     -fx-alignment: center;
     -fx-border-width: 0.4;
+}
+
+.table-cell:selected {
+    -fx-background-color: #29AAE3;
+    -fx-text-fill: white;
 }
 
 .table-row-cell:odd {
@@ -662,7 +667,6 @@
 
 .table-view .table-row-cell:selected {
     -fx-background-color: -fx-accent-suspension-color;
-
 }
 
 .table-view .table-row-cell:selected .table-cell {

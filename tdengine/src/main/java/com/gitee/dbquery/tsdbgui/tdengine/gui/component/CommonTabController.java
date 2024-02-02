@@ -5,6 +5,7 @@ import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.DatabaseModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.TableModel;
 import com.gitee.dbquery.tsdbgui.tdengine.store.TsdbConnectionUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.util.TableUtils;
 import com.zhenergy.fire.util.ObjectUtils;
 import com.zhenergy.zntsdb.common.dto.ConnectionDTO;
 import com.zhenergy.zntsdb.common.dto.QueryRstDTO;
@@ -19,10 +20,15 @@ import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.MapValueFactory;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -52,7 +58,39 @@ public class CommonTabController {
 
     @PostConstruct
     public void init() {
+// enable copy/paste
+        TableUtils.installCopyPasteHandler(tableView);
+        tableView.getSelectionModel().setCellSelectionEnabled(true);
+        tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
+        MenuItem item = new MenuItem("复制");
+        item.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                ObservableList<TablePosition> posList = tableView.getSelectionModel().getSelectedCells();
+                int old_r = -1;
+                StringBuilder clipboardString = new StringBuilder();
+                for (TablePosition p : posList) {
+                    int r = p.getRow();
+                    int c = p.getColumn();
+                    Object cell = tableView.getColumns().get(c).getCellData(r);
+                    if (cell == null)
+                        cell = "";
+                    if (old_r == r)
+                        clipboardString.append('\t');
+                    else if (old_r != -1)
+                        clipboardString.append('\n');
+                    clipboardString.append(cell);
+                    old_r = r;
+                }
+                final ClipboardContent content = new ClipboardContent();
+                content.putString(clipboardString.toString());
+                Clipboard.getSystemClipboard().setContent(content);
+            }
+        });
+        ContextMenu menu = new ContextMenu();
+        menu.getItems().add(item);
+        tableView.setContextMenu(menu);
 
         FilteredList<Map<String, Object>> filteredData = new FilteredList<>(dataModelMapList, p -> true);
         tableView.setItems(filteredData);
@@ -197,11 +235,11 @@ public class CommonTabController {
 
         if (MainController.currentNode.getType() == 2) {
             Integer page = (Integer) queryMap.get("page");
-            int start = (page - 1) * 20;
+            int start = (page - 1) * 1000;
             TableModel tableModel = (TableModel) MainController.currentNode.getData();
             Connection connection = TsdbConnectionUtils.getConnection(tableModel.getDb().getConnectionModel());
             QueryRstDTO queryRstDTO = ConnectionUtils.executeQuery(connection, "select * from " + tableModel.getDb().getName() + "." +
-                    tableModel.getStb().getName() + " limit " + start + ", " + 20);
+                    tableModel.getStb().getName() + " limit " + start + ", " + 1000);
 
             tableView.getColumns().clear();
             queryRstDTO.getColumnList().forEach(column -> {
@@ -226,7 +264,7 @@ public class CommonTabController {
             QueryRstDTO countRstDTO = ConnectionUtils.executeQuery(connection, "select count(*) from " + tableModel.getDb().getName() + "." +
                     tableModel.getStb().getName());
             long total = ObjectUtils.isEmpty(countRstDTO.getDataList()) ? 0 : (long) countRstDTO.getDataList().get(0).get("count(*)");
-            pageCount.setValue((total / 20) + 1);
+            pageCount.setValue((total / 1000) + 1);
         }
 
     }
