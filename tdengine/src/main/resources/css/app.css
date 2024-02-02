@@ -374,7 +374,7 @@
 .jfx-tab-pane .headers-region .tab .tab-container .tab-label {
     -fx-text-fill: -fx-text-color;
     -fx-font-family: "Microsoft YaHei";
-    -fx-font-size: 14px;
+    -fx-font-size: 12px;
     -fx-font-weight: 600;
     -fx-graphic-text-gap: 10;
     -fx-padding: 6 10 6 10;
@@ -393,8 +393,8 @@
 }
 
 .jfx-tab-pane .headers-region .tab {
-    -fx-pref-height: 50px;
-
+    -fx-pref-height: 30px;
+    -fx-pref-width: 200px;
 }
 
 .jfx-tab-pane .headers-region .tab:closable {
