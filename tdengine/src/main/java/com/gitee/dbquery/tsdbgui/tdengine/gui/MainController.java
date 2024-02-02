@@ -5,15 +5,11 @@ import com.gitee.dbquery.tsdbgui.tdengine.model.CommonNode;
 import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.DatabaseModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.TableModel;
-import com.gitee.dbquery.tsdbgui.tdengine.store.ApplicationStore;
 import com.gitee.dbquery.tsdbgui.tdengine.store.H2DbUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.store.TsdbConnectionUtils;
 import com.jfoenix.controls.*;
-import com.jfoenix.svg.SVGGlyphLoader;
-import com.zhenergy.zntsdb.common.dto.ConnectionDTO;
 import com.zhenergy.zntsdb.common.dto.res.DatabaseResDTO;
 import com.zhenergy.zntsdb.common.dto.res.StableResDTO;
-import com.zhenergy.zntsdb.common.util.ConnectionUtils;
 import com.zhenergy.zntsdb.common.util.DataBaseUtils;
 import com.zhenergy.zntsdb.common.util.SuperTableUtils;
 import io.datafx.controller.ViewController;
@@ -29,7 +25,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
@@ -82,15 +77,22 @@ public class MainController {
     @FXML
     private JFXTextField passwordTextField;
 
+
     private TreeItem<CommonNode> root;
+
+
+    private ImageView getImageViewByType(Integer type) {
+        String icon = type == 0 ? "tdengine.png" : type == 1 ? "db.png" : type == 2 ? "tb.png" : "";
+        return new ImageView("/images/" + icon);
+    }
+
     private void onSelectItem(CommonNode item) {
         if (item.getType() == -1) {
             return;
         }
         currentNode = item;
         try {
-            String icon = item.getType() == 0 ? "connection" : item.getType() == 1 ? "database" : item.getType() == 2 ? "stable" : "";
-            addTab(item.getData().toString(), SVGGlyphLoader.getIcoMoonGlyph(ApplicationStore.ICON_FONT_KEY + "." + icon), CommonTabController.class, null);
+            addTab(item.getData().toString(), getImageViewByType(item.getType()), CommonTabController.class, null);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -127,9 +129,7 @@ public class MainController {
         connectionModel.setUsername(usernameTextField.getText());
         connectionModel.setPassword(passwordTextField.getText());
 
-        TreeItem<CommonNode> tdConnectionTreeItem = new TreeItem<>(new CommonNode(nameTextField.getText(), 0, connectionModel));
-
-        root.getChildren().add(tdConnectionTreeItem);
+        root.getChildren().add(getConnectionTreeItem(connectionModel));
         System.out.println(ipTextField.getText());
         dialog.close();
 
@@ -181,9 +181,29 @@ public class MainController {
         }).collect(Collectors.toList());
     }
 
+    private TreeItem<CommonNode> getConnectionTreeItem(ConnectionModel connectionModel) {
+        TreeItem<CommonNode> connectionItem = new TreeItem<>(new CommonNode(connectionModel.getName(), 0, connectionModel), getImageViewByType(0));
+
+
+        Connection connection = TsdbConnectionUtils.getConnection(connectionModel);
+
+        for (DatabaseResDTO db : DataBaseUtils.getAllDatabase(connection)) {
+            List<StableResDTO> tbList = SuperTableUtils.getAllStable(connection, db.getName());
+            DatabaseModel databaseModel = new DatabaseModel(db.getName(), db, connectionModel);
+            TreeItem<CommonNode> dbNode = new TreeItem<>(new CommonNode(db.getName(), 1, databaseModel), getImageViewByType(1));
+            connectionItem.getChildren().add(dbNode);
+
+            for (StableResDTO tb : tbList) {
+                TreeItem<CommonNode> tbNode = new TreeItem<>(new CommonNode(tb.getName(), 2, new TableModel(tb, databaseModel)), getImageViewByType(2));
+                dbNode.getChildren().add(tbNode);
+            }
+        }
+
+        return connectionItem;
+    }
+
     @PostConstruct
     public void init() throws SQLException {
-        ImageView rootIcon = new ImageView("/images/app.png");
 
         initTable();
 
@@ -223,27 +243,9 @@ public class MainController {
         leftTreeView.setRoot(root);
 
 
-
         List<ConnectionModel> connectionNodeList = getConnectionList();
         for (ConnectionModel connectionModel : connectionNodeList) {
-            TreeItem<CommonNode> connectionItem = new TreeItem<>(new CommonNode(connectionModel.getName(), 0, connectionModel), rootIcon);
-            root.getChildren().add(connectionItem);
-
-            Connection connection = TsdbConnectionUtils.getConnection(connectionModel);
-
-            for (DatabaseResDTO db : DataBaseUtils.getAllDatabase(connection)) {
-                List<StableResDTO> tbList = SuperTableUtils.getAllStable(connection, db.getName());
-                DatabaseModel databaseModel = new DatabaseModel(db.getName(), db, connectionModel);
-                TreeItem<CommonNode> dbNode = new TreeItem<>(new CommonNode(db.getName(), 1, databaseModel));
-                connectionItem.getChildren().add(dbNode);
-
-                for (StableResDTO tb : tbList) {
-                    TreeItem<CommonNode> tbNode = new TreeItem<>(new CommonNode(tb.getName(), 2, new TableModel(tb, databaseModel)));
-                    dbNode.getChildren().add(tbNode);
-                }
-            }
-
-
+            root.getChildren().add(getConnectionTreeItem(connectionModel));
         }
 
 //
