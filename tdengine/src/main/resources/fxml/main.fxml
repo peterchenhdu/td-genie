@@ -5,6 +5,11 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.geometry.Insets?>
 <StackPane fx:id="rootPane" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
     <VBox>
         <MenuBar>
@@ -17,14 +22,9 @@
                         <MenuItem fx:id="exitMenuItem" mnemonicParsing="false" text="退出 tsdb-gui"/>
                     </items>
                 </Menu>
-                <Menu mnemonicParsing="false" text="Edit">
+                <Menu mnemonicParsing="false" text="帮助">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Delete"/>
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Help">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="About"/>
+                        <MenuItem fx:id="aboutMenuItem" mnemonicParsing="false" text="关于"/>
                     </items>
                 </Menu>
             </menus>
@@ -42,11 +42,11 @@
             <body>
                 <GridPane>
                     <children>
-                        <JFXTextField fx:id="nameTextField"  promptText="*连接名称"  GridPane.rowIndex="1"/>
-                    <JFXTextField fx:id="ipTextField"  promptText="*IP地址"  GridPane.rowIndex="2"/>
-                    <JFXTextField fx:id="portTextField"  promptText="*RESTFul端口" GridPane.rowIndex="3"/>
-                    <JFXTextField fx:id="usernameTextField"  promptText="*用户名" GridPane.rowIndex="4"/>
-                    <JFXTextField fx:id="passwordTextField"  promptText="*密码" GridPane.rowIndex="5"/>
+                        <JFXTextField fx:id="nameTextField" promptText="*连接名称" GridPane.rowIndex="1"/>
+                        <JFXTextField fx:id="ipTextField" promptText="*IP地址" GridPane.rowIndex="2"/>
+                        <JFXTextField fx:id="portTextField" promptText="*RESTFul端口" GridPane.rowIndex="3"/>
+                        <JFXTextField fx:id="usernameTextField" promptText="*用户名" GridPane.rowIndex="4"/>
+                        <JFXTextField fx:id="passwordTextField" promptText="*密码" GridPane.rowIndex="5"/>
                     </children>
                 </GridPane>
             </body>
@@ -57,6 +57,26 @@
                 <JFXButton fx:id="saveButton" buttonType="RAISED" text="保存"/>
                 <JFXButton fx:id="cancelButton" buttonType="RAISED" text="取消"/>
             </actions>
+        </JFXDialogLayout>
+    </JFXDialog>
+    <JFXDialog fx:id="aboutDialog" overlayClose="true">
+        <JFXDialogLayout>
+            <heading>
+                <HBox>
+                    <Label>关于TSDB-GUI</Label>
+                </HBox>
+            </heading>
+            <body>
+                <GridPane>
+                    <children>
+                        <JFXTextField editable="false" GridPane.rowIndex="1" prefWidth="500">通用时序数据库管理工具</JFXTextField>
+                        <JFXTextField editable="false" GridPane.rowIndex="2" prefWidth="500">版本：V1.0.0</JFXTextField>
+                        <JFXTextField editable="false" GridPane.rowIndex="3" prefWidth="500">
+                            问题反馈：https://gitee.com/dbquery/tsdb-gui
+                        </JFXTextField>
+                    </children>
+                </GridPane>
+            </body>
         </JFXDialogLayout>
     </JFXDialog>
 </StackPane>

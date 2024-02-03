@@ -22,10 +22,14 @@ import io.datafx.controller.flow.action.ActionTrigger;
 import io.datafx.controller.flow.container.AnimatedFlowContainer;
 import io.datafx.controller.flow.container.ContainerAnimations;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
@@ -61,7 +65,11 @@ public class MainController {
     @FXML
     private MenuItem exitMenuItem;
     @FXML
+    private MenuItem aboutMenuItem;
+    @FXML
     private JFXDialog dialog;
+    @FXML
+    private JFXDialog aboutDialog;
     @FXML
     @ActionTrigger("saveJob")
     private JFXButton saveButton;
@@ -84,7 +92,7 @@ public class MainController {
 
 
     private ImageView getImageViewByType(Integer type) {
-        if(-1 == type) {
+        if (-1 == type) {
             return new ImageView("/images/logo.png");
         }
         String icon = type == 0 ? "tdengine.png" : type == 1 ? "db.png" : type == 2 ? "tb.png" : "";
@@ -209,8 +217,12 @@ public class MainController {
 
     @PostConstruct
     public void init() throws SQLException {
+        aboutMenuItem.setOnAction((ActionEvent t) -> {
+            aboutDialog.setTransitionType(JFXDialog.DialogTransition.TOP);
+            aboutDialog.show(rootPane);
+        });
 
-        exitMenuItem.setOnAction((event)-> System.exit(0));
+        exitMenuItem.setOnAction((event) -> System.exit(0));
 
         initTable();
 
@@ -258,6 +270,26 @@ public class MainController {
             root.getChildren().add(getConnectionTreeItem(connectionModel));
         }
 
+
+        // 创建右键菜单
+        ContextMenu dbMenu = new ContextMenu();
+        MenuItem menuItem1 = new MenuItem("创建数据库");
+        MenuItem menuItem2 = new MenuItem("新建查询");
+        dbMenu.getItems().addAll(menuItem1, menuItem2);
+        // 注册鼠标右击事件处理程序
+        leftTreeView.addEventFilter(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent event) {
+                System.out.println(event);
+                dbMenu.hide();
+                if(!event.getButton().equals(MouseButton.SECONDARY)) {
+                    return;
+                }
+                Node node = event.getPickResult().getIntersectedNode();                //给node对象添加下来菜单；
+                dbMenu.show(leftTreeView, event.getScreenX(), event.getScreenY());
+                CommonNode name =  ( leftTreeView.getSelectionModel().getSelectedItem()).getValue();
+                System.out.println("Node click: " + name);
+            }
+        });
 //
 //        TreeItem<CommonNode> tdConnectionTreeItem = new TreeItem<>(new CommonNode("TD-127.0.0.1", 0, null));
 //
