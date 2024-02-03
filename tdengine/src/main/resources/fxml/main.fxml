@@ -13,6 +13,9 @@
                     <items>
                         <MenuItem fx:id="createConnectionMenuItem" mnemonicParsing="false" text="新建连接"/>
                     </items>
+                    <items>
+                        <MenuItem fx:id="exitMenuItem" mnemonicParsing="false" text="退出 tsdb-gui"/>
+                    </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Edit">
                     <items>

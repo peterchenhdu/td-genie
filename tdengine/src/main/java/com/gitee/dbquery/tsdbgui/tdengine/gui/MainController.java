@@ -59,6 +59,8 @@ public class MainController {
     @FXML
     private MenuItem createConnectionMenuItem;
     @FXML
+    private MenuItem exitMenuItem;
+    @FXML
     private JFXDialog dialog;
     @FXML
     @ActionTrigger("saveJob")
@@ -82,6 +84,9 @@ public class MainController {
 
 
     private ImageView getImageViewByType(Integer type) {
+        if(-1 == type) {
+            return new ImageView("/images/logo.png");
+        }
         String icon = type == 0 ? "tdengine.png" : type == 1 ? "db.png" : type == 2 ? "tb.png" : "";
         return new ImageView("/images/" + icon);
     }
@@ -205,9 +210,14 @@ public class MainController {
     @PostConstruct
     public void init() throws SQLException {
 
+        exitMenuItem.setOnAction((event)-> System.exit(0));
+
         initTable();
 
-        splitPane.setDividerPositions(0.25, 1);
+        splitPane.setDividerPositions(0.2);
+        SplitPane.setResizableWithParent(leftTreeView, Boolean.FALSE);
+
+
         ApplicationContext.getInstance().register(this, MainController.class);
 
 
@@ -238,10 +248,10 @@ public class MainController {
 //        }
 
         leftTreeView.setMinWidth(100);
-        root = new TreeItem<>(new CommonNode("根节点", -1, null));
+        root = new TreeItem<>(new CommonNode("TSDB-GUI", -1, null), getImageViewByType(-1));
         root.setExpanded(true);
         leftTreeView.setRoot(root);
-
+        leftTreeView.setShowRoot(false);
 
         List<ConnectionModel> connectionNodeList = getConnectionList();
         for (ConnectionModel connectionModel : connectionNodeList) {
