@@ -37,18 +37,6 @@ public class AppStartup extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-
-        new Thread(() -> {
-            try {
-                SVGGlyphLoader.loadGlyphsFont(AppStartup.class.getResourceAsStream("/fonts/icon_font/iconfont.svg"),
-                        ApplicationStore.ICON_FONT_KEY);
-
-            } catch (IOException ioExc) {
-                ioExc.printStackTrace();
-            }
-        }).start();
-
-
         Flow contentFlow = new Flow(MainController.class);
         AnimatedFlowContainer container = new AnimatedFlowContainer(Duration.millis(320), ContainerAnimations.SWIPE_LEFT);
         flowContext = new ViewFlowContext();
@@ -61,8 +49,8 @@ public class AppStartup extends Application {
         wfxDecorator.setCustomMaximize(true);
         wfxDecorator.setGraphic(new SVGGlyph(""));
 
-        Scene scene = new Scene(wfxDecorator, 1000, 750);
-        stage.setTitle("tsdb-gui");
+        Scene scene = new Scene(wfxDecorator, 1200, 1000);
+        stage.setTitle("TSDB-GUI");
         scene.setFill(Color.TRANSPARENT);
         stage.setScene(scene);
         stage.show();
