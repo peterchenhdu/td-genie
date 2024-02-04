@@ -1,6 +1,7 @@
 package com.gitee.dbquery.tsdbgui.tdengine;
 
 import com.gitee.dbquery.tsdbgui.tdengine.gui.MainController;
+import com.gitee.dbquery.tsdbgui.tdengine.util.ValueUtils;
 import com.jfoenix.controls.JFXDecorator;
 import com.jfoenix.svg.SVGGlyph;
 import io.datafx.controller.context.ApplicationContext;
@@ -12,6 +13,7 @@ import io.datafx.controller.flow.context.FXMLViewFlowContext;
 import io.datafx.controller.flow.context.ViewFlowContext;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.control.SplitPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -67,10 +69,10 @@ public class AppStartup extends Application {
         stage.setTitle("TSDB-GUI");
         scene.setFill(Color.TRANSPARENT);
         stage.setScene(scene);
-        stage.setX(Double.parseDouble(sysConfigProperties.getProperty(WINDOW_X_PROPERTY)));
-        stage.setY(Double.parseDouble(sysConfigProperties.getProperty(WINDOW_Y_PROPERTY)));
-        stage.setWidth(Double.parseDouble(sysConfigProperties.getProperty(WINDOW_WIDTH_PROPERTY)));
-        stage.setHeight(Double.parseDouble(sysConfigProperties.getProperty(WINDOW_HEIGHT_PROPERTY)));
+        stage.setX(Double.parseDouble(ValueUtils.getString(sysConfigProperties.getProperty(WINDOW_X_PROPERTY), 100)));
+        stage.setY(Double.parseDouble(ValueUtils.getString(sysConfigProperties.getProperty(WINDOW_Y_PROPERTY), 100)));
+        stage.setWidth(Double.parseDouble(ValueUtils.getString(sysConfigProperties.getProperty(WINDOW_WIDTH_PROPERTY), 800)));
+        stage.setHeight(Double.parseDouble(ValueUtils.getString(sysConfigProperties.getProperty(WINDOW_HEIGHT_PROPERTY), 600)));
         stage.show();
 
         stage.setOnCloseRequest(event -> {
@@ -91,6 +93,9 @@ public class AppStartup extends Application {
 
         /*全局样式*/
         scene.getStylesheets().addAll(AppStartup.class.getResource("/css/app.css").toExternalForm());
+
+        System.out.println(Double.parseDouble(ValueUtils.getString(AppStartup.sysConfigProperties.getProperty("dividerPositions"), 0.2)));
+        ((SplitPane)(scene.lookup("#splitPane"))).setDividerPositions(Double.parseDouble(ValueUtils.getString(AppStartup.sysConfigProperties.getProperty("dividerPositions"), 0.2)));
 
     }
 

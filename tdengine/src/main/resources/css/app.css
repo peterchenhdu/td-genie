@@ -1029,5 +1029,7 @@
 }
 
 
-
+.tool-box:hover {
+    -fx-background-color: #D8E6F2
+}
 

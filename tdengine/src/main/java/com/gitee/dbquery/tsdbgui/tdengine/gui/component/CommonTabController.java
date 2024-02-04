@@ -123,12 +123,75 @@ public class CommonTabController {
             cacheColumn.setText("cache(MB)");
             cacheColumn.setCellValueFactory(new MapValueFactory("cache"));
 
+            TableColumn<Map<String, Object>, String> blocksColumn = new TableColumn<>();
+            blocksColumn.setId("blocksColumn");
+            blocksColumn.setText("blocks");
+            blocksColumn.setCellValueFactory(new MapValueFactory("blocks"));
+
+            TableColumn<Map<String, Object>, String> quorumColumn = new TableColumn<>();
+            quorumColumn.setId("quorumColumn");
+            quorumColumn.setText("quorum");
+            quorumColumn.setCellValueFactory(new MapValueFactory("quorum"));
+
+            TableColumn<Map<String, Object>, String> compColumn = new TableColumn<>();
+            compColumn.setId("compColumn");
+            compColumn.setText("comp");
+            compColumn.setCellValueFactory(new MapValueFactory("comp"));
+
+            TableColumn<Map<String, Object>, String> walLevelColumn = new TableColumn<>();
+            walLevelColumn.setId("walLevelColumn");
+            walLevelColumn.setText("walLevelColumn");
+            walLevelColumn.setCellValueFactory(new MapValueFactory("walLevel"));
+
+            TableColumn<Map<String, Object>, String> fsyncColumn = new TableColumn<>();
+            fsyncColumn.setId("fsyncColumn");
+            fsyncColumn.setText("fsync");
+            fsyncColumn.setCellValueFactory(new MapValueFactory("fsync"));
+
+            TableColumn<Map<String, Object>, String> replicaColumn = new TableColumn<>();
+            replicaColumn.setId("replicaColumn");
+            replicaColumn.setText("replica");
+            replicaColumn.setCellValueFactory(new MapValueFactory("replica"));
+
+            TableColumn<Map<String, Object>, String> updateColumn = new TableColumn<>();
+            updateColumn.setId("updateColumn");
+            updateColumn.setText("update");
+            updateColumn.setCellValueFactory(new MapValueFactory("update"));
+
+            TableColumn<Map<String, Object>, String> cacheLastColumn = new TableColumn<>();
+            cacheLastColumn.setId("cacheLastColumn");
+            cacheLastColumn.setText("cacheLast");
+            cacheLastColumn.setCellValueFactory(new MapValueFactory("cacheLast"));
+
+            TableColumn<Map<String, Object>, String> minRowsColumn = new TableColumn<>();
+            minRowsColumn.setId("minRowsColumn");
+            minRowsColumn.setText("minRows");
+            minRowsColumn.setCellValueFactory(new MapValueFactory("minRows"));
+
+            TableColumn<Map<String, Object>, String> maxRowsColumn = new TableColumn<>();
+            maxRowsColumn.setId("maxRowsColumn");
+            maxRowsColumn.setText("maxRows");
+            maxRowsColumn.setCellValueFactory(new MapValueFactory("maxRows"));
+
+            TableColumn<Map<String, Object>, String> precisionColumn = new TableColumn<>();
+            precisionColumn.setId("precisionColumn");
+            precisionColumn.setText("precision");
+            precisionColumn.setCellValueFactory(new MapValueFactory("precision"));
 
             tableView.getColumns().add(dbNameColumn);
             tableView.getColumns().add(daysColumn);
             tableView.getColumns().add(keepColumn);
             tableView.getColumns().add(cacheColumn);
-
+            tableView.getColumns().add(blocksColumn);
+            tableView.getColumns().add(quorumColumn);
+            tableView.getColumns().add(compColumn);
+            tableView.getColumns().add(walLevelColumn);
+            tableView.getColumns().add(fsyncColumn);
+            tableView.getColumns().add(replicaColumn);
+            tableView.getColumns().add(cacheLastColumn);
+            tableView.getColumns().add(minRowsColumn);
+            tableView.getColumns().add(maxRowsColumn);
+            tableView.getColumns().add(precisionColumn);
 
             ConnectionModel connectionModel = (ConnectionModel) MainController.currentNode.getData();
 
@@ -143,6 +206,17 @@ public class CommonTabController {
                 testMap.put("days", db.getDays());
                 testMap.put("keep", db.getKeep());
                 testMap.put("cache", db.getCache());
+                testMap.put("blocks", db.getBlocks());
+                testMap.put("quorum", db.getQuorum());
+                testMap.put("comp", db.getComp());
+                testMap.put("walLevel", db.getWalLevel());
+                testMap.put("fsync", db.getFsync());
+                testMap.put("replica", db.getReplica());
+                testMap.put("update", db.getUpdate());
+                testMap.put("cacheLast", db.getCacheLast());
+                testMap.put("minRows", db.getMinRows());
+                testMap.put("maxRows", db.getMaxRows());
+                testMap.put("precision", db.getPrecision());
                 dataModelMapList.add(testMap);
             });
 
