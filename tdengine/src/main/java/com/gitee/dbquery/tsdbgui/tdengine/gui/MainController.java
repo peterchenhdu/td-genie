@@ -1,5 +1,6 @@
 package com.gitee.dbquery.tsdbgui.tdengine.gui;
 
+import com.gitee.dbquery.tsdbgui.tdengine.AppStartup;
 import com.gitee.dbquery.tsdbgui.tdengine.gui.component.CommonTabController;
 import com.gitee.dbquery.tsdbgui.tdengine.model.CommonNode;
 import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
@@ -24,7 +25,6 @@ import io.datafx.controller.flow.container.ContainerAnimations;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
@@ -214,7 +214,11 @@ public class MainController {
 
         return connectionItem;
     }
-
+    private void dividerResized(Number oldPos,
+                                Number newPos) {
+        AppStartup.dividerPositions = newPos.doubleValue();
+        System.out.println("oldPos:" + oldPos + ",newPos:" + newPos);
+    }
     @PostConstruct
     public void init() throws SQLException {
         aboutMenuItem.setOnAction((ActionEvent t) -> {
@@ -226,7 +230,14 @@ public class MainController {
 
         initTable();
 
-        splitPane.setDividerPositions(0.2);
+        splitPane.setDividerPositions(Double.parseDouble(AppStartup.sysConfigProperties.getProperty("dividerPositions")));
+        splitPane.getDividers().get(0).positionProperty().addListener(
+                (o, oldPos, newPos) -> dividerResized(oldPos, newPos));
+
+
+
+
+
         SplitPane.setResizableWithParent(leftTreeView, Boolean.FALSE);
 
 
