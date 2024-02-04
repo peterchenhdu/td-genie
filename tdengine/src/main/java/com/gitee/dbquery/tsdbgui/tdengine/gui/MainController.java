@@ -8,6 +8,7 @@ import com.gitee.dbquery.tsdbgui.tdengine.model.DatabaseModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.TableModel;
 import com.gitee.dbquery.tsdbgui.tdengine.store.H2DbUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.store.TsdbConnectionUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.util.ValueUtils;
 import com.jfoenix.controls.*;
 import com.zhenergy.zntsdb.common.dto.res.DatabaseResDTO;
 import com.zhenergy.zntsdb.common.dto.res.StableResDTO;
@@ -219,6 +220,9 @@ public class MainController {
         AppStartup.dividerPositions = newPos.doubleValue();
         System.out.println("oldPos:" + oldPos + ",newPos:" + newPos);
     }
+
+
+
     @PostConstruct
     public void init() throws SQLException {
         aboutMenuItem.setOnAction((ActionEvent t) -> {
@@ -230,15 +234,17 @@ public class MainController {
 
         initTable();
 
-        splitPane.setDividerPositions(Double.parseDouble(AppStartup.sysConfigProperties.getProperty("dividerPositions")));
         splitPane.getDividers().get(0).positionProperty().addListener(
-                (o, oldPos, newPos) -> dividerResized(oldPos, newPos));
+                (o, oldPos, newPos) -> {
+                    System.out.println(o);
+                    dividerResized(oldPos, newPos);
+                });
 
 
 
 
 
-        SplitPane.setResizableWithParent(leftTreeView, Boolean.FALSE);
+//        SplitPane.setResizableWithParent(leftTreeView, Boolean.FALSE);
 
 
         ApplicationContext.getInstance().register(this, MainController.class);
@@ -321,6 +327,8 @@ public class MainController {
 
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.ALL_TABS);
         tabPane.setMinWidth(300);
+
+
 
     }
 
