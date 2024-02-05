@@ -29,9 +29,11 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
 import javax.annotation.PostConstruct;
@@ -64,6 +66,10 @@ public class MainController {
     private JFXTabPane tabPane;
     @FXML
     private MenuItem createConnectionMenuItem;
+    @FXML
+    private VBox createConnectionBox;
+    @FXML
+    private VBox queryBox;
     @FXML
     private MenuItem exitMenuItem;
     @FXML
@@ -256,6 +262,26 @@ public class MainController {
             showAddJobDialog();
         });
 
+        createConnectionBox.setOnMouseClicked((MouseEvent t) -> {
+            System.out.println("createConnectionBox点击");
+            if(!t.getButton().equals(MouseButton.PRIMARY)) {
+                return;
+            }
+            showAddJobDialog();
+        });
+
+        queryBox.setOnMouseClicked((MouseEvent t) -> {
+            System.out.println("queryBox点击");
+            if(!t.getButton().equals(MouseButton.PRIMARY)) {
+                return;
+            }
+            try {
+                addTab("查询" + (currentNode == null ? System.currentTimeMillis():currentNode.getData().toString()), new ImageView("/images/query.png"), QueryTabController.class, null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
 
 //        ConnectionDTO connectionDTO = new ConnectionDTO();
 //        connectionDTO.setIp("10.162.201.62");
@@ -292,17 +318,17 @@ public class MainController {
 
         // 创建右键菜单
         ContextMenu dbMenu = new ContextMenu();
-        MenuItem menuItem1 = new MenuItem("创建数据库");
+//        MenuItem menuItem1 = new MenuItem("创建数据库");
         MenuItem menuItem2 = new MenuItem("新建查询");
         menuItem2.setOnAction((ActionEvent t) -> {
             System.out.println("新建查询 - 菜单点击");
             try {
-                addTab("查询" + t.getTarget().toString(), new ImageView("/images/query.png"), QueryTabController.class, null);
+                addTab("查询" + currentNode.getData().toString(), new ImageView("/images/query.png"), QueryTabController.class, null);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
-        dbMenu.getItems().addAll(menuItem1, menuItem2);
+        dbMenu.getItems().addAll(menuItem2);
         // 注册鼠标右击事件处理程序
         leftTreeView.addEventFilter(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) {

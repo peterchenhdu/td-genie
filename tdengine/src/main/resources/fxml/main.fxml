@@ -31,7 +31,7 @@
             </menus>
         </MenuBar>
         <HBox style="-fx-border-color: #cfd3cd; -fx-border-width: 0 0 1 0;">
-            <VBox alignment="CENTER" styleClass="tool-box">
+            <VBox alignment="CENTER" fx:id="createConnectionBox" styleClass="tool-box">
                 <padding>
                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                 </padding>
@@ -40,7 +40,7 @@
                 </ImageView>
                 <Text>新建连接</Text>
             </VBox>
-            <VBox alignment="CENTER" styleClass="tool-box">
+            <VBox alignment="CENTER" fx:id="queryBox" styleClass="tool-box">
                 <padding>
                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                 </padding>
