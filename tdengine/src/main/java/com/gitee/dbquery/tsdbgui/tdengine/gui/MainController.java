@@ -2,13 +2,13 @@ package com.gitee.dbquery.tsdbgui.tdengine.gui;
 
 import com.gitee.dbquery.tsdbgui.tdengine.AppStartup;
 import com.gitee.dbquery.tsdbgui.tdengine.gui.component.CommonTabController;
+import com.gitee.dbquery.tsdbgui.tdengine.gui.component.QueryTabController;
 import com.gitee.dbquery.tsdbgui.tdengine.model.CommonNode;
 import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.DatabaseModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.TableModel;
 import com.gitee.dbquery.tsdbgui.tdengine.store.H2DbUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.store.TsdbConnectionUtils;
-import com.gitee.dbquery.tsdbgui.tdengine.util.ValueUtils;
 import com.jfoenix.controls.*;
 import com.zhenergy.zntsdb.common.dto.res.DatabaseResDTO;
 import com.zhenergy.zntsdb.common.dto.res.StableResDTO;
@@ -50,6 +50,7 @@ import java.util.stream.Collectors;
  **/
 @ViewController("/fxml/main.fxml")
 public class MainController {
+    public static TreeItem<CommonNode> connectionTree;
     public static CommonNode currentNode;
     public static Connection currentConnection;
     private final HashMap<String, Tab> tabsMap = new HashMap<>();
@@ -279,6 +280,7 @@ public class MainController {
         leftTreeView.setMinWidth(100);
         root = new TreeItem<>(new CommonNode("TSDB-GUI", -1, null), getImageViewByType(-1));
         root.setExpanded(true);
+        connectionTree = root;
         leftTreeView.setRoot(root);
         leftTreeView.setShowRoot(false);
 
@@ -292,6 +294,14 @@ public class MainController {
         ContextMenu dbMenu = new ContextMenu();
         MenuItem menuItem1 = new MenuItem("创建数据库");
         MenuItem menuItem2 = new MenuItem("新建查询");
+        menuItem2.setOnAction((ActionEvent t) -> {
+            System.out.println("新建查询 - 菜单点击");
+            try {
+                addTab("查询" + t.getTarget().toString(), new ImageView("/images/query.png"), QueryTabController.class, null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
         dbMenu.getItems().addAll(menuItem1, menuItem2);
         // 注册鼠标右击事件处理程序
         leftTreeView.addEventFilter(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
