@@ -455,7 +455,7 @@
 
 .jfx-list-cell:filled:hover,
 .jfx-list-cell:selected .label {
-    -fx-text-fill: #ffffff;
+    -fx-background-color: derive(-fx-accent-suspension-color, 20%)
 }
 
 .jfx-list-cell .jfx-rippler {
