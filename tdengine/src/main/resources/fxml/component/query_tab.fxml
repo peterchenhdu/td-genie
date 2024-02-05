@@ -5,22 +5,24 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<StackPane fx:id="root" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXTextArea?>
+<StackPane fx:id="rootPane" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <VBox fx:id="centPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="10.0">
             <SplitPane fx:id="querySplitPane" orientation="VERTICAL" VBox.vgrow="ALWAYS">
                 <VBox>
-                    <HBox>
+                    <HBox spacing="10.0">
                         <padding>
                             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                         </padding>
-                        <JFXComboBox fx:id="connectionComboBox"  maxWidth="1.7976931348623157E308" promptText="连接" GridPane.rowIndex="1">
+                        <JFXComboBox fx:id="connectionComboBox"  maxWidth="1.7976931348623157E308" promptText="选择连接" GridPane.rowIndex="1">
 
                         </JFXComboBox>
-                        <JFXComboBox fx:id="dbComboBox"  maxWidth="1.7976931348623157E308" promptText="数据库" GridPane.rowIndex="1">
+                        <JFXComboBox fx:id="dbComboBox"  maxWidth="1.7976931348623157E308" promptText="选择数据库" GridPane.rowIndex="1">
 
                         </JFXComboBox>
-                        <Button fx:id="executeButton">执行</Button>
+                        <JFXButton fx:id="executeButton">执行</JFXButton>
                     </HBox>
                     <TextArea fx:id="sqlEditArea" VBox.vgrow="ALWAYS"/>
                 </VBox>

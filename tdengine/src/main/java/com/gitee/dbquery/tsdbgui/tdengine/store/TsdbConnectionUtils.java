@@ -20,4 +20,13 @@ public class TsdbConnectionUtils {
         connectionDTO.setPassword(connectionModel.getPassword());
         return ConnectionUtils.getConnection(connectionDTO);
     }
+
+    public static Connection getConnectionWithDB(ConnectionModel connectionModel, String db) {
+        ConnectionDTO connectionDTO = new ConnectionDTO();
+        connectionDTO.setIp(connectionModel.getIp());
+        connectionDTO.setRestfulPort(connectionModel.getPort());
+        connectionDTO.setUsername(connectionModel.getUsername());
+        connectionDTO.setPassword(connectionModel.getPassword());
+        return ConnectionUtils.getConnection(connectionDTO, db);
+    }
 }
