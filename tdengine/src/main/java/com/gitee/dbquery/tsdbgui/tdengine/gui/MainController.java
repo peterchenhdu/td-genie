@@ -1,14 +1,17 @@
 package com.gitee.dbquery.tsdbgui.tdengine.gui;
 
 import com.gitee.dbquery.tsdbgui.tdengine.AppStartup;
+import com.gitee.dbquery.tsdbgui.tdengine.common.enums.NodeTypeEnum;
 import com.gitee.dbquery.tsdbgui.tdengine.gui.component.CommonTabController;
 import com.gitee.dbquery.tsdbgui.tdengine.gui.component.QueryTabController;
 import com.gitee.dbquery.tsdbgui.tdengine.model.CommonNode;
 import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.DatabaseModel;
-import com.gitee.dbquery.tsdbgui.tdengine.model.TableModel;
+import com.gitee.dbquery.tsdbgui.tdengine.model.StableModel;
+import com.gitee.dbquery.tsdbgui.tdengine.store.ApplicationStore;
 import com.gitee.dbquery.tsdbgui.tdengine.store.H2DbUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.store.TsdbConnectionUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.util.ImageViewUtils;
 import com.jfoenix.controls.*;
 import com.zhenergy.zntsdb.common.dto.res.DatabaseResDTO;
 import com.zhenergy.zntsdb.common.dto.res.StableResDTO;
@@ -29,20 +32,22 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
+import lombok.extern.log4j.Log4j2;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * MainController
@@ -50,12 +55,9 @@ import java.util.stream.Collectors;
  * @author pc
  * @since 2024/01/31
  **/
+@Log4j2
 @ViewController("/fxml/main.fxml")
 public class MainController {
-    public static TreeItem<CommonNode> connectionTree;
-    public static CommonNode currentNode;
-    public static Connection currentConnection;
-    private final HashMap<String, Tab> tabsMap = new HashMap<>();
     @FXML
     private StackPane rootPane;
     @FXML
@@ -73,13 +75,14 @@ public class MainController {
     @FXML
     private MenuItem exitMenuItem;
     @FXML
+    @ActionTrigger("aboutAction")
     private MenuItem aboutMenuItem;
     @FXML
     private JFXDialog dialog;
     @FXML
     private JFXDialog aboutDialog;
     @FXML
-    @ActionTrigger("saveJob")
+    @ActionTrigger("saveConnection")
     private JFXButton saveButton;
     @FXML
     @ActionTrigger("closeDialog")
@@ -99,39 +102,182 @@ public class MainController {
     private TreeItem<CommonNode> root;
 
 
-    private ImageView getImageViewByType(Integer type) {
-        if (-1 == type) {
-            return new ImageView("/images/logo.png");
+
+
+    private TreeItem<CommonNode> getConnectionTreeItem(ConnectionModel connectionModel) {
+        TreeItem<CommonNode> connectionItem = new TreeItem<>(new CommonNode(connectionModel.getName(), NodeTypeEnum.CONNECTION, connectionModel), ImageViewUtils.getImageViewByType(NodeTypeEnum.CONNECTION));
+
+
+        Connection connection = TsdbConnectionUtils.getConnection(connectionModel);
+
+        for (DatabaseResDTO db : DataBaseUtils.getAllDatabase(connection)) {
+            List<StableResDTO> tbList = SuperTableUtils.getAllStable(connection, db.getName());
+            DatabaseModel databaseModel = new DatabaseModel(db.getName(), db, connectionModel);
+            TreeItem<CommonNode> dbNode = new TreeItem<>(new CommonNode(db.getName(), NodeTypeEnum.DB, databaseModel), ImageViewUtils.getImageViewByType(NodeTypeEnum.DB));
+            connectionItem.getChildren().add(dbNode);
+
+            for (StableResDTO tb : tbList) {
+                TreeItem<CommonNode> tbNode = new TreeItem<>(new CommonNode(tb.getName(), NodeTypeEnum.STB, new StableModel(tb, databaseModel)), ImageViewUtils.getImageViewByType(NodeTypeEnum.STB));
+                dbNode.getChildren().add(tbNode);
+            }
         }
-        String icon = type == 0 ? "tdengine.png" : type == 1 ? "db.png" : type == 2 ? "tb.png" : "";
-        return new ImageView("/images/" + icon);
+
+        return connectionItem;
     }
 
-    private void onSelectItem(CommonNode item) {
-        if (item.getType() == -1) {
+
+    @PostConstruct
+    public void init() throws SQLException {
+        aboutMenuItem.setOnAction((ActionEvent t) -> {
+            aboutDialog.setTransitionType(JFXDialog.DialogTransition.TOP);
+            aboutDialog.show(rootPane);
+        });
+
+        exitMenuItem.setOnAction((event) -> System.exit(0));
+
+        ApplicationStore.connectionTbCheck();
+
+        splitPane.getDividers().get(0).positionProperty().addListener(
+                (o, oldPos, newPos) -> {
+                    System.out.println(o);
+                    AppStartup.dividerPositions = newPos.doubleValue();
+                });
+
+
+        ApplicationContext.getInstance().register(this, MainController.class);
+
+
+        createConnectionMenuItem.setOnAction((ActionEvent t) -> {
+            System.out.println("菜单点击");
+            showAddConnectionDialog();
+        });
+
+        createConnectionBox.setOnMouseClicked((MouseEvent t) -> {
+            System.out.println("createConnectionBox点击");
+            if (!t.getButton().equals(MouseButton.PRIMARY)) {
+                return;
+            }
+            showAddConnectionDialog();
+        });
+
+        queryBox.setOnMouseClicked((MouseEvent t) -> {
+            System.out.println("queryBox点击");
+            if (!t.getButton().equals(MouseButton.PRIMARY)) {
+                return;
+            }
+            try {
+                addTab("查询" + (ApplicationStore.getCurrentNode() == null ? System.currentTimeMillis() : ApplicationStore.getCurrentNode().getData().toString()), new ImageView("/images/query.png"), QueryTabController.class, null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        leftTreeView.setMinWidth(100);
+        root = new TreeItem<>(new CommonNode("TSDB-GUI", NodeTypeEnum.ROOT, null), ImageViewUtils.getImageViewByType(NodeTypeEnum.ROOT));
+        root.setExpanded(true);
+        ApplicationStore.setConnectionTree(root);
+        leftTreeView.setRoot(root);
+        leftTreeView.setShowRoot(false);
+
+        List<ConnectionModel> connectionNodeList = ApplicationStore.getConnectionList();
+        for (ConnectionModel connectionModel : connectionNodeList) {
+            root.getChildren().add(getConnectionTreeItem(connectionModel));
+        }
+
+
+        // 创建右键菜单
+        ContextMenu dbMenu = new ContextMenu();
+//        MenuItem menuItem1 = new MenuItem("创建数据库");
+        MenuItem menuItem2 = new MenuItem("新建查询");
+        menuItem2.setOnAction((ActionEvent t) -> {
+            System.out.println("新建查询 - 菜单点击");
+            try {
+                addTab("查询" + ApplicationStore.getCurrentNode().getData().toString(), new ImageView("/images/query.png"), QueryTabController.class, null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        dbMenu.getItems().addAll(menuItem2);
+        // 注册鼠标右击事件处理程序
+        leftTreeView.addEventFilter(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                System.out.println(event);
+                dbMenu.hide();
+                if (!event.getButton().equals(MouseButton.SECONDARY)) {
+                    return;
+                }
+                Node node = event.getPickResult().getIntersectedNode();                //给node对象添加下来菜单；
+                dbMenu.show(leftTreeView, event.getScreenX(), event.getScreenY());
+                CommonNode name = (leftTreeView.getSelectionModel().getSelectedItem()).getValue();
+                System.out.println("Node click: " + name);
+            }
+        });
+
+        // 监听当前的选择
+        leftTreeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> onSelectTreeItem(newValue.getValue()));
+
+        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.ALL_TABS);
+        tabPane.setMinWidth(300);
+
+
+    }
+
+    private void onSelectTreeItem(CommonNode item) {
+        if (item.getType() == NodeTypeEnum.ROOT) {
             return;
         }
-        currentNode = item;
+        ApplicationStore.setCurrentNode(item);
         try {
-            addTab(item.getData().toString(), getImageViewByType(item.getType()), CommonTabController.class, null);
+            addTab(item.getData().toString(), ImageViewUtils.getImageViewByType(item.getType()), CommonTabController.class, null);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
-
     }
 
-    private void showAddJobDialog() {
+    private void showAddConnectionDialog() {
         dialog.setTransitionType(JFXDialog.DialogTransition.TOP);
         dialog.show(rootPane);
     }
 
-    @ActionMethod("closeDialog")
-    private void closeDialog() {
-        dialog.close();
+
+    public <T> void addTab(String title, Node icon, Class<T> controllerClass, Object userData) {
+        FlowHandler flowHandler = new Flow(controllerClass).createHandler();
+        Tab tab = ApplicationStore.getTabsMap().get(title);
+
+        if (tab == null) {
+
+            tab = new Tab(title);
+            tab.setUserData(userData);
+            tab.setGraphic(icon);
+
+            try {
+                StackPane node = flowHandler.start(new AnimatedFlowContainer(Duration.millis(320), ContainerAnimations.SWIPE_LEFT));
+                node.getStyleClass().addAll("tab-content");
+                tab.setContent(node);
+            } catch (FlowException e) {
+                e.printStackTrace();
+            }
+            tabPane.getTabs().add(tab);
+            ApplicationStore.getTabsMap().put(title, tab);
+            tab.setOnClosed(event -> {
+                ApplicationStore.getTabsMap().remove(title);
+                try {
+                    flowHandler.getCurrentViewContext().destroy();
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    log.error(e.getMessage(), e);
+                }
+            });
+        }
+
+        if ("主页".equals(title)) {
+            tab.setClosable(false);
+        }
+        tabPane.getSelectionModel().select(tab);
     }
 
-    @ActionMethod("saveJob")
-    private void saveJob() throws SQLException {
+    @ActionMethod("saveConnection")
+    private void saveConnection() throws SQLException {
         System.out.println("save job...");
 
         Map<String, Object> dataMap = new HashMap<>();
@@ -156,256 +302,16 @@ public class MainController {
 
     }
 
-    public void initTable() throws SQLException {
-        List<String> tableNameList = new ArrayList<>();
-        List<Map<String, Object>> tables = H2DbUtils.query("show tables;");
-        for (Map<String, Object> tb : tables) {
-            tableNameList.add(tb.get("TABLE_NAME").toString());
-        }
-
-        if (!tableNameList.contains("t_connection".toUpperCase())) {
-            Map<String, Object> fieldMap = new HashMap<>();
-            fieldMap.put("name", String.class);
-            fieldMap.put("ip", String.class);
-            fieldMap.put("port", String.class);
-            fieldMap.put("username", String.class);
-            fieldMap.put("password", String.class);
-            H2DbUtils.createTable("t_connection", fieldMap);
-        }
-
-//
-//        Map<String, Object> dataMap = new HashMap<>();
-//        dataMap.put("id", 1L);
-//        dataMap.put("name", "test");
-//        dataMap.put("birthday", LocalDateTime.now());
-//        dataMap.put("height", 12.6);
-//        insertByHashMap("t_user", Collections.singletonList(dataMap));
-//
-//
-//        List<Map<String, Object>> users = query("select * from  t_user;");
-//        for (Map<String, Object> user : users) {
-//            System.out.println(user);
-//        }
-
+    @ActionMethod("closeDialog")
+    private void closeDialog() {
+        dialog.close();
     }
 
-    private List<ConnectionModel> getConnectionList() throws SQLException {
-        List<Map<String, Object>> connectionList = H2DbUtils.query("select * from  t_connection;");
-        return connectionList.stream().map(con -> {
-            ConnectionModel connectionDTO = new ConnectionModel();
-            connectionDTO.setIp(con.get("IP").toString());
-            connectionDTO.setPort(con.get("PORT").toString());
-            connectionDTO.setUsername(con.get("USERNAME").toString());
-            connectionDTO.setPassword(con.get("PASSWORD").toString());
-            connectionDTO.setName(con.get("NAME").toString());
-            return connectionDTO;
-        }).collect(Collectors.toList());
+    @ActionMethod("aboutAction")
+    public void about() {
+        aboutDialog.setTransitionType(JFXDialog.DialogTransition.TOP);
+        aboutDialog.show(rootPane);
     }
-
-    private TreeItem<CommonNode> getConnectionTreeItem(ConnectionModel connectionModel) {
-        TreeItem<CommonNode> connectionItem = new TreeItem<>(new CommonNode(connectionModel.getName(), 0, connectionModel), getImageViewByType(0));
-
-
-        Connection connection = TsdbConnectionUtils.getConnection(connectionModel);
-
-        for (DatabaseResDTO db : DataBaseUtils.getAllDatabase(connection)) {
-            List<StableResDTO> tbList = SuperTableUtils.getAllStable(connection, db.getName());
-            DatabaseModel databaseModel = new DatabaseModel(db.getName(), db, connectionModel);
-            TreeItem<CommonNode> dbNode = new TreeItem<>(new CommonNode(db.getName(), 1, databaseModel), getImageViewByType(1));
-            connectionItem.getChildren().add(dbNode);
-
-            for (StableResDTO tb : tbList) {
-                TreeItem<CommonNode> tbNode = new TreeItem<>(new CommonNode(tb.getName(), 2, new TableModel(tb, databaseModel)), getImageViewByType(2));
-                dbNode.getChildren().add(tbNode);
-            }
-        }
-
-        return connectionItem;
-    }
-    private void dividerResized(Number oldPos,
-                                Number newPos) {
-        AppStartup.dividerPositions = newPos.doubleValue();
-        System.out.println("oldPos:" + oldPos + ",newPos:" + newPos);
-    }
-
-
-
-    @PostConstruct
-    public void init() throws SQLException {
-        aboutMenuItem.setOnAction((ActionEvent t) -> {
-            aboutDialog.setTransitionType(JFXDialog.DialogTransition.TOP);
-            aboutDialog.show(rootPane);
-        });
-
-        exitMenuItem.setOnAction((event) -> System.exit(0));
-
-        initTable();
-
-        splitPane.getDividers().get(0).positionProperty().addListener(
-                (o, oldPos, newPos) -> {
-                    System.out.println(o);
-                    dividerResized(oldPos, newPos);
-                });
-
-
-
-
-
-//        SplitPane.setResizableWithParent(leftTreeView, Boolean.FALSE);
-
-
-        ApplicationContext.getInstance().register(this, MainController.class);
-
-
-        createConnectionMenuItem.setOnAction((ActionEvent t) -> {
-            System.out.println("菜单点击");
-            showAddJobDialog();
-        });
-
-        createConnectionBox.setOnMouseClicked((MouseEvent t) -> {
-            System.out.println("createConnectionBox点击");
-            if(!t.getButton().equals(MouseButton.PRIMARY)) {
-                return;
-            }
-            showAddJobDialog();
-        });
-
-        queryBox.setOnMouseClicked((MouseEvent t) -> {
-            System.out.println("queryBox点击");
-            if(!t.getButton().equals(MouseButton.PRIMARY)) {
-                return;
-            }
-            try {
-                addTab("查询" + (currentNode == null ? System.currentTimeMillis():currentNode.getData().toString()), new ImageView("/images/query.png"), QueryTabController.class, null);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-
-
-//        ConnectionDTO connectionDTO = new ConnectionDTO();
-//        connectionDTO.setIp("10.162.201.62");
-//        connectionDTO.setRestfulPort("6041");
-//        connectionDTO.setUsername("root");
-//        connectionDTO.setPassword("Abc123_");
-
-//        ConnectionDTO connectionDTO = new ConnectionDTO();
-//        connectionDTO.setIp("127.0.0.1");
-//        connectionDTO.setRestfulPort("6041");
-//        connectionDTO.setUsername("root");
-//        connectionDTO.setPassword("taosdata");
-
-
-//        Map<DatabaseResDTO, List<StableResDTO>> tbMap = new LinkedHashMap<>();
-//        currentConnection = ConnectionUtils.getConnection(connectionDTO);
-//        for (DatabaseResDTO db : DataBaseUtils.getAllDatabase(currentConnection)) {
-//            List<StableResDTO> tbList = SuperTableUtils.getAllStable(currentConnection, db.getName());
-//            tbMap.put(db, tbList);
-//        }
-
-        leftTreeView.setMinWidth(100);
-        root = new TreeItem<>(new CommonNode("TSDB-GUI", -1, null), getImageViewByType(-1));
-        root.setExpanded(true);
-        connectionTree = root;
-        leftTreeView.setRoot(root);
-        leftTreeView.setShowRoot(false);
-
-        List<ConnectionModel> connectionNodeList = getConnectionList();
-        for (ConnectionModel connectionModel : connectionNodeList) {
-            root.getChildren().add(getConnectionTreeItem(connectionModel));
-        }
-
-
-        // 创建右键菜单
-        ContextMenu dbMenu = new ContextMenu();
-//        MenuItem menuItem1 = new MenuItem("创建数据库");
-        MenuItem menuItem2 = new MenuItem("新建查询");
-        menuItem2.setOnAction((ActionEvent t) -> {
-            System.out.println("新建查询 - 菜单点击");
-            try {
-                addTab("查询" + currentNode.getData().toString(), new ImageView("/images/query.png"), QueryTabController.class, null);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        dbMenu.getItems().addAll(menuItem2);
-        // 注册鼠标右击事件处理程序
-        leftTreeView.addEventFilter(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
-            public void handle(MouseEvent event) {
-                System.out.println(event);
-                dbMenu.hide();
-                if(!event.getButton().equals(MouseButton.SECONDARY)) {
-                    return;
-                }
-                Node node = event.getPickResult().getIntersectedNode();                //给node对象添加下来菜单；
-                dbMenu.show(leftTreeView, event.getScreenX(), event.getScreenY());
-                CommonNode name =  ( leftTreeView.getSelectionModel().getSelectedItem()).getValue();
-                System.out.println("Node click: " + name);
-            }
-        });
-//
-//        TreeItem<CommonNode> tdConnectionTreeItem = new TreeItem<>(new CommonNode("TD-127.0.0.1", 0, null));
-//
-//        root.getChildren().add(tdConnectionTreeItem);
-//
-//        tbMap.forEach((k, v) -> {
-//            TreeItem<CommonNode> dbNode = new TreeItem<>(new CommonNode(k.getName(), 1, k));
-//            for (StableResDTO tb : v) {
-//                TreeItem<CommonNode> tbNode = new TreeItem<>(new CommonNode(tb.getName(), 2, new TableModel(tb, k)));
-//                dbNode.getChildren().add(tbNode);
-//            }
-//            tdConnectionTreeItem.getChildren().add(dbNode);
-//        });
-
-
-        // 监听当前的选择
-        leftTreeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> onSelectItem(newValue.getValue()));
-
-        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.ALL_TABS);
-        tabPane.setMinWidth(300);
-
-
-
-    }
-
-
-    public <T> void addTab(String title, Node icon, Class<T> controllerClass, Object userData) {
-        FlowHandler flowHandler = new Flow(controllerClass).createHandler();
-        Tab tab = tabsMap.get(title);
-
-        if (tab == null) {
-
-            tab = new Tab(title);
-            tab.setUserData(userData);
-            tab.setGraphic(icon);
-
-            try {
-                StackPane node = flowHandler.start(new AnimatedFlowContainer(Duration.millis(320), ContainerAnimations.SWIPE_LEFT));
-                node.getStyleClass().addAll("tab-content");
-                tab.setContent(node);
-            } catch (FlowException e) {
-                e.printStackTrace();
-            }
-            tabPane.getTabs().add(tab);
-            tabsMap.put(title, tab);
-            tab.setOnClosed(event -> {
-                tabsMap.remove(title);
-                try {
-                    flowHandler.getCurrentViewContext().destroy();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                }
-            });
-        }
-
-        if ("主页".equals(title)) {
-            tab.setClosable(false);
-        }
-        tabPane.getSelectionModel().select(tab);
-    }
-
 
     @PreDestroy
     public void destroy() {

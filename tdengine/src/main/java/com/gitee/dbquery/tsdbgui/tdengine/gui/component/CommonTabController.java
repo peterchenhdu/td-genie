@@ -1,13 +1,13 @@
 package com.gitee.dbquery.tsdbgui.tdengine.gui.component;
 
-import com.gitee.dbquery.tsdbgui.tdengine.gui.MainController;
+import com.gitee.dbquery.tsdbgui.tdengine.common.enums.NodeTypeEnum;
 import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.DatabaseModel;
-import com.gitee.dbquery.tsdbgui.tdengine.model.TableModel;
+import com.gitee.dbquery.tsdbgui.tdengine.model.StableModel;
+import com.gitee.dbquery.tsdbgui.tdengine.store.ApplicationStore;
 import com.gitee.dbquery.tsdbgui.tdengine.store.TsdbConnectionUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.util.TableUtils;
 import com.zhenergy.fire.util.ObjectUtils;
-import com.zhenergy.zntsdb.common.dto.ConnectionDTO;
 import com.zhenergy.zntsdb.common.dto.QueryRstDTO;
 import com.zhenergy.zntsdb.common.dto.res.DatabaseResDTO;
 import com.zhenergy.zntsdb.common.dto.res.StableResDTO;
@@ -74,12 +74,14 @@ public class CommonTabController {
                     int r = p.getRow();
                     int c = p.getColumn();
                     Object cell = tableView.getColumns().get(c).getCellData(r);
-                    if (cell == null)
+                    if (cell == null) {
                         cell = "";
-                    if (old_r == r)
+                    }
+                    if (old_r == r) {
                         clipboardString.append('\t');
-                    else if (old_r != -1)
+                    } else if (old_r != -1) {
                         clipboardString.append('\n');
+                    }
                     clipboardString.append(cell);
                     old_r = r;
                 }
@@ -102,7 +104,7 @@ public class CommonTabController {
         });
 
 
-        if (MainController.currentNode.getType() == 0) {
+        if (ApplicationStore.getCurrentNode().getType() == NodeTypeEnum.CONNECTION) {
             TableColumn<Map<String, Object>, String> dbNameColumn = new TableColumn<>();
             dbNameColumn.setId("nameColumn");
             dbNameColumn.setText("数据库名");
@@ -193,7 +195,7 @@ public class CommonTabController {
             tableView.getColumns().add(maxRowsColumn);
             tableView.getColumns().add(precisionColumn);
 
-            ConnectionModel connectionModel = (ConnectionModel) MainController.currentNode.getData();
+            ConnectionModel connectionModel = (ConnectionModel) ApplicationStore.getCurrentNode().getData();
 
 
 
@@ -221,7 +223,7 @@ public class CommonTabController {
             });
 
 
-        } else if (MainController.currentNode.getType() == 1) {
+        } else if (ApplicationStore.getCurrentNode().getType() == NodeTypeEnum.DB) {
             TableColumn<Map<String, Object>, String> dbNameColumn = new TableColumn<>();
             dbNameColumn.setId("nameColumn");
             dbNameColumn.setText("超级表");
@@ -254,10 +256,10 @@ public class CommonTabController {
             tableView.getColumns().add(tablesColumn);
 
 
-            DatabaseModel databaseModel = (DatabaseModel) MainController.currentNode.getData();
+            DatabaseModel databaseModel = (DatabaseModel) ApplicationStore.getCurrentNode().getData();
             Connection connection = TsdbConnectionUtils.getConnection(databaseModel.getConnectionModel());
 
-            List<StableResDTO> stbList = SuperTableUtils.getAllStable(connection, MainController.currentNode.getName());
+            List<StableResDTO> stbList = SuperTableUtils.getAllStable(connection, ApplicationStore.getCurrentNode().getName());
 
             stbList.forEach(db -> {
                 Map<String, Object> testMap = new HashMap<>();
@@ -268,11 +270,11 @@ public class CommonTabController {
                 testMap.put("tables", db.getTables());
                 dataModelMapList.add(testMap);
             });
-        } else if (MainController.currentNode.getType() == 2) {
-            TableModel tableModel = (TableModel) MainController.currentNode.getData();
-            Connection connection = TsdbConnectionUtils.getConnection(tableModel.getDb().getConnectionModel());
-            QueryRstDTO queryRstDTO = ConnectionUtils.executeQuery(connection, "select * from " + tableModel.getDb().getName() + "." +
-                    tableModel.getStb().getName() + " limit 1, 10");
+        } else if (ApplicationStore.getCurrentNode().getType() == NodeTypeEnum.STB) {
+            StableModel stableModel = (StableModel) ApplicationStore.getCurrentNode().getData();
+            Connection connection = TsdbConnectionUtils.getConnection(stableModel.getDb().getConnectionModel());
+            QueryRstDTO queryRstDTO = ConnectionUtils.executeQuery(connection, "select * from " + stableModel.getDb().getName() + "." +
+                    stableModel.getStb().getName() + " limit 1, 10");
 
             queryRstDTO.getColumnList().forEach(column -> {
                 TableColumn<Map<String, Object>, String> tmpColumn = new TableColumn<>();
@@ -307,13 +309,13 @@ public class CommonTabController {
 
     private void query(Map<String, Object> queryMap) {
 
-        if (MainController.currentNode.getType() == 2) {
+        if (ApplicationStore.getCurrentNode().getType() == NodeTypeEnum.STB) {
             Integer page = (Integer) queryMap.get("page");
             int start = (page - 1) * 1000;
-            TableModel tableModel = (TableModel) MainController.currentNode.getData();
-            Connection connection = TsdbConnectionUtils.getConnection(tableModel.getDb().getConnectionModel());
-            QueryRstDTO queryRstDTO = ConnectionUtils.executeQuery(connection, "select * from " + tableModel.getDb().getName() + "." +
-                    tableModel.getStb().getName() + " limit " + start + ", " + 1000);
+            StableModel stableModel = (StableModel) ApplicationStore.getCurrentNode().getData();
+            Connection connection = TsdbConnectionUtils.getConnection(stableModel.getDb().getConnectionModel());
+            QueryRstDTO queryRstDTO = ConnectionUtils.executeQuery(connection, "select * from " + stableModel.getDb().getName() + "." +
+                    stableModel.getStb().getName() + " limit " + start + ", " + 1000);
 
             tableView.getColumns().clear();
             queryRstDTO.getColumnList().forEach(column -> {
@@ -335,8 +337,8 @@ public class CommonTabController {
             });
 
 
-            QueryRstDTO countRstDTO = ConnectionUtils.executeQuery(connection, "select count(*) from " + tableModel.getDb().getName() + "." +
-                    tableModel.getStb().getName());
+            QueryRstDTO countRstDTO = ConnectionUtils.executeQuery(connection, "select count(*) from " + stableModel.getDb().getName() + "." +
+                    stableModel.getStb().getName());
             long total = ObjectUtils.isEmpty(countRstDTO.getDataList()) ? 0 : (long) countRstDTO.getDataList().get(0).get("count(*)");
             pageCount.setValue((total / 1000) + 1);
         }

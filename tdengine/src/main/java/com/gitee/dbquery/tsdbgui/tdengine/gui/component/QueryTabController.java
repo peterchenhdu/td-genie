@@ -1,10 +1,11 @@
 package com.gitee.dbquery.tsdbgui.tdengine.gui.component;
 
-import com.gitee.dbquery.tsdbgui.tdengine.gui.MainController;
+import com.gitee.dbquery.tsdbgui.tdengine.common.enums.NodeTypeEnum;
 import com.gitee.dbquery.tsdbgui.tdengine.model.CommonNode;
 import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.DatabaseModel;
-import com.gitee.dbquery.tsdbgui.tdengine.model.TableModel;
+import com.gitee.dbquery.tsdbgui.tdengine.model.StableModel;
+import com.gitee.dbquery.tsdbgui.tdengine.store.ApplicationStore;
 import com.gitee.dbquery.tsdbgui.tdengine.store.TsdbConnectionUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.util.TableUtils;
 import com.jfoenix.controls.JFXAlert;
@@ -77,8 +78,8 @@ public class QueryTabController {
     }
     @PostConstruct
     public void init() {
-        if(MainController.connectionTree != null) {
-            MainController.connectionTree.getChildren().forEach(d->{
+        if(ApplicationStore.getConnectionTree() != null) {
+            ApplicationStore.getConnectionTree().getChildren().forEach(d->{
                 connectionComboBox.getItems().add(d.getValue().getName());
             });
         }
@@ -87,7 +88,7 @@ public class QueryTabController {
                 (observable, oldValue, newValue) -> {
                     System.out.println(newValue);
 
-                    for(TreeItem<CommonNode> node :  MainController.connectionTree.getChildren()) {
+                    for(TreeItem<CommonNode> node :  ApplicationStore.getConnectionTree().getChildren()) {
                         if(node.getValue().getName().equals(newValue)) {
                             node.getChildren().forEach(d->{
                                 dbComboBox.getItems().add(d.getValue().getName());
@@ -97,20 +98,20 @@ public class QueryTabController {
 
                 });
 
-        if(null == MainController.currentNode) {
+        if(null == ApplicationStore.getCurrentNode()) {
 
-        } else if (MainController.currentNode.getType() == 0) {
-            ConnectionModel connectionModel = (ConnectionModel) MainController.currentNode.getData();
+        } else if (ApplicationStore.getCurrentNode().getType() == NodeTypeEnum.CONNECTION) {
+            ConnectionModel connectionModel = (ConnectionModel) ApplicationStore.getCurrentNode().getData();
 
             connectionComboBox.getSelectionModel().select(connectionModel.getName());
-        } else if (MainController.currentNode.getType() == 1) {
-            DatabaseModel databaseModel = (DatabaseModel) MainController.currentNode.getData();
+        } else if (ApplicationStore.getCurrentNode().getType() == NodeTypeEnum.DB) {
+            DatabaseModel databaseModel = (DatabaseModel) ApplicationStore.getCurrentNode().getData();
 
             connectionComboBox.getSelectionModel().select(databaseModel.getConnectionModel().getName());
             dbComboBox.getSelectionModel().select(databaseModel.getName());
-        } else if (MainController.currentNode.getType() == 2) {
-            TableModel tableModel = (TableModel) MainController.currentNode.getData();
-            DatabaseModel databaseModel = tableModel.getDb();
+        } else if (ApplicationStore.getCurrentNode().getType() == NodeTypeEnum.STB) {
+            StableModel stableModel = (StableModel) ApplicationStore.getCurrentNode().getData();
+            DatabaseModel databaseModel = stableModel.getDb();
             connectionComboBox.getSelectionModel().select(databaseModel.getConnectionModel().getName());
             dbComboBox.getSelectionModel().select(databaseModel.getName());
         }
@@ -134,12 +135,14 @@ public class QueryTabController {
                     int r = p.getRow();
                     int c = p.getColumn();
                     Object cell = tableView.getColumns().get(c).getCellData(r);
-                    if (cell == null)
+                    if (cell == null) {
                         cell = "";
-                    if (old_r == r)
+                    }
+                    if (old_r == r) {
                         clipboardString.append('\t');
-                    else if (old_r != -1)
+                    } else if (old_r != -1) {
                         clipboardString.append('\n');
+                    }
                     clipboardString.append(cell);
                     old_r = r;
                 }
@@ -175,7 +178,7 @@ public class QueryTabController {
 
     private ConnectionModel getConnectionModel(String connectionName) {
 
-        for(TreeItem<CommonNode> item: MainController.connectionTree.getChildren()) {
+        for(TreeItem<CommonNode> item: ApplicationStore.getConnectionTree().getChildren()) {
             if(item.getValue().getName().equals(connectionName)) {
                 return (ConnectionModel) item.getValue().getData();
             }
