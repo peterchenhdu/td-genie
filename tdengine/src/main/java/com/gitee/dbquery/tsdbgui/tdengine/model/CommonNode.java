@@ -1,5 +1,6 @@
 package com.gitee.dbquery.tsdbgui.tdengine.model;
 
+import com.gitee.dbquery.tsdbgui.tdengine.common.enums.NodeTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,7 +16,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CommonNode {
     private String name;
-    private Integer type;
+    private NodeTypeEnum type;
     private Object Data;
 
 
