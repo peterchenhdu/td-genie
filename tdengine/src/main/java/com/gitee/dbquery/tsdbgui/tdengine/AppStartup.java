@@ -17,6 +17,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import lombok.extern.log4j.Log4j2;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -30,6 +31,7 @@ import java.util.Properties;
  * @author pc
  * @since 2024/01/31
  **/
+@Log4j2
 public class AppStartup extends Application {
 
     @FXMLViewFlowContext
@@ -45,7 +47,7 @@ public class AppStartup extends Application {
         try {
             sysConfigProperties.load(new FileInputStream(System.getProperty("user.home") + "/windowState.properties"));
         } catch (IOException e) {
-            e.printStackTrace();
+            log.warn(e.getMessage());
         }
 
     }

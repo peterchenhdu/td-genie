@@ -5,7 +5,7 @@ import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.DatabaseModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.StableModel;
 import com.gitee.dbquery.tsdbgui.tdengine.store.ApplicationStore;
-import com.gitee.dbquery.tsdbgui.tdengine.store.TsdbConnectionUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.util.TsdbConnectionUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.util.TableUtils;
 import com.zhenergy.fire.util.ObjectUtils;
 import com.zhenergy.zntsdb.common.dto.QueryRstDTO;
@@ -29,6 +29,8 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -43,9 +45,12 @@ import java.util.Map;
  * @author pc
  * @since 2024/01/31
  **/
-@ViewController(value = "/fxml/component/common_tab.fxml")
-public class CommonTabController {
-
+@ViewController(value = "/fxml/component/db_tab.fxml")
+public class DbTabController {
+    @FXML
+    private VBox centPane;
+    @FXML
+    private HBox queryBox;
     @FXML
     private Pagination pagination;
 
@@ -222,7 +227,7 @@ public class CommonTabController {
                 dataModelMapList.add(testMap);
             });
 
-
+            centPane.getChildren().removeAll(queryBox);
         } else if (ApplicationStore.getCurrentNode().getType() == NodeTypeEnum.DB) {
             TableColumn<Map<String, Object>, String> dbNameColumn = new TableColumn<>();
             dbNameColumn.setId("nameColumn");
@@ -270,6 +275,8 @@ public class CommonTabController {
                 testMap.put("tables", db.getTables());
                 dataModelMapList.add(testMap);
             });
+
+            centPane.getChildren().removeAll(queryBox);
         } else if (ApplicationStore.getCurrentNode().getType() == NodeTypeEnum.STB) {
             StableModel stableModel = (StableModel) ApplicationStore.getCurrentNode().getData();
             Connection connection = TsdbConnectionUtils.getConnection(stableModel.getDb().getConnectionModel());
@@ -287,11 +294,12 @@ public class CommonTabController {
             queryRstDTO.getDataList().forEach(db -> {
                 db.forEach((k, v) -> {
                     if (v instanceof Byte[] || v instanceof byte[]) {
-                        db.put(k, new java.lang.String((byte[]) v));
+                        db.put(k, new String((byte[]) v));
                     }
                 });
                 dataModelMapList.add(db);
             });
+
 
         }
 
@@ -330,7 +338,7 @@ public class CommonTabController {
             queryRstDTO.getDataList().forEach(db -> {
                 db.forEach((k, v) -> {
                     if (v instanceof Byte[] || v instanceof byte[]) {
-                        db.put(k, new java.lang.String((byte[]) v));
+                        db.put(k, new String((byte[]) v));
                     }
                 });
                 dataModelMapList.add(db);

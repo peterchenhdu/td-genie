@@ -1,16 +1,17 @@
 package com.gitee.dbquery.tsdbgui.tdengine.gui;
 
+import cn.hutool.core.io.FileUtil;
 import com.gitee.dbquery.tsdbgui.tdengine.AppStartup;
 import com.gitee.dbquery.tsdbgui.tdengine.common.enums.NodeTypeEnum;
-import com.gitee.dbquery.tsdbgui.tdengine.gui.component.CommonTabController;
-import com.gitee.dbquery.tsdbgui.tdengine.gui.component.QueryTabController;
+import com.gitee.dbquery.tsdbgui.tdengine.gui.component.*;
 import com.gitee.dbquery.tsdbgui.tdengine.model.CommonNode;
 import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.DatabaseModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.StableModel;
 import com.gitee.dbquery.tsdbgui.tdengine.store.ApplicationStore;
 import com.gitee.dbquery.tsdbgui.tdengine.store.H2DbUtils;
-import com.gitee.dbquery.tsdbgui.tdengine.store.TsdbConnectionUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.util.TsdbConnectionUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.util.AlertUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.util.ImageViewUtils;
 import com.jfoenix.controls.*;
 import com.zhenergy.zntsdb.common.dto.res.DatabaseResDTO;
@@ -36,11 +37,14 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import lombok.extern.log4j.Log4j2;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -73,6 +77,8 @@ public class MainController {
     @FXML
     private VBox queryBox;
     @FXML
+    private VBox monitorBox;
+    @FXML
     private MenuItem exitMenuItem;
     @FXML
     @ActionTrigger("aboutAction")
@@ -100,8 +106,6 @@ public class MainController {
 
 
     private TreeItem<CommonNode> root;
-
-
 
 
     private TreeItem<CommonNode> getConnectionTreeItem(ConnectionModel connectionModel) {
@@ -172,6 +176,18 @@ public class MainController {
             }
         });
 
+        monitorBox.setOnMouseClicked((MouseEvent t) -> {
+            System.out.println("queryBox点击");
+            if (!t.getButton().equals(MouseButton.PRIMARY)) {
+                return;
+            }
+            try {
+                addTab("监控" + (ApplicationStore.getCurrentNode() == null ? System.currentTimeMillis() : ApplicationStore.getCurrentNode().getData().toString()), new ImageView("/images/query.png"), MonitorController.class, null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
         leftTreeView.setMinWidth(100);
         root = new TreeItem<>(new CommonNode("TSDB-GUI", NodeTypeEnum.ROOT, null), ImageViewUtils.getImageViewByType(NodeTypeEnum.ROOT));
         root.setExpanded(true);
@@ -185,9 +201,12 @@ public class MainController {
         }
 
 
-        // 创建右键菜单
+        // 创建右键菜单(连接、库、表)
         ContextMenu dbMenu = new ContextMenu();
-//        MenuItem menuItem1 = new MenuItem("创建数据库");
+        MenuItem menuItem1 = new MenuItem("导出SQL");
+        menuItem1.setOnAction((ActionEvent t) -> {
+            handExportDateAction(t);
+        });
         MenuItem menuItem2 = new MenuItem("新建查询");
         menuItem2.setOnAction((ActionEvent t) -> {
             System.out.println("新建查询 - 菜单点击");
@@ -197,7 +216,7 @@ public class MainController {
                 e.printStackTrace();
             }
         });
-        dbMenu.getItems().addAll(menuItem2);
+        dbMenu.getItems().addAll(menuItem1, menuItem2);
         // 注册鼠标右击事件处理程序
         leftTreeView.addEventFilter(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             @Override
@@ -207,6 +226,7 @@ public class MainController {
                 if (!event.getButton().equals(MouseButton.SECONDARY)) {
                     return;
                 }
+
                 Node node = event.getPickResult().getIntersectedNode();                //给node对象添加下来菜单；
                 dbMenu.show(leftTreeView, event.getScreenX(), event.getScreenY());
                 CommonNode name = (leftTreeView.getSelectionModel().getSelectedItem()).getValue();
@@ -224,12 +244,19 @@ public class MainController {
     }
 
     private void onSelectTreeItem(CommonNode item) {
-        if (item.getType() == NodeTypeEnum.ROOT) {
-            return;
-        }
-        ApplicationStore.setCurrentNode(item);
         try {
-            addTab(item.getData().toString(), ImageViewUtils.getImageViewByType(item.getType()), CommonTabController.class, null);
+            ApplicationStore.setCurrentNode(item);
+            if (item.getType() == NodeTypeEnum.ROOT) {
+                //do nothing
+                log.info("click root node...");
+                return;
+            } else if (item.getType() == NodeTypeEnum.CONNECTION) {
+                addTab(item.getData().toString(), ImageViewUtils.getImageViewByType(item.getType()), DbTabController.class, null);
+            } else if (item.getType() == NodeTypeEnum.DB) {
+                addTab(item.getData().toString(), ImageViewUtils.getImageViewByType(item.getType()), StbTabController.class, null);
+            } else {
+                addTab(item.getData().toString(), ImageViewUtils.getImageViewByType(item.getType()), RecordTabController.class, null);
+            }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -274,6 +301,30 @@ public class MainController {
             tab.setClosable(false);
         }
         tabPane.getSelectionModel().select(tab);
+    }
+
+    protected void handExportDateAction(ActionEvent event) {
+        // ShowDialog.showConfirmDialog(FXRobotHelper.getStages().get(0),
+        // "是否导出数据到txt？", "信息");
+        FileChooser fileChooser = new FileChooser();
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("TXT files (*.txt)", "*.txt");
+        fileChooser.getExtensionFilters().add(extFilter);
+        Stage s = new Stage();
+        File file = fileChooser.showSaveDialog(s);
+        if (file == null)
+            return;
+        if (file.exists()) {//文件已存在，则删除覆盖文件
+            file.delete();
+        }
+        String exportFilePath = file.getAbsolutePath();
+        System.out.println("导出文件的路径" + exportFilePath);
+
+
+        FileUtil.writeString(ApplicationStore.getCurrentNode().getData().toString(), file, "utf-8");
+
+        AlertUtils.show(rootPane, "导出成功!保存路径:\n" + exportFilePath);
+
+
     }
 
     @ActionMethod("saveConnection")
