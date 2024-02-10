@@ -6,12 +6,11 @@ import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.DatabaseModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.StableModel;
 import com.gitee.dbquery.tsdbgui.tdengine.store.ApplicationStore;
-import com.gitee.dbquery.tsdbgui.tdengine.store.TsdbConnectionUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.util.TsdbConnectionUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.util.AlertUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.util.TableUtils;
-import com.jfoenix.controls.JFXAlert;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
-import com.jfoenix.controls.JFXDialogLayout;
 import com.zhenergy.fire.util.ObjectUtils;
 import com.zhenergy.zntsdb.common.dto.QueryRstDTO;
 import com.zhenergy.zntsdb.common.util.ConnectionUtils;
@@ -33,8 +32,6 @@ import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.StackPane;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -193,17 +190,7 @@ public class QueryTabController {
         }
 
         if(!sqlEditArea.getText().toUpperCase().startsWith("SELECT")) {
-            JFXAlert alert = new JFXAlert((Stage) rootPane.getScene().getWindow());
-            alert.initModality(Modality.APPLICATION_MODAL);
-            alert.setOverlayClose(false);
-            JFXDialogLayout layout = new JFXDialogLayout();
-            layout.setHeading(new Label("提示"));
-            layout.setBody(new Label("不支持的操作！"));
-            JFXButton closeButton = new JFXButton("确定");
-            closeButton.setOnAction(event -> alert.hideWithAnimation());
-            layout.setActions(closeButton);
-            alert.setContent(layout);
-            alert.show();
+            AlertUtils.show(rootPane, "不支持的操作！");
             return;
         }
 

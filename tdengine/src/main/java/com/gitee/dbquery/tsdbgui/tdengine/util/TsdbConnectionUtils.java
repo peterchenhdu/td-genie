@@ -1,6 +1,5 @@
-package com.gitee.dbquery.tsdbgui.tdengine.store;
+package com.gitee.dbquery.tsdbgui.tdengine.util;
 
-import com.gitee.dbquery.tsdbgui.tdengine.gui.MainController;
 import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
 import com.zhenergy.zntsdb.common.dto.ConnectionDTO;
 import com.zhenergy.zntsdb.common.util.ConnectionUtils;
