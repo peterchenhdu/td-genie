@@ -27,6 +27,8 @@
 ![输入图片说明](tdengine/src/main/resources/images/readme/executeSQL.png)
 7. 资源监控查看(可查看CPU、内存、磁盘使用趋势)
 ![输入图片说明](tdengine/src/main/resources/images/resourceMonitor.png)
+8. 导出库表DDL
+![输入图片说明](tdengine/src/main/resources/images/readme/exportDDL.png)
 #### 参与贡献
 
 1.  Fork 本仓库
