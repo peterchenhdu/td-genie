@@ -104,8 +104,7 @@
                 <GridPane>
                     <children>
                         <Label GridPane.columnIndex="0" GridPane.rowIndex="1">*库名称</Label>
-                        <JFXTextField fx:id="createDbName" GridPane.columnIndex="1" GridPane.rowIndex="1"
-                                      disable="true"/>
+                        <JFXTextField fx:id="createDbName" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
                         <Label GridPane.columnIndex="0" GridPane.rowIndex="2">*副本个数</Label>
                         <JFXTextField fx:id="createDbReplica" text="1" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
                         <Label GridPane.columnIndex="0" GridPane.rowIndex="3">*数据保留天数</Label>

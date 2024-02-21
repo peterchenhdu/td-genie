@@ -364,6 +364,7 @@ public class MainController {
         createDbMenuItem.setOnAction((ActionEvent t) -> {
             System.out.println("新建数据库 - 菜单点击");
             createDbDialogTitle.setText("新建数据库");
+            createDbName.setDisable(false);
             createDbDialog.setTransitionType(JFXDialog.DialogTransition.TOP);
             createDbDialog.show(rootPane);
         });
@@ -372,6 +373,7 @@ public class MainController {
         updateDbMenuItem.setOnAction((ActionEvent t) -> {
             System.out.println("编辑数据库 - 菜单点击");
             createDbDialogTitle.setText("编辑数据库");
+            createDbName.setDisable(true);
             DatabaseModel databaseModel = (DatabaseModel) ApplicationStore.getCurrentNode().getData();
             createDbName.setText(databaseModel.getDatabaseResDTO().getName());
             createDbComp.setText(databaseModel.getDatabaseResDTO().getComp());
