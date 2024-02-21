@@ -4,7 +4,7 @@ import com.gitee.dbquery.tsdbgui.tdengine.sdk.annotation.TdField;
 import lombok.Data;
 
 /**
- * @author chenpi
+ * @author 风一样的码农
  * @since 2023/8/23
  **/
 @Data

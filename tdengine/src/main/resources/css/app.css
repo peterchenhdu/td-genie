@@ -40,7 +40,7 @@
 
 .jfx-svg-glyph {
     -fx-background-color: -fx-text-color;
-    -jfx-size:15px
+    -jfx-size: 15px
 
 }
 
@@ -344,7 +344,7 @@
     -fx-pref-height: 32;
     -fx-pref-width: 32;
     -fx-background-radius: 16;
-    -fx-background-color:  ladder(-fx-main-base, rgba(255, 255, 255, .2) 29%, rgba(0, 0, 0, .2) 30%);
+    -fx-background-color: ladder(-fx-main-base, rgba(255, 255, 255, .2) 29%, rgba(0, 0, 0, .2) 30%);
 }
 
 .tool-bar-toggle > .jfx-svg-glyph {

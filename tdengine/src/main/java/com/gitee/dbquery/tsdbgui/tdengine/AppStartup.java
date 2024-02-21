@@ -19,6 +19,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -32,7 +33,7 @@ import java.util.Properties;
  * @author pc
  * @since 2024/01/31
  **/
-@Log4j2
+@Slf4j
 public class AppStartup extends Application {
 
     @FXMLViewFlowContext
