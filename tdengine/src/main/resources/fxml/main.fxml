@@ -181,7 +181,7 @@
     </JFXDialog>
 
     <JFXDialog fx:id="aboutDialog" overlayClose="true">
-        <JFXDialogLayout>
+        <JFXDialogLayout prefWidth="600">
             <heading>
                 <HBox>
                     <Label>关于TSDB-GUI</Label>
@@ -190,11 +190,27 @@
             <body>
                 <GridPane>
                     <children>
-                        <JFXTextField editable="false" GridPane.rowIndex="1" prefWidth="500">通用时序数据库管理工具</JFXTextField>
-                        <JFXTextField editable="false" GridPane.rowIndex="2" prefWidth="500">版本：V1.0.0</JFXTextField>
-                        <JFXTextField editable="false" GridPane.rowIndex="3" prefWidth="500">
-                            问题反馈：https://gitee.com/dbquery/tsdb-gui
+                        <HBox GridPane.rowIndex="1">
+                            <Label prefWidth="100">软件说明：</Label>
+                            <JFXTextField editable="false"  prefWidth="400">通用时序数据库管理工具</JFXTextField>
+                        </HBox>
+                        <HBox GridPane.rowIndex="2">
+                            <Label prefWidth="100">软件版本：</Label>
+                        <JFXTextField editable="false"  prefWidth="400">V1.0.0</JFXTextField>
+                        </HBox>
+                        <HBox GridPane.rowIndex="3">
+                            <Label prefWidth="100">问题反馈1：</Label>
+                        <JFXTextField editable="false"  prefWidth="400">
+                            https://gitee.com/dbquery/tsdb-gui
                         </JFXTextField>
+                        </HBox>
+                        <HBox GridPane.rowIndex="4">
+                            <Label prefWidth="100">问题反馈2：</Label>
+                        <JFXTextField editable="false"  prefWidth="400">
+                            https://github.com/peterchenhdu/tsdb-gui
+                        </JFXTextField>
+                        </HBox>
+
                     </children>
                 </GridPane>
             </body>
