@@ -1,7 +1,7 @@
 package com.gitee.dbquery.tsdbgui.tdengine.model;
 
-import com.zhenergy.zntsdb.common.dto.res.DatabaseResDTO;
-import com.zhenergy.zntsdb.common.dto.res.StableResDTO;
+import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.res.DatabaseResDTO;
+import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.res.StableResDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

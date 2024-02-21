@@ -1,6 +1,6 @@
 package com.gitee.dbquery.tsdbgui.tdengine.store;
 
-import com.zhenergy.fire.util.ObjectUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.util.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.sql.*;

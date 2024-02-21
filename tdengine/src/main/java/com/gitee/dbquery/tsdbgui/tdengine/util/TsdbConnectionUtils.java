@@ -1,8 +1,8 @@
 package com.gitee.dbquery.tsdbgui.tdengine.util;
 
 import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
-import com.zhenergy.zntsdb.common.dto.ConnectionDTO;
-import com.zhenergy.zntsdb.common.util.ConnectionUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.ConnectionDTO;
+import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.ConnectionUtils;
 
 import java.sql.Connection;
 
