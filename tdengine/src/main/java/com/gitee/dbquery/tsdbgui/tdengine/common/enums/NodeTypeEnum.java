@@ -1,6 +1,5 @@
 package com.gitee.dbquery.tsdbgui.tdengine.common.enums;
 
-import com.zhenergy.fire.base.exception.BusinessException;
 import lombok.Getter;
 
 /**
@@ -56,6 +55,6 @@ public enum NodeTypeEnum {
                 return o;
             }
         }
-        throw new BusinessException("invalid Node type ");
+        throw new RuntimeException("invalid Node type ");
     }
 }

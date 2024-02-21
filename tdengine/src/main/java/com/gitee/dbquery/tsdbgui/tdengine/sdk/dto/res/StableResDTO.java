@@ -1,0 +1,22 @@
+package com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.res;
+
+import com.gitee.dbquery.tsdbgui.tdengine.sdk.annotation.TdField;
+import lombok.Data;
+
+/**
+ * @author chenpi
+ * @since 2023/8/18
+ **/
+@Data
+public class StableResDTO {
+    @TdField
+    private String name;
+    @TdField
+    private String createdTime;
+    @TdField
+    private Integer columns;
+    @TdField
+    private Integer tags;
+    @TdField
+    private Integer tables;
+}
