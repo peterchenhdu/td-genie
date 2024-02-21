@@ -10,7 +10,7 @@ import cn.hutool.core.bean.BeanUtil;
  * @since 1.0.3
  **/
 public class ObjectUtils extends BeanUtil {
-
+ssss
     public static boolean isNotEmpty( Object[] array) {
         return !isEmpty(array);
     }
