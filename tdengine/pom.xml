@@ -5,7 +5,7 @@
     <parent>
         <artifactId>tsdb-gui</artifactId>
         <groupId>com.gitee.dbquery</groupId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
     <version>0.0.1-SNAPSHOT</version>
     <modelVersion>4.0.0</modelVersion>
