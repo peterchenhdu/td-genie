@@ -26,6 +26,4 @@ public class ConnectionDTO {
     private String password;
 
 
-
-
 }

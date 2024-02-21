@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author chenpi
+ * @author 风一样的码农
  * @since 2023/8/23
  **/
 @Data
@@ -18,7 +18,7 @@ public class TableUpdateDTO {
     private List<TableFieldDTO> deleteList;
     private List<TableFieldDTO> updateList;
     /**
-     *  Tag Name修改Map
+     * Tag Name修改Map
      */
     private Map<String, String> tagNameChangeMap;
 }

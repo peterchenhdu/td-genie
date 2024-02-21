@@ -3,7 +3,7 @@ package com.gitee.dbquery.tsdbgui.tdengine.sdk.constant;
 /**
  * 公共常量类
  *
- * @author chenpi
+ * @author 风一样的码农
  * @since 2023/8/10
  **/
 public class TdClientConstants {

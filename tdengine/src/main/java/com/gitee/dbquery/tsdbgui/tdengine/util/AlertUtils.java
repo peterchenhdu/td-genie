@@ -9,7 +9,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 /**
- * @author chenpi
+ * @author 风一样的码农
  * @since 2024/2/8
  **/
 public class AlertUtils {

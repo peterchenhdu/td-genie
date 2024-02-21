@@ -1,12 +1,14 @@
 package com.gitee.dbquery.tsdbgui.tdengine.sdk.util;
 
+import cn.hutool.core.util.StrUtil;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.annotation.TdField;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.ConnectionDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.QueryRstDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.res.SystemVariableResDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.util.ObjectUtils;
-import com.google.common.base.CaseFormat;
+import lombok.extern.log4j.Log4j;
 import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -17,10 +19,10 @@ import java.util.*;
 /**
  * 数据连接工具类
  *
- * @author chenpi
+ * @author 风一样的码农
  * @since 2021/12/2
  **/
-@Log4j2
+@Slf4j
 public class ConnectionUtils {
     public static String RS_URL = "jdbc:TAOS-RS://%s:%s?user=%s&password=%s&timezone=UTC-8&charset=UTF-8&locale=en_US.UTF-8";
     public static String RS_DB_URL = "jdbc:TAOS-RS://%s:%s/%s?user=%s&password=%s&timezone=UTC-8&charset=UTF-8&locale=en_US.UTF-8";
@@ -275,7 +277,7 @@ public class ConnectionUtils {
     }
 
     private static void setValue(Object obj, String columnName, Field field, ResultSet rs) throws NoSuchMethodException, SQLException, InvocationTargetException, IllegalAccessException {
-        String tdColumnName = ObjectUtils.isEmpty(columnName) ? CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, field.getName()) : columnName;
+        String tdColumnName = ObjectUtils.isEmpty(columnName) ? StrUtil.toUnderlineCase(field.getName()) : columnName;
         String fieldName = field.getName();
         String setMethodName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
         Method setMethod = obj.getClass().getMethod(setMethodName, field.getType());

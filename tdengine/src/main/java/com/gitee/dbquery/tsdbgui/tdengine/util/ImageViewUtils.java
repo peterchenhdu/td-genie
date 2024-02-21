@@ -4,7 +4,7 @@ import com.gitee.dbquery.tsdbgui.tdengine.common.enums.NodeTypeEnum;
 import javafx.scene.image.ImageView;
 
 /**
- * @author chenpi
+ * @author 风一样的码农
  * @since 2024/2/6
  **/
 public class ImageViewUtils {

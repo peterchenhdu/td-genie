@@ -6,7 +6,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 /**
- * @author chenpi
+ * @author 风一样的码农
  * @since 2024/2/20
  **/
 public class JavaFxBeanUtils {

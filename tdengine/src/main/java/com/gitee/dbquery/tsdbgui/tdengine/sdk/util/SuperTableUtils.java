@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 /**
  * 超级表工具类
  *
- * @author chenpi
+ * @author 风一样的码农
  * @since 2023/8/18
  **/
 public class SuperTableUtils {

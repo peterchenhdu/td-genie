@@ -7,6 +7,7 @@ import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.res.DatabaseResDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.exception.DatabaseAlreadyExistException;
 import com.gitee.dbquery.tsdbgui.tdengine.util.ObjectUtils;
 import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -16,10 +17,10 @@ import java.util.List;
 /**
  * 数据库工具类
  *
- * @author chenpi
+ * @author 风一样的码农
  * @since 2023/8/11
  **/
-@Log4j2
+@Slf4j
 public class DataBaseUtils {
 
     /**

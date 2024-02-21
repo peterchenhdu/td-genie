@@ -3,7 +3,7 @@ package com.gitee.dbquery.tsdbgui.tdengine.common.enums;
 import lombok.Getter;
 
 /**
- * @author chenpi
+ * @author 风一样的码农
  * @since 2024/2/6
  **/
 @Getter

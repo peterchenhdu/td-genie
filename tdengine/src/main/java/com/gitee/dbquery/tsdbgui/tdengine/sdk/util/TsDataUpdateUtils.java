@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * 时序数据更新工具类
  *
- * @author chenpi
+ * @author 风一样的码农
  * @since 2023/8/24
  **/
 public class TsDataUpdateUtils {

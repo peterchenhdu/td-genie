@@ -51,6 +51,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -67,7 +68,7 @@ import java.util.stream.Collectors;
  * @author pc
  * @since 2024/01/31
  **/
-@Log4j2
+@Slf4j
 @ViewController("/fxml/main.fxml")
 public class MainController {
     @FXML
