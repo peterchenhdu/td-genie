@@ -6,6 +6,6 @@ package com.gitee.dbquery.tsdbgui.tdengine.util;
  **/
 public class ValueUtils {
     public static String getString(String obj, Object defaultValue) {
-        return obj == null ? defaultValue.toString():obj;
+        return obj == null ? defaultValue.toString() : obj;
     }
 }

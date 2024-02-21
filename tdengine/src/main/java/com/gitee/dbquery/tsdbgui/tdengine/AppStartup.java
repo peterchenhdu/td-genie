@@ -14,6 +14,7 @@ import io.datafx.controller.flow.context.ViewFlowContext;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -43,6 +44,7 @@ public class AppStartup extends Application {
     public static Double dividerPositions;
     private ApplicationContext applicationContext = ApplicationContext.getInstance();
     public static Properties sysConfigProperties = new Properties();
+
     static {
         try {
             sysConfigProperties.load(new FileInputStream(System.getProperty("user.home") + "/windowState.properties"));
@@ -55,6 +57,10 @@ public class AppStartup extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+        // Image 的 url 是 classpath 的相对目录，也可以是一个绝对目录
+        Image image = new Image("/images/logo.png");
+        stage.getIcons().add(image);
+
         Flow contentFlow = new Flow(MainController.class);
         AnimatedFlowContainer container = new AnimatedFlowContainer(Duration.millis(320), ContainerAnimations.SWIPE_LEFT);
         flowContext = new ViewFlowContext();
@@ -82,12 +88,12 @@ public class AppStartup extends Application {
             // 记录窗口位置和大小到本地存储
             Properties windowProperties = new Properties();
             windowProperties.put(WINDOW_X_PROPERTY, stage.getX() + "");
-            windowProperties.put(WINDOW_Y_PROPERTY, stage.getY()+ "");
-            windowProperties.put(WINDOW_WIDTH_PROPERTY, stage.getWidth()+ "");
-            windowProperties.put(WINDOW_HEIGHT_PROPERTY, stage.getHeight()+ "");
-            windowProperties.put("dividerPositions", dividerPositions+ "");
+            windowProperties.put(WINDOW_Y_PROPERTY, stage.getY() + "");
+            windowProperties.put(WINDOW_WIDTH_PROPERTY, stage.getWidth() + "");
+            windowProperties.put(WINDOW_HEIGHT_PROPERTY, stage.getHeight() + "");
+            windowProperties.put("dividerPositions", dividerPositions + "");
             try {
-                windowProperties.store(new FileOutputStream(System.getProperty("user.home") + "/windowState.properties") , "");
+                windowProperties.store(new FileOutputStream(System.getProperty("user.home") + "/windowState.properties"), "");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -97,7 +103,7 @@ public class AppStartup extends Application {
         scene.getStylesheets().addAll(AppStartup.class.getResource("/css/app.css").toExternalForm());
 
         System.out.println(Double.parseDouble(ValueUtils.getString(AppStartup.sysConfigProperties.getProperty("dividerPositions"), 0.2)));
-        ((SplitPane)(scene.lookup("#splitPane"))).setDividerPositions(Double.parseDouble(ValueUtils.getString(AppStartup.sysConfigProperties.getProperty("dividerPositions"), 0.2)));
+        ((SplitPane) (scene.lookup("#splitPane"))).setDividerPositions(Double.parseDouble(ValueUtils.getString(AppStartup.sysConfigProperties.getProperty("dividerPositions"), 0.2)));
 
     }
 

@@ -33,7 +33,7 @@
         <HBox style="-fx-border-color: #cfd3cd; -fx-border-width: 0 0 1 0;">
             <VBox alignment="CENTER" fx:id="createConnectionBox" styleClass="tool-box">
                 <padding>
-                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
                 </padding>
                 <ImageView fitHeight="20.0" fitWidth="20.0" nodeOrientation="INHERIT" pickOnBounds="true">
                     <Image url="/images/connection.png"/>
@@ -42,7 +42,7 @@
             </VBox>
             <VBox alignment="CENTER" fx:id="queryBox" styleClass="tool-box">
                 <padding>
-                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
                 </padding>
                 <ImageView fitHeight="20.0" fitWidth="20.0" nodeOrientation="INHERIT" pickOnBounds="true">
                     <Image url="/images/query.png"/>
@@ -51,10 +51,10 @@
             </VBox>
             <VBox alignment="CENTER" fx:id="monitorBox" styleClass="tool-box">
                 <padding>
-                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
                 </padding>
                 <ImageView fitHeight="20.0" fitWidth="20.0" nodeOrientation="INHERIT" pickOnBounds="true">
-                    <Image url="/images/query.png"/>
+                    <Image url="/images/monitor.png"/>
                 </ImageView>
                 <Text>资源监控</Text>
             </VBox>
@@ -72,11 +72,16 @@
             <body>
                 <GridPane>
                     <children>
-                        <JFXTextField fx:id="nameTextField" promptText="*连接名称" GridPane.rowIndex="1"/>
-                        <JFXTextField fx:id="ipTextField" promptText="*IP地址" GridPane.rowIndex="2"/>
-                        <JFXTextField fx:id="portTextField" promptText="*RESTFul端口" GridPane.rowIndex="3"/>
-                        <JFXTextField fx:id="usernameTextField" promptText="*用户名" GridPane.rowIndex="4"/>
-                        <JFXTextField fx:id="passwordTextField" promptText="*密码" GridPane.rowIndex="5"/>
+                        <Label GridPane.columnIndex="0" GridPane.rowIndex="1">*连接名称</Label>
+                        <JFXTextField fx:id="nameTextField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                        <Label GridPane.columnIndex="0" GridPane.rowIndex="2">*IP地址</Label>
+                        <JFXTextField fx:id="ipTextField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                        <Label GridPane.columnIndex="0" GridPane.rowIndex="3">*端口</Label>
+                        <JFXTextField fx:id="portTextField" text="6041" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                        <Label GridPane.columnIndex="0" GridPane.rowIndex="4">*用户名</Label>
+                        <JFXTextField fx:id="usernameTextField" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                        <Label GridPane.columnIndex="0" GridPane.rowIndex="5">*密码</Label>
+                        <JFXTextField fx:id="passwordTextField" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
                     </children>
                 </GridPane>
             </body>
@@ -89,6 +94,92 @@
             </actions>
         </JFXDialogLayout>
     </JFXDialog>
+
+    <JFXDialog fx:id="createDbDialog" overlayClose="false">
+        <JFXDialogLayout>
+            <heading>
+                <Label fx:id="createDbDialogTitle">新增数据库</Label>
+            </heading>
+            <body>
+                <GridPane>
+                    <children>
+                        <Label GridPane.columnIndex="0" GridPane.rowIndex="1">*库名称</Label>
+                        <JFXTextField fx:id="createDbName" GridPane.columnIndex="1" GridPane.rowIndex="1"
+                                      disable="true"/>
+                        <Label GridPane.columnIndex="0" GridPane.rowIndex="2">*副本个数</Label>
+                        <JFXTextField fx:id="createDbReplica" text="1" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                        <Label GridPane.columnIndex="0" GridPane.rowIndex="3">*数据保留天数</Label>
+                        <JFXTextField fx:id="createDbDays" text="3650" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                        <Label GridPane.columnIndex="0" GridPane.rowIndex="4">*VNODE内存块数目</Label>
+                        <JFXTextField fx:id="createDbBlocks" text="6" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                        <Label GridPane.columnIndex="0" GridPane.rowIndex="5">*文件压缩标志位</Label>
+                        <JFXTextField fx:id="createDbComp" text="2" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                    </children>
+                </GridPane>
+            </body>
+            <actions>
+                <JFXButton fx:id="createDBSaveButton" buttonType="RAISED" text="保存"/>
+                <JFXButton fx:id="createDBCancelButton" buttonType="RAISED" text="取消"/>
+            </actions>
+        </JFXDialogLayout>
+    </JFXDialog>
+
+    <JFXDialog fx:id="createTbDialog" overlayClose="false">
+        <JFXDialogLayout>
+            <heading>
+                <Label fx:id="createTbDialogTitle">编辑数据表</Label>
+            </heading>
+            <body>
+
+                <GridPane fx:id="createTbPane">
+                    <children>
+                        <HBox fx:id="0_tableNameHbox">
+                            <padding>
+                                <Insets right="6.0" bottom="20.0"/>
+                            </padding>
+                            <Label fx:id="0_tableNamelabel" minWidth="100" GridPane.columnIndex="0"
+                                   GridPane.rowIndex="0">表名
+                            </Label>
+                            <JFXTextField fx:id="tableName0_TextField" minWidth="100" GridPane.columnIndex="1"
+                                          GridPane.rowIndex="0">
+                            </JFXTextField>
+                        </HBox>
+                        <Label fx:id="1_labelName" GridPane.columnIndex="0" GridPane.rowIndex="1">字段名称
+                            <padding>
+                                <Insets right="6.0"/>
+                            </padding>
+                        </Label>
+                        <Label fx:id="1_labelType" GridPane.columnIndex="1" GridPane.rowIndex="1">数据类型
+                            <padding>
+                                <Insets right="6.0"/>
+                            </padding>
+                        </Label>
+                        <Label fx:id="1_labelLength" GridPane.columnIndex="2" GridPane.rowIndex="1">长度
+                            <padding>
+                                <Insets right="6.0"/>
+                            </padding>
+                        </Label>
+                        <Label fx:id="1_labelIsTag" GridPane.columnIndex="3" GridPane.rowIndex="1">是否TAG
+                            <padding>
+                                <Insets right="6.0"/>
+                            </padding>
+                        </Label>
+                        <Label fx:id="1_labelOpt" GridPane.columnIndex="4" GridPane.rowIndex="1">操作
+                            <padding>
+                                <Insets right="6.0"/>
+                            </padding>
+                        </Label>
+                    </children>
+                </GridPane>
+            </body>
+            <actions>
+                <JFXButton fx:id="addFieldButton" text="新增字段"/>
+                <JFXButton fx:id="createTBSaveButton" buttonType="RAISED" text="保存"/>
+                <JFXButton fx:id="createTBCancelButton" buttonType="RAISED" text="取消"/>
+            </actions>
+        </JFXDialogLayout>
+    </JFXDialog>
+
     <JFXDialog fx:id="aboutDialog" overlayClose="true">
         <JFXDialogLayout>
             <heading>

@@ -22,6 +22,7 @@ public class ConnectionModel {
     private String username;
     private String password;
     private List<DatabaseModel> dbList;
+
     @Override
     public String toString() {
         return name;

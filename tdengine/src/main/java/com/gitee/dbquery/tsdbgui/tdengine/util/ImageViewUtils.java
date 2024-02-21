@@ -10,7 +10,7 @@ import javafx.scene.image.ImageView;
 public class ImageViewUtils {
     public static ImageView getImageViewByType(NodeTypeEnum nodeTypeEnum) {
         ImageView imageView;
-        switch (nodeTypeEnum){
+        switch (nodeTypeEnum) {
             case ROOT:
                 imageView = new ImageView("/images/logo.png");
                 break;

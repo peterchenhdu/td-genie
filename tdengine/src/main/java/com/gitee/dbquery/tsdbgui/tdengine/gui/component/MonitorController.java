@@ -2,6 +2,8 @@ package com.gitee.dbquery.tsdbgui.tdengine.gui.component;
 
 import com.gitee.dbquery.tsdbgui.tdengine.common.enums.NodeTypeEnum;
 import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
+import com.gitee.dbquery.tsdbgui.tdengine.model.DatabaseModel;
+import com.gitee.dbquery.tsdbgui.tdengine.model.StableModel;
 import com.gitee.dbquery.tsdbgui.tdengine.store.ApplicationStore;
 import com.gitee.dbquery.tsdbgui.tdengine.util.TsdbConnectionUtils;
 import com.zhenergy.fire.util.DateTimeUtils;
@@ -27,22 +29,18 @@ import java.util.Map;
 @ViewController(value = "/fxml/component/monitor.fxml", title = "资源监控", iconPath = "")
 public class MonitorController {
 
-    @ActionHandler
-    private FlowActionHandler actionHandler;
-
     public static final Color BACKGROUND_DARK = Color.rgb(39, 49, 66); // #2a2a2a
     public static final Color BACKGROUND_LIGHT = Color.rgb(255, 255, 255); // #2a2a2a
     public static final Color FOREGROUND_DARK = Color.rgb(223, 223, 223); // #2a2a2a
     public static final Color FOREGROUND_LIGHT = Color.rgb(52, 52, 52); // #2a2a2a
     public static final Color BORDERCOLOR_DARK = Color.rgb(49, 61, 79); // #2a2a2a
     public static final Color BORDERCOLOR_LIGHT = Color.rgb(185, 185, 185, 0.3f); // #2a2a2a
-
-
-
+    @ActionHandler
+    private FlowActionHandler actionHandler;
     private Tile donutChartTile;
     private Tile cpuProcessChart;
     private Tile memProcessChart;
-    private Tile  diskProcessChart;
+    private Tile diskProcessChart;
 
     private Tile cpuChartTile;
     private Tile memChartTile;
@@ -50,7 +48,6 @@ public class MonitorController {
 
     private long lastTimerCall;
     private AnimationTimer timer;
-
 
 
     @FXML
@@ -76,30 +73,36 @@ public class MonitorController {
         double usedDisk = 0;
         double totalDisk = 1;
 
-        if(ApplicationStore.getCurrentNode().getType().equals(NodeTypeEnum.CONNECTION)) {
-            QueryRstDTO rst = ConnectionUtils.executeQuery(TsdbConnectionUtils.getConnection((ConnectionModel) ApplicationStore.getCurrentNode().getData()),
-                    "select  avg(cpu_taosd) as avg_cpu_taosd,  avg(cpu_system) as avg_cpu_system,  avg(cpu_cores) as avg_cpu_cores,avg(mem_taosd) as avg_mem_taosd,avg(mem_system) as avg_mem_system,  avg(mem_total) as avg_mem_total, avg(disk_used) as avg_disk_used,  avg(disk_total) as avg_disk_total from log.dn where ts > '" + DateTimeUtils.format(LocalDateTime.now().minusDays(1)) + "' interval(10m);");
-            for (Map<String, Object> map : rst.getDataList()) {
-                cpuSeries.getData().add(new XYChart.Data(map.get("ts").toString().substring(11,16), map.get("avg_cpu_taosd")));
-                memSeries.getData().add(new XYChart.Data(map.get("ts").toString().substring(11,16), map.get("avg_mem_taosd")));
-                diskSeries.getData().add(new XYChart.Data(map.get("ts").toString().substring(11,16), map.get("avg_disk_used")));
 
-            }
+        ConnectionModel connectionModel;
+        if (ApplicationStore.getCurrentNode().getType().equals(NodeTypeEnum.CONNECTION)) {
+            connectionModel = (ConnectionModel) ApplicationStore.getCurrentNode().getData();
+        } else if (ApplicationStore.getCurrentNode().getType().equals(NodeTypeEnum.DB)) {
+            connectionModel = ((DatabaseModel) ApplicationStore.getCurrentNode().getData()).getConnectionModel();
+        } else if (ApplicationStore.getCurrentNode().getType().equals(NodeTypeEnum.STB)) {
+            connectionModel = ((StableModel) ApplicationStore.getCurrentNode().getData()).getDb().getConnectionModel();
+        } else {
+            return;
+        }
 
-            if(ObjectUtils.isNotEmpty(rst.getDataList())) {
-                Map<String, Object> lastObj = rst.getDataList().get(rst.getDataList().size() - 1);
-                usedCpu = (double) lastObj.get("avg_cpu_system");
-                totalCpu = 100 * (double) lastObj.get("avg_cpu_cores");
-                usedMen = (double) lastObj.get("avg_mem_system");
-                totalMen = (double) lastObj.get("avg_mem_total");
-                usedDisk = (double) lastObj.get("avg_disk_used");
-                totalDisk = (double) lastObj.get("avg_disk_total");
-            }
+        QueryRstDTO rst = ConnectionUtils.executeQuery(TsdbConnectionUtils.getConnection(connectionModel),
+                "select  avg(cpu_taosd) as avg_cpu_taosd,  avg(cpu_system) as avg_cpu_system,  avg(cpu_cores) as avg_cpu_cores,avg(mem_taosd) as avg_mem_taosd,avg(mem_system) as avg_mem_system,  avg(mem_total) as avg_mem_total, avg(disk_used) as avg_disk_used,  avg(disk_total) as avg_disk_total from log.dn where ts > '" + DateTimeUtils.format(LocalDateTime.now().minusDays(1)) + "' interval(10m);");
+        for (Map<String, Object> map : rst.getDataList()) {
+            cpuSeries.getData().add(new XYChart.Data(map.get("ts").toString().substring(11, 16), map.get("avg_cpu_taosd")));
+            memSeries.getData().add(new XYChart.Data(map.get("ts").toString().substring(11, 16), map.get("avg_mem_taosd")));
+            diskSeries.getData().add(new XYChart.Data(map.get("ts").toString().substring(11, 16), map.get("avg_disk_used")));
 
         }
 
-
-
+        if (ObjectUtils.isNotEmpty(rst.getDataList())) {
+            Map<String, Object> lastObj = rst.getDataList().get(rst.getDataList().size() - 1);
+            usedCpu = (double) lastObj.get("avg_cpu_system");
+            totalCpu = 100 * (double) lastObj.get("avg_cpu_cores");
+            usedMen = (double) lastObj.get("avg_mem_system");
+            totalMen = (double) lastObj.get("avg_mem_total");
+            usedDisk = (double) lastObj.get("avg_disk_used");
+            totalDisk = (double) lastObj.get("avg_disk_total");
+        }
 
 
         cpuChartTile = TileBuilder.create()
@@ -139,14 +142,6 @@ public class MonitorController {
                 .build();
 
 
-
-
-
-
-
-
-
-
         cpuProcessChart = TileBuilder.create()
                 .skinType(Tile.SkinType.CIRCULAR_PROGRESS)
                 .title("CPU使用率").foregroundBaseColor(FOREGROUND_LIGHT).backgroundColor(BACKGROUND_LIGHT).borderColor(BORDERCOLOR_LIGHT).borderWidth(0.8d)
@@ -155,7 +150,7 @@ public class MonitorController {
                 //.graphic(new WeatherSymbol(ConditionAndIcon.CLEAR_DAY, 48, Color.WHITE))
                 .build();
 
-        cpuProcessChart.setValue(100*usedCpu/totalCpu);
+        cpuProcessChart.setValue(100 * usedCpu / totalCpu);
 
         memProcessChart = TileBuilder.create()
                 .skinType(Tile.SkinType.CIRCULAR_PROGRESS)
@@ -165,7 +160,7 @@ public class MonitorController {
                 //.graphic(new WeatherSymbol(ConditionAndIcon.CLEAR_DAY, 48, Color.WHITE))
                 .build();
 
-        memProcessChart.setValue(100*usedMen/totalMen);
+        memProcessChart.setValue(100 * usedMen / totalMen);
 
 
         diskProcessChart = TileBuilder.create()
@@ -176,14 +171,7 @@ public class MonitorController {
                 //.graphic(new WeatherSymbol(ConditionAndIcon.CLEAR_DAY, 48, Color.WHITE))
                 .build();
 
-        diskProcessChart.setValue(100*usedDisk/totalDisk);
-
-
-
-
-
-
-
+        diskProcessChart.setValue(100 * usedDisk / totalDisk);
 
 
         lastTimerCall = System.nanoTime();
@@ -207,9 +195,9 @@ public class MonitorController {
         centerPane.add(cpuProcessChart, 0, 0);
         centerPane.add(memProcessChart, 1, 0);
         centerPane.add(diskProcessChart, 2, 0);
-        centerPane.add(cpuChartTile, 0, 1,3,1);
-        centerPane.add(memChartTile, 0, 2,3,1);
-        centerPane.add(diskChartTile, 0, 3,3,1);
+        centerPane.add(cpuChartTile, 0, 1, 3, 1);
+        centerPane.add(memChartTile, 0, 2, 3, 1);
+        centerPane.add(diskChartTile, 0, 3, 3, 1);
 
         timer.start();
 
@@ -221,7 +209,6 @@ public class MonitorController {
         timer.stop();
         System.err.println("destroy " + this + actionHandler.getExceptionHandler());
     }
-
 
 
 }

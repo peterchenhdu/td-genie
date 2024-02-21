@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 public class ApplicationStore {
     private static TreeItem<CommonNode> connectionTree;
     private static CommonNode currentNode;
+    private static TreeItem<CommonNode> currentTreeItem;
     private static HashMap<String, Tab> tabsMap = new HashMap<>();
 
 
@@ -67,11 +68,7 @@ public class ApplicationStore {
     }
 
     public static CommonNode getCurrentNode() {
-        return currentNode;
-    }
-
-    public static void setCurrentNode(CommonNode currentNode) {
-        ApplicationStore.currentNode = currentNode;
+        return currentTreeItem == null ? null : currentTreeItem.getValue();
     }
 
     public static HashMap<String, Tab> getTabsMap() {
@@ -80,6 +77,14 @@ public class ApplicationStore {
 
     public static void setTabsMap(HashMap<String, Tab> tabsMap) {
         ApplicationStore.tabsMap = tabsMap;
+    }
+
+    public static TreeItem<CommonNode> getCurrentTreeItem() {
+        return currentTreeItem;
+    }
+
+    public static void setCurrentTreeItem(TreeItem<CommonNode> currentTreeItem) {
+        ApplicationStore.currentTreeItem = currentTreeItem;
     }
 }
 

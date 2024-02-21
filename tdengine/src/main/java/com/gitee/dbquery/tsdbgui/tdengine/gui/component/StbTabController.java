@@ -203,8 +203,6 @@ public class StbTabController {
             ConnectionModel connectionModel = (ConnectionModel) ApplicationStore.getCurrentNode().getData();
 
 
-
-
             List<DatabaseResDTO> dbList = DataBaseUtils.getAllDatabase(TsdbConnectionUtils.getConnection(connectionModel));
 
             dbList.forEach(db -> {
