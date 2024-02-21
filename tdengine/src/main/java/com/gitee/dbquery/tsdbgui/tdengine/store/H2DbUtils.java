@@ -123,7 +123,13 @@ public class H2DbUtils {
         return true;
     }
 
-
+    public static boolean executeUpdate(String sql) throws SQLException {
+        try (Connection connection = H2ConnectionPool.getConnection(); Statement statement = connection.createStatement()) {
+            // 连接到H2数据库
+            // 执行批处理
+            return statement.execute(sql);
+        }
+    }
 
     public static List<Map<String, Object>> query(String sql) throws SQLException {
         // 创建List对象来存储查询结果

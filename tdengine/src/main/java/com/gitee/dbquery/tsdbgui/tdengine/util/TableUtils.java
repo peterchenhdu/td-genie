@@ -18,8 +18,9 @@ public class TableUtils {
 
     /**
      * Install the keyboard handler:
-     *   + CTRL + C = copy to clipboard
-     *   + CTRL + V = paste to clipboard
+     * + CTRL + C = copy to clipboard
+     * + CTRL + V = paste to clipboard
+     *
      * @param table
      */
     public static void installCopyPasteHandler(TableView<?> table) {
@@ -42,30 +43,29 @@ public class TableUtils {
 
             if (copyKeyCodeCompination.match(keyEvent)) {
 
-                if( keyEvent.getSource() instanceof TableView) {
+                if (keyEvent.getSource() instanceof TableView) {
 
                     // copy to clipboard
-                    copySelectionToClipboard( (TableView<?>) keyEvent.getSource());
+                    copySelectionToClipboard((TableView<?>) keyEvent.getSource());
 
                     // event is handled, consume it
                     keyEvent.consume();
 
                 }
 
-            } 
-            else if (pasteKeyCodeCompination.match(keyEvent)) {
+            } else if (pasteKeyCodeCompination.match(keyEvent)) {
 
-                if( keyEvent.getSource() instanceof TableView) {
+                if (keyEvent.getSource() instanceof TableView) {
 
                     // copy to clipboard
-                    pasteClipboard( (TableView<?>) keyEvent.getSource());
+                    pasteClipboard((TableView<?>) keyEvent.getSource());
 
                     // event is handled, consume it
                     keyEvent.consume();
 
                 }
 
-            } 
+            }
 
         }
 
@@ -73,6 +73,7 @@ public class TableUtils {
 
     /**
      * Get table selection and copy it to the clipboard.
+     *
      * @param table
      */
     public static void copySelectionToClipboard(TableView<?> table) {
@@ -124,7 +125,7 @@ public class TableUtils {
         // set clipboard content
         Clipboard.getSystemClipboard().setContent(clipboardContent);
 
-        System.out.println( "Clipboard string: " + clipboardContent);
+        System.out.println("Clipboard string: " + clipboardContent);
 
     }
 
@@ -144,7 +145,7 @@ public class TableUtils {
 
             System.out.println(matcher.group(1) + "," + matcher.group(2) + "," + matcher.group(3));
 
-            // TODO: what now? how to paste the data?  
+            // TODO: what now? how to paste the data?
 
         }
 

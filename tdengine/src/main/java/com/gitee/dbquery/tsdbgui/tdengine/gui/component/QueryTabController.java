@@ -6,11 +6,11 @@ import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.DatabaseModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.StableModel;
 import com.gitee.dbquery.tsdbgui.tdengine.store.ApplicationStore;
-import com.gitee.dbquery.tsdbgui.tdengine.util.TsdbConnectionUtils;
-import com.gitee.dbquery.tsdbgui.tdengine.util.AlertUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.util.TableUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.util.TsdbConnectionUtils;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
+import com.jfoenix.controls.JFXTabPane;
 import com.zhenergy.fire.util.ObjectUtils;
 import com.zhenergy.zntsdb.common.dto.QueryRstDTO;
 import com.zhenergy.zntsdb.common.util.ConnectionUtils;
@@ -32,10 +32,12 @@ import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.StackPane;
+import javafx.scene.text.Text;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.sql.Connection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,11 +59,19 @@ public class QueryTabController {
     @FXML
     private SplitPane querySplitPane;
     @FXML
+    private JFXTabPane executeResultTabPane;
+    @FXML
     private JFXComboBox<String> connectionComboBox;
     @FXML
     private JFXComboBox<String> dbComboBox;
     @FXML
     private TextArea sqlEditArea;
+    @FXML
+    private Text executeSql;
+    @FXML
+    private Text executeStatus;
+    @FXML
+    private Text executeCost;
     @FXML
     @ActionTrigger("executeQuery")
     private JFXButton executeButton;
@@ -73,10 +83,11 @@ public class QueryTabController {
     private void executeQuery() {
         showPage(1);
     }
+
     @PostConstruct
     public void init() {
-        if(ApplicationStore.getConnectionTree() != null) {
-            ApplicationStore.getConnectionTree().getChildren().forEach(d->{
+        if (ApplicationStore.getConnectionTree() != null) {
+            ApplicationStore.getConnectionTree().getChildren().forEach(d -> {
                 connectionComboBox.getItems().add(d.getValue().getName());
             });
         }
@@ -85,9 +96,9 @@ public class QueryTabController {
                 (observable, oldValue, newValue) -> {
                     System.out.println(newValue);
 
-                    for(TreeItem<CommonNode> node :  ApplicationStore.getConnectionTree().getChildren()) {
-                        if(node.getValue().getName().equals(newValue)) {
-                            node.getChildren().forEach(d->{
+                    for (TreeItem<CommonNode> node : ApplicationStore.getConnectionTree().getChildren()) {
+                        if (node.getValue().getName().equals(newValue)) {
+                            node.getChildren().forEach(d -> {
                                 dbComboBox.getItems().add(d.getValue().getName());
                             });
                         }
@@ -95,7 +106,7 @@ public class QueryTabController {
 
                 });
 
-        if(null == ApplicationStore.getCurrentNode()) {
+        if (null == ApplicationStore.getCurrentNode()) {
 
         } else if (ApplicationStore.getCurrentNode().getType() == NodeTypeEnum.CONNECTION) {
             ConnectionModel connectionModel = (ConnectionModel) ApplicationStore.getCurrentNode().getData();
@@ -175,8 +186,8 @@ public class QueryTabController {
 
     private ConnectionModel getConnectionModel(String connectionName) {
 
-        for(TreeItem<CommonNode> item: ApplicationStore.getConnectionTree().getChildren()) {
-            if(item.getValue().getName().equals(connectionName)) {
+        for (TreeItem<CommonNode> item : ApplicationStore.getConnectionTree().getChildren()) {
+            if (item.getValue().getName().equals(connectionName)) {
                 return (ConnectionModel) item.getValue().getData();
             }
         }
@@ -185,28 +196,40 @@ public class QueryTabController {
     }
 
     private void query(Map<String, Object> queryMap) {
-        if(connectionComboBox.getSelectionModel().isEmpty() || ObjectUtils.isEmpty(sqlEditArea.getText())) {
-            return;
-        }
-
-        if(!sqlEditArea.getText().toUpperCase().startsWith("SELECT")) {
-            AlertUtils.show(rootPane, "不支持的操作！");
+        if (connectionComboBox.getSelectionModel().isEmpty() || ObjectUtils.isEmpty(sqlEditArea.getText())) {
             return;
         }
 
         String connectionName = connectionComboBox.getSelectionModel().getSelectedItem();
         String dbName = dbComboBox.getSelectionModel().getSelectedItem();
+        ConnectionModel connectionModel = getConnectionModel(connectionName);
+        Connection connection = null;
+        if (null == dbName) {
+            connection = TsdbConnectionUtils.getConnection(connectionModel);
+        } else {
+            connection = TsdbConnectionUtils.getConnectionWithDB(connectionModel, dbName);
+        }
+
+
+        executeSql.setText(sqlEditArea.getText());
+
+        if (sqlEditArea.getText().toUpperCase().startsWith("SELECT")) {
+            executeResultTabPane.getSelectionModel().select(1);
+
 
             Integer page = (Integer) queryMap.get("page");
             int start = (page - 1) * 1000;
-            ConnectionModel connectionModel = getConnectionModel(connectionName);
-            Connection connection = null;
-            if(null == dbName) {
-                connection = TsdbConnectionUtils.getConnection(connectionModel);
-            } else {
-                connection = TsdbConnectionUtils.getConnectionWithDB(connectionModel, dbName);
+
+            QueryRstDTO queryRstDTO = null;
+            long queryStart = System.currentTimeMillis();
+            try {
+                queryRstDTO = ConnectionUtils.executeQuery(connection, "select * from (" + sqlEditArea.getText() + ") limit " + start + ", " + 1000);
+                executeStatus.setText("OK");
+            } catch (Exception e) {
+                executeStatus.setText(e.getMessage());
+                tableView.getColumns().clear();
             }
-            QueryRstDTO queryRstDTO = ConnectionUtils.executeQuery(connection, "select * from ("+sqlEditArea.getText() + ") limit " + start + ", " + 1000);
+            executeCost.setText((System.currentTimeMillis() - queryStart) + "ms");
 
             tableView.getColumns().clear();
             queryRstDTO.getColumnList().forEach(column -> {
@@ -231,6 +254,18 @@ public class QueryTabController {
             QueryRstDTO countRstDTO = ConnectionUtils.executeQuery(connection, "select count(*) from (" + sqlEditArea.getText() + ")");
             long total = ObjectUtils.isEmpty(countRstDTO.getDataList()) ? 0 : (long) countRstDTO.getDataList().get(0).get("count(*)");
             pageCount.setValue((total / 1000) + 1);
+        } else {
+            executeResultTabPane.getSelectionModel().select(0);
+            long start = System.currentTimeMillis();
+            try {
+                int[] executeUpdateRst = ConnectionUtils.executeUpdate(connection, Collections.singletonList(sqlEditArea.getText()));
+                executeStatus.setText("OK");
+            } catch (Exception e) {
+                executeStatus.setText(e.getMessage());
+            }
+            executeCost.setText((System.currentTimeMillis() - start) + "ms");
+
+        }
 
 
     }

@@ -13,27 +13,29 @@
                     <children>
                         <HBox alignment="CENTER_RIGHT">
                             <children>
-                                <JFXDatePicker fx:id="beginDatePicker" maxWidth="-Infinity" prefWidth="120.0" promptText="开始时间">
+                                <JFXDatePicker fx:id="beginDatePicker" maxWidth="-Infinity" prefWidth="120.0"
+                                               promptText="开始时间">
                                     <HBox.margin>
-                                        <Insets />
+                                        <Insets/>
                                     </HBox.margin>
                                     <padding>
-                                        <Insets left="6.0" />
+                                        <Insets left="6.0"/>
                                     </padding>
                                 </JFXDatePicker>
-                                <Label text="-" />
-                                <JFXDatePicker fx:id="endDatePicker" maxWidth="-Infinity" prefWidth="120.0" promptText="结束时间">
+                                <Label text="-"/>
+                                <JFXDatePicker fx:id="endDatePicker" maxWidth="-Infinity" prefWidth="120.0"
+                                               promptText="结束时间">
                                     <padding>
-                                        <Insets left="6.0" />
+                                        <Insets left="6.0"/>
                                     </padding>
                                     <HBox.margin>
-                                        <Insets />
+                                        <Insets/>
                                     </HBox.margin>
                                 </JFXDatePicker>
                             </children>
                         </HBox>
-                        <JFXButton fx:id="resetButton" text="重置" />
-                        <JFXButton fx:id="searchButton" text="搜索" />
+                        <JFXButton fx:id="searchButton" text="搜索"/>
+                        <JFXButton fx:id="resetButton" text="重置"/>
                     </children>
                 </HBox>
                 <AnchorPane VBox.vgrow="ALWAYS">

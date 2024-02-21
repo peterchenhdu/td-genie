@@ -5,16 +5,22 @@ import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.DatabaseModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.StableModel;
 import com.gitee.dbquery.tsdbgui.tdengine.store.ApplicationStore;
-import com.gitee.dbquery.tsdbgui.tdengine.util.TsdbConnectionUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.util.TableUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.util.TimeUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.util.TsdbConnectionUtils;
+import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXDatePicker;
 import com.zhenergy.fire.util.ObjectUtils;
 import com.zhenergy.zntsdb.common.dto.QueryRstDTO;
+import com.zhenergy.zntsdb.common.dto.field.TableFieldDTO;
 import com.zhenergy.zntsdb.common.dto.res.DatabaseResDTO;
 import com.zhenergy.zntsdb.common.dto.res.StableResDTO;
 import com.zhenergy.zntsdb.common.util.ConnectionUtils;
 import com.zhenergy.zntsdb.common.util.DataBaseUtils;
 import com.zhenergy.zntsdb.common.util.SuperTableUtils;
 import io.datafx.controller.ViewController;
+import io.datafx.controller.flow.action.ActionMethod;
+import io.datafx.controller.flow.action.ActionTrigger;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -53,7 +59,17 @@ public class RecordTabController {
     private HBox queryBox;
     @FXML
     private Pagination pagination;
+    @ActionTrigger("search")
+    @FXML
+    private JFXButton searchButton;
+    @ActionTrigger("reset")
+    @FXML
+    private JFXButton resetButton;
 
+    @FXML
+    private JFXDatePicker beginDatePicker;
+    @FXML
+    private JFXDatePicker endDatePicker;
     @FXML
     private TableView<Map<String, Object>> tableView;
 
@@ -203,8 +219,6 @@ public class RecordTabController {
             ConnectionModel connectionModel = (ConnectionModel) ApplicationStore.getCurrentNode().getData();
 
 
-
-
             List<DatabaseResDTO> dbList = DataBaseUtils.getAllDatabase(TsdbConnectionUtils.getConnection(connectionModel));
 
             dbList.forEach(db -> {
@@ -306,6 +320,18 @@ public class RecordTabController {
 
     }
 
+    @ActionMethod("search")
+    private void search() {
+        showPage(1);
+    }
+
+
+    @ActionMethod("reset")
+    private void reset() {
+        beginDatePicker.setValue(null);
+        endDatePicker.setValue(null);
+        showPage(1);
+    }
 
     private void showPage(Integer page) {
         Map<String, Object> queryMap = new HashMap<>();
@@ -318,12 +344,27 @@ public class RecordTabController {
     private void query(Map<String, Object> queryMap) {
 
         if (ApplicationStore.getCurrentNode().getType() == NodeTypeEnum.STB) {
+
+
             Integer page = (Integer) queryMap.get("page");
             int start = (page - 1) * 1000;
             StableModel stableModel = (StableModel) ApplicationStore.getCurrentNode().getData();
             Connection connection = TsdbConnectionUtils.getConnection(stableModel.getDb().getConnectionModel());
+
+            List<TableFieldDTO> fieldList = SuperTableUtils.getStableField(connection, stableModel.getDb().getName(), stableModel.getStb().getName());
+
+            String whereSql = "";
+            if (beginDatePicker.getValue() != null && endDatePicker.getValue() != null) {
+                whereSql = " where " + fieldList.get(0).getName() + " > " + TimeUtils.LocalDateToLong(beginDatePicker.getValue()) +
+                        " and " + fieldList.get(0).getName() + " < " + TimeUtils.LocalDateToLong(endDatePicker.getValue());
+            } else if (beginDatePicker.getValue() != null && endDatePicker.getValue() == null) {
+                whereSql = " where " + fieldList.get(0).getName() + " > " + TimeUtils.LocalDateToLong(beginDatePicker.getValue());
+            } else if (beginDatePicker.getValue() == null && endDatePicker.getValue() != null) {
+                whereSql = " where " + fieldList.get(0).getName() + " < " + TimeUtils.LocalDateToLong(endDatePicker.getValue());
+            }
+
             QueryRstDTO queryRstDTO = ConnectionUtils.executeQuery(connection, "select * from " + stableModel.getDb().getName() + "." +
-                    stableModel.getStb().getName() + " limit " + start + ", " + 1000);
+                    stableModel.getStb().getName() + whereSql + " limit " + start + ", " + 1000);
 
             tableView.getColumns().clear();
             queryRstDTO.getColumnList().forEach(column -> {
@@ -346,7 +387,7 @@ public class RecordTabController {
 
 
             QueryRstDTO countRstDTO = ConnectionUtils.executeQuery(connection, "select count(*) from " + stableModel.getDb().getName() + "." +
-                    stableModel.getStb().getName());
+                    stableModel.getStb().getName() + whereSql);
             long total = ObjectUtils.isEmpty(countRstDTO.getDataList()) ? 0 : (long) countRstDTO.getDataList().get(0).get("count(*)");
             pageCount.setValue((total / 1000) + 1);
         }

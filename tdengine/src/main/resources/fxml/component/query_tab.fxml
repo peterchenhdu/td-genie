@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.jfoenix.controls.JFXButton?>
 <?import com.jfoenix.controls.JFXComboBox?>
-<?import javafx.collections.FXCollections?>
+<?import com.jfoenix.controls.JFXTabPane?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import com.jfoenix.controls.JFXButton?>
-<?import com.jfoenix.controls.JFXTextArea?>
+<?import javafx.scene.shape.Box?>
+<?import javafx.scene.text.Text?>
 <StackPane fx:id="rootPane" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <VBox fx:id="centPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="10.0">
@@ -14,12 +15,14 @@
                 <VBox>
                     <HBox spacing="10.0">
                         <padding>
-                            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
                         </padding>
-                        <JFXComboBox fx:id="connectionComboBox"  maxWidth="1.7976931348623157E308" promptText="选择连接" GridPane.rowIndex="1">
+                        <JFXComboBox fx:id="connectionComboBox" maxWidth="1.7976931348623157E308" promptText="选择连接"
+                                     GridPane.rowIndex="1">
 
                         </JFXComboBox>
-                        <JFXComboBox fx:id="dbComboBox"  maxWidth="1.7976931348623157E308" promptText="选择数据库" GridPane.rowIndex="1">
+                        <JFXComboBox fx:id="dbComboBox" maxWidth="1.7976931348623157E308" promptText="选择数据库"
+                                     GridPane.rowIndex="1">
 
                         </JFXComboBox>
                         <JFXButton fx:id="executeButton">执行</JFXButton>
@@ -27,18 +30,44 @@
                     <TextArea fx:id="sqlEditArea" VBox.vgrow="ALWAYS"/>
                 </VBox>
 
+                <JFXTabPane fx:id="executeResultTabPane">
+                    <tabs>
+                        <Tab text="信息">
+                            <VBox>
+                                <HBox>
+                                    <Text text="执行SQL: "/>
+                                    <Text fx:id="executeSql"/>
+                                </HBox>
+                                <HBox>
+                                    <Text text="执行状态: "/>
+                                    <Text fx:id="executeStatus"/>
+                                </HBox>
+                                <HBox>
+                                    <Text text="执行耗时: "/>
+                                    <Text fx:id="executeCost"/>
+                                </HBox>
+                            </VBox>
+                        </Tab>
+                        <Tab text="结果">
+                            <AnchorPane VBox.vgrow="ALWAYS">
+                                <children>
+                                    <Pagination fx:id="pagination" cache="true" AnchorPane.bottomAnchor="0.0"
+                                                AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                                AnchorPane.topAnchor="0.0"/>
+                                    <TableView fx:id="tableView" AnchorPane.bottomAnchor="60.0"
+                                               AnchorPane.leftAnchor="0.0"
+                                               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                        <columns/>
+                                    </TableView>
+                                </children>
+                            </AnchorPane>
+                        </Tab>
 
-                <AnchorPane VBox.vgrow="ALWAYS">
-                    <children>
-                        <Pagination fx:id="pagination" cache="true" AnchorPane.bottomAnchor="0.0"
-                                    AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                                    AnchorPane.topAnchor="0.0"/>
-                        <TableView fx:id="tableView" AnchorPane.bottomAnchor="60.0" AnchorPane.leftAnchor="0.0"
-                                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                            <columns/>
-                        </TableView>
-                    </children>
-                </AnchorPane>
+                    </tabs>
+
+
+                </JFXTabPane>
+
 
             </SplitPane>
 
