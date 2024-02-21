@@ -1,15 +1,26 @@
 # tsdb-gui
 
 #### 介绍
-时序数据库图形用户界面工具，V1.0.0版本目前仅支持TDengine2.x版本，3.x版本以及其它时序数据库的支持，会在后续版本中实现。
+免费开源的时序数据库图形用户界面工具，V1.0.0版本目前仅支持TDengine2.x版本，3.x版本以及其它时序数据库的支持，会在后续版本中实现。
 
+支持的时序数据库列表：
+1. TDengine
+
+主要功能：
+1. 数据连接维护（新增、修改、查询）
+2. 数据库维护（新增、修改、查询）
+3. 超级表维护（新增、修改、查询）
+4. 超级表数据查询（支持按时间查询，自动分页展示）
+5. 自定义SQL执行(可执行更新SQL或查询SQL，可展示查询结果、执行耗时、错误信息等) 
+6. 资源监控查看(可查看数据库CPU、内存、磁盘使用趋势) 
+7. 库表DDL导出（数据库创建SQL、表创建SQL）
 #### 软件架构
 基于JavaFX实现UI功能。
 
 
 #### 安装教程
 
-1.  下载解压，双击执行tsdb-gui.exe文件即可
+1.  从发行版中下载最新版本，解压，双击执行tsdb-gui.exe文件即可
 
 #### 使用说明
 
@@ -25,7 +36,7 @@
 ![输入图片说明](tdengine/src/main/resources/images/readme/queryStbRecord.png)
 6. 自定义SQL执行(可执行任意SQL，对于查询SQL，可展示查询结果)
 ![输入图片说明](tdengine/src/main/resources/images/readme/executeSQL.png)
-7. 资源监控查看(可查看CPU、内存、磁盘使用趋势)
+7. 资源监控查看(可查看数据库CPU、内存、磁盘使用趋势)
 ![输入图片说明](tdengine/src/main/resources/images/resourceMonitor.png)
 8. 导出库表DDL
 ![输入图片说明](tdengine/src/main/resources/images/readme/exportDDL.png)
