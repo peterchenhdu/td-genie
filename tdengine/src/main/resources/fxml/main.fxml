@@ -64,7 +64,7 @@
             <JFXTabPane fx:id="tabPane"/>
         </SplitPane>
     </VBox>
-    <JFXDialog fx:id="dialog" overlayClose="false">
+    <JFXDialog fx:id="dialog" overlayClose="true">
         <JFXDialogLayout>
             <heading>
                 <Label fx:id="dialogTitle">新增连接</Label>
@@ -95,7 +95,7 @@
         </JFXDialogLayout>
     </JFXDialog>
 
-    <JFXDialog fx:id="createDbDialog" overlayClose="false">
+    <JFXDialog fx:id="createDbDialog" overlayClose="true">
         <JFXDialogLayout>
             <heading>
                 <Label fx:id="createDbDialogTitle">新增数据库</Label>
@@ -123,7 +123,7 @@
         </JFXDialogLayout>
     </JFXDialog>
 
-    <JFXDialog fx:id="createTbDialog" overlayClose="false">
+    <JFXDialog fx:id="createTbDialog" overlayClose="true">
         <JFXDialogLayout>
             <heading>
                 <Label fx:id="createTbDialogTitle">编辑数据表</Label>

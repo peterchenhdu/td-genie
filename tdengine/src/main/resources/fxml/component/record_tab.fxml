@@ -40,17 +40,41 @@
                 </HBox>
                 <AnchorPane VBox.vgrow="ALWAYS">
                     <children>
-                        <Pagination fx:id="pagination" cache="true" AnchorPane.bottomAnchor="0.0"
+                        <Pagination fx:id="pagination" style="-fx-page-information-visible:false" cache="true" AnchorPane.bottomAnchor="0.0"
                                     AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                                     AnchorPane.topAnchor="0.0"/>
-                        <TableView fx:id="tableView" AnchorPane.bottomAnchor="60.0" AnchorPane.leftAnchor="0.0"
+                        <TableView fx:id="tableView" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="0.0"
                                    AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <columns/>
                         </TableView>
                     </children>
                 </AnchorPane>
+                <HBox alignment="BOTTOM_RIGHT" >
+                    <Label id="selectLocInfo" style="-fx-font-size: 12px">                                    <padding>
+                        <Insets right="50.0" left="50"/>
+                    </padding></Label>
+                    <Label id="pageInformation" style="-fx-font-size: 12px"/></HBox>
             </children>
         </VBox>
     </children>
 
+
+    <JFXDialog fx:id="updateRecordDialog" overlayClose="true">
+        <JFXDialogLayout>
+            <heading>
+                <Label fx:id="updateRecordDialogTitle">编辑数据</Label>
+            </heading>
+            <body>
+                <VBox fx:id="updateRecordPane">
+                    <children>
+
+                    </children>
+                </VBox>
+            </body>
+            <actions>
+                <JFXButton fx:id="updateRecordSaveButton" buttonType="RAISED" text="保存"/>
+                <JFXButton fx:id="updateRecordCancelButton" buttonType="RAISED" text="取消"/>
+            </actions>
+        </JFXDialogLayout>
+    </JFXDialog>
 </StackPane>

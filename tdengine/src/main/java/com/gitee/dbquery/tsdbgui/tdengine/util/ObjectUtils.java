@@ -38,4 +38,21 @@ public class ObjectUtils {
         }
     }
 
+
+    public static Object stringTypeConvert(String dataType, String value) {
+        if(ObjectUtils.isEmpty(value)) {
+            return null;
+        }
+
+        if("NCHAR".equals(dataType) || "TIMESTAMP".equals(dataType)) {
+            return value;
+        } else if("BOOL".equals(dataType)) {
+            return Boolean.valueOf(value);
+        } else if("FLOAT".equals(dataType)||"DOUBLE".equals(dataType)) {
+            return Double.valueOf(value);
+        } else {
+            return Long.valueOf(value);
+        }
+    }
+
 }
