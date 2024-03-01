@@ -49,7 +49,10 @@ import java.util.Map;
  **/
 @ViewController(value = "/fxml/component/query_tab.fxml")
 public class QueryTabController {
-
+    @FXML
+    private Label pageInformation;
+    @FXML
+    private Label selectLocInfo;
     @FXML
     private Pagination pagination;
     @FXML
@@ -223,7 +226,7 @@ public class QueryTabController {
             QueryRstDTO queryRstDTO = null;
             long queryStart = System.currentTimeMillis();
             try {
-                queryRstDTO = ConnectionUtils.executeQuery(connection, "select * from (" + sqlEditArea.getText() + ") limit " + start + ", " + 1000);
+                queryRstDTO = ConnectionUtils.executeQuery(connection, "select * from (" + sqlEditArea.getText().replaceAll(";", "") + ") limit " + start + ", " + 1000);
                 executeStatus.setText("OK");
             } catch (Exception e) {
                 executeStatus.setText(e.getMessage());
@@ -250,10 +253,13 @@ public class QueryTabController {
                 dataModelMapList.add(db);
             });
 
+            pageCount.setValue(Integer.MAX_VALUE);
+            pagination.setMaxPageIndicatorCount(3);
+            pageInformation.setText("每页1000条，当前第" + (pagination.currentPageIndexProperty().get() + 1) + "页，当前页记录数（" + dataModelMapList.size() + "）");
 
-            QueryRstDTO countRstDTO = ConnectionUtils.executeQuery(connection, "select count(*) from (" + sqlEditArea.getText() + ")");
-            long total = ObjectUtils.isEmpty(countRstDTO.getDataList()) ? 0 : (long) countRstDTO.getDataList().get(0).get("count(*)");
-            pageCount.setValue((total / 1000) + 1);
+//            QueryRstDTO countRstDTO = ConnectionUtils.executeQuery(connection, "select count(*) from (" + sqlEditArea.getText().replaceAll(";", "") + ")");
+//            long total = ObjectUtils.isEmpty(countRstDTO.getDataList()) ? 0 : (long) countRstDTO.getDataList().get(0).get("count(*)");
+//            pageCount.setValue((total / 1000) + 1);
         } else {
             executeResultTabPane.getSelectionModel().select(0);
             long start = System.currentTimeMillis();

@@ -49,6 +49,7 @@
                             </VBox>
                         </Tab>
                         <Tab text="结果">
+                            <VBox>
                             <AnchorPane VBox.vgrow="ALWAYS">
                                 <children>
                                     <Pagination fx:id="pagination" cache="true" AnchorPane.bottomAnchor="0.0"
@@ -61,6 +62,12 @@
                                     </TableView>
                                 </children>
                             </AnchorPane>
+                            <HBox alignment="BOTTOM_RIGHT" >
+                                <Label fx:id="selectLocInfo" style="-fx-font-size: 12px">                                    <padding>
+                                    <Insets right="50.0" left="50"/>
+                                </padding></Label>
+                                <Label fx:id="pageInformation" style="-fx-font-size: 12px"/></HBox>
+                            </VBox>
                         </Tab>
 
                     </tabs>

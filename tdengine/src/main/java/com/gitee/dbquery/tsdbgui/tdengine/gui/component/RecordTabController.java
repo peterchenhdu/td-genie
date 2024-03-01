@@ -238,7 +238,7 @@ public class RecordTabController {
             tbLabel.setText("子表名:");
             tbLabel.setPadding(new Insets(0,24,0,0));
             JFXTextField tbNameTextField = new JFXTextField();
-            tbNameTextField.setPromptText(recordMap.get("tbname").toString());
+            tbNameTextField.setPromptText((recordMap == null || recordMap.get("tbname") == null) ? "":recordMap.get("tbname").toString());
             tbNameTextField.setDisable(false);
             HBox tbNameHBox = new HBox(tbLabel, tbNameTextField);
             tbNameHBox.setPadding(new Insets(0,0,10,0));
@@ -256,7 +256,7 @@ public class RecordTabController {
                 updateRecordPane.getChildren().addAll(hBox);
             }
 
-            currentUpdateTbName = recordMap.get("tbname").toString();
+            currentUpdateTbName = (recordMap == null || recordMap.get("tbname") == null) ? "":recordMap.get("tbname").toString();
             updateRecordDialogTitle.setText("新建数据");
             updateRecordDialog.setTransitionType(JFXDialog.DialogTransition.TOP);
             updateRecordDialog.show(root);

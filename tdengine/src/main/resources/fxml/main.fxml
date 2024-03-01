@@ -195,7 +195,7 @@
                         </HBox>
                         <HBox GridPane.rowIndex="2">
                             <Label prefWidth="100">软件版本：</Label>
-                            <JFXTextField editable="false" prefWidth="400">V1.0.0</JFXTextField>
+                            <JFXTextField editable="false" prefWidth="400">V1.0.1</JFXTextField>
                         </HBox>
                         <HBox GridPane.rowIndex="3">
                             <Label prefWidth="100">问题反馈1：</Label>
