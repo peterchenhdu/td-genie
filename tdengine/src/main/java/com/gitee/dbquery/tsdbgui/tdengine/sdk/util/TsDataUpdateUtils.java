@@ -86,7 +86,7 @@ public class TsDataUpdateUtils {
             } else if (obj instanceof LocalDate) {
                 sb.append("'").append(DateTimeUtils.format(((LocalDate) obj).atStartOfDay(), "yyyy-MM-dd HH:mm:ss.SSS")).append("',");
             } else {
-                sb.append(obj.toString()).append(",");
+                sb.append(obj == null ? null : obj.toString()).append(",");
             }
         }
         sb.deleteCharAt(sb.length() - 1);

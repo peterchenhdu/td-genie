@@ -39,7 +39,7 @@ public class ObjectUtils {
     }
 
 
-    public static Object stringTypeConvert(String dataType, String value) {
+    public static Object  stringTypeConvert(String dataType, String value) {
         if(ObjectUtils.isEmpty(value)) {
             return null;
         }

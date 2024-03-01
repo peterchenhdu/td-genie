@@ -7,10 +7,7 @@ import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.ConnectionUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.SuperTableUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.TsDataUpdateUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.store.ApplicationStore;
-import com.gitee.dbquery.tsdbgui.tdengine.util.ObjectUtils;
-import com.gitee.dbquery.tsdbgui.tdengine.util.TableUtils;
-import com.gitee.dbquery.tsdbgui.tdengine.util.TimeUtils;
-import com.gitee.dbquery.tsdbgui.tdengine.util.TsdbConnectionUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.util.*;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDatePicker;
 import com.jfoenix.controls.JFXDialog;
@@ -43,10 +40,8 @@ import javafx.util.Callback;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * CommonTabController
@@ -82,6 +77,8 @@ public class RecordTabController {
     @FXML
     private Label selectLocInfo;
     @FXML
+    private Label updateRecordDialogTitle;
+    @FXML
     private JFXDialog updateRecordDialog;
     @FXML
     private VBox updateRecordPane;
@@ -100,22 +97,51 @@ public class RecordTabController {
     @ActionMethod("updateRecordAction")
     private void updateRecordSaveButton() {
         StableModel stableModel = (StableModel) ApplicationStore.getCurrentNode().getData();
+
+        if ("0".equals(stableModel.getDb().getDatabaseResDTO().getUpdate())) {
+            AlertUtils.show(root, "当前数据库不允许修改数据(update=0)");
+            return;
+        }
+
         Connection connection = TsdbConnectionUtils.getConnection(stableModel.getDb().getConnectionModel());
 
         List<List<Object>> dataList = new ArrayList<>();
         List<Object> data = new ArrayList<>();
         for(Node hbox: updateRecordPane.getChildren()) {
             for(Node node:((HBox)hbox).getChildren()) {
-                if(node instanceof  JFXTextField) {
-                    data.add(node.getUserData());
+                if(node instanceof  JFXTextField && !node.isDisable()) {
+                    if(node.getUserData() == null) {
+                        data.add(((JFXTextField) node).getText());
+                    } else {
+                        data.add(ObjectUtils.stringTypeConvert(((TableFieldDTO)node.getUserData()).getDataType(), ((JFXTextField) node).getText()));
+                    }
                 }
             }
         }
         dataList.add(data);
 
-        TsDataUpdateUtils.batchInsertFullColumn(connection, stableModel.getDb().getName(), currentUpdateTbName,
-                dataList);
 
+        List<TableFieldDTO> fieldList = SuperTableUtils.getStableField(connection, stableModel.getDb().getName(),
+                stableModel.getStb().getName());
+
+
+
+        if (updateRecordDialogTitle.getText().equals("新建数据")) {
+            String tbName = dataList.get(0).remove(0).toString();
+            List<String> fList = fieldList.stream().filter(d-> !d.getIsTag()).map(TableFieldDTO::getName).collect(Collectors.toList());
+            TsDataUpdateUtils.batchInsertAutoCreateTable(connection, stableModel.getDb().getName(), tbName,
+                    stableModel.getDb().getName(), stableModel.getStb().getName(),
+                    dataList.get(0).subList(fList.size(), dataList.get(0).size()),
+                    Collections.singletonList(dataList.get(0).subList(0, fList.size())));
+        } else {
+            //更新
+            TsDataUpdateUtils.batchInsertSpecifyColumn(connection, stableModel.getDb().getName(), currentUpdateTbName,
+                    fieldList.stream().filter(f -> !f.getIsTag()).map(TableFieldDTO::getName).collect(Collectors.toList()), dataList);
+        }
+
+
+
+        showPage((pagination.currentPageIndexProperty().get() + 1));
 
         updateRecordDialog.close();
     }
@@ -132,9 +158,10 @@ public class RecordTabController {
         tableView.getSelectionModel().setCellSelectionEnabled(true);
         tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        MenuItem item = new MenuItem("复制");
+        MenuItem copyItem = new MenuItem("复制");
         MenuItem editItem = new MenuItem("编辑");
-        item.setOnAction(event -> {
+        MenuItem addItem = new MenuItem("新建");
+        copyItem.setOnAction(event -> {
             ObservableList<TablePosition> posList = tableView.getSelectionModel().getSelectedCells();
             int old_r = -1;
             StringBuilder clipboardString = new StringBuilder();
@@ -165,27 +192,78 @@ public class RecordTabController {
 
             List<TableFieldDTO> fieldList = SuperTableUtils.getStableField(connection, stableModel.getDb().getName(), stableModel.getStb().getName());
 
+
+
             Map<String, Object> recordMap = tableView.getSelectionModel().getSelectedItem();
+
+            Label tbLabel = new Label();
+            tbLabel.setText("子表名:");
+            tbLabel.setPadding(new Insets(0,24,0,0));
+            JFXTextField tbNameTextField = new JFXTextField();
+            tbNameTextField.setText(recordMap.get("tbname").toString());
+            tbNameTextField.setDisable(true);
+            HBox tbNameHBox = new HBox(tbLabel, tbNameTextField);
+            tbNameHBox.setPadding(new Insets(0,0,10,0));
+            updateRecordPane.getChildren().addAll(tbNameHBox);
+
             for(TableFieldDTO field:fieldList) {
                 Label label = new Label();
                 label.setText(field.getName() + ":");
                 label.setPadding(new Insets(0,24,0,0));
                 JFXTextField textField = new JFXTextField();
                 textField.setText((recordMap == null || recordMap.get(field.getName()) == null) ? "":recordMap.get(field.getName()).toString());
-                textField.setUserData(ObjectUtils.stringTypeConvert(field.getDataType(), textField.getText()));
+                textField.setUserData(field);
+                textField.setDisable(field.getIsTag());
                 HBox hBox = new HBox(label, textField);
                 hBox.setPadding(new Insets(0,0,10,0));
                 updateRecordPane.getChildren().addAll(hBox);
             }
 
             currentUpdateTbName = recordMap.get("tbname").toString();
+
+            updateRecordDialogTitle.setText("编辑数据");
             updateRecordDialog.setTransitionType(JFXDialog.DialogTransition.TOP);
             updateRecordDialog.show(root);
         });
 
+        addItem.setOnAction(event -> {
+            updateRecordPane.getChildren().clear();
+            StableModel stableModel = (StableModel) ApplicationStore.getCurrentNode().getData();
+            Connection connection = TsdbConnectionUtils.getConnection(stableModel.getDb().getConnectionModel());
+
+            List<TableFieldDTO> fieldList = SuperTableUtils.getStableField(connection, stableModel.getDb().getName(), stableModel.getStb().getName());
+
+            Map<String, Object> recordMap = tableView.getSelectionModel().getSelectedItem();
+            Label tbLabel = new Label();
+            tbLabel.setText("子表名:");
+            tbLabel.setPadding(new Insets(0,24,0,0));
+            JFXTextField tbNameTextField = new JFXTextField();
+            tbNameTextField.setPromptText(recordMap.get("tbname").toString());
+            tbNameTextField.setDisable(false);
+            HBox tbNameHBox = new HBox(tbLabel, tbNameTextField);
+            tbNameHBox.setPadding(new Insets(0,0,10,0));
+            updateRecordPane.getChildren().addAll(tbNameHBox);
+            for(TableFieldDTO field:fieldList) {
+                Label label = new Label();
+                label.setText(field.getName() + ":");
+                label.setPadding(new Insets(0,24,0,0));
+                JFXTextField textField = new JFXTextField();
+                textField.setPromptText((recordMap == null || recordMap.get(field.getName()) == null) ? "":recordMap.get(field.getName()).toString());
+                textField.setUserData(field);
+//                textField.setDisable(field.getIsTag());
+                HBox hBox = new HBox(label, textField);
+                hBox.setPadding(new Insets(0,0,10,0));
+                updateRecordPane.getChildren().addAll(hBox);
+            }
+
+            currentUpdateTbName = recordMap.get("tbname").toString();
+            updateRecordDialogTitle.setText("新建数据");
+            updateRecordDialog.setTransitionType(JFXDialog.DialogTransition.TOP);
+            updateRecordDialog.show(root);
+        });
 
         ContextMenu menu = new ContextMenu();
-        menu.getItems().addAll(item, editItem);
+        menu.getItems().addAll(copyItem, editItem, addItem);
         tableView.setContextMenu(menu);
 
         FilteredList<Map<String, Object>> filteredData = new FilteredList<>(dataModelMapList, p -> true);
