@@ -18,7 +18,6 @@ import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.FileInputStream;
@@ -102,7 +101,7 @@ public class AppStartup extends Application {
 
         /*全局样式*/
         scene.getStylesheets().addAll(AppStartup.class.getResource("/css/app.css").toExternalForm());
-
+        scene.getStylesheets().addAll(AppStartup.class.getResource("/css/sql-keyword.css").toExternalForm());
         System.out.println(Double.parseDouble(ValueUtils.getString(AppStartup.sysConfigProperties.getProperty("dividerPositions"), 0.2)));
         ((SplitPane) (scene.lookup("#splitPane"))).setDividerPositions(Double.parseDouble(ValueUtils.getString(AppStartup.sysConfigProperties.getProperty("dividerPositions"), 0.2)));
 
