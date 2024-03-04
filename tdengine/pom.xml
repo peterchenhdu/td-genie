@@ -109,6 +109,17 @@
             <artifactId>taos-jdbcdriver</artifactId>
             <version>2.0.39</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.fxmisc.richtext</groupId>
+            <artifactId>richtextfx</artifactId>
+            <version>0.10.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.vertical-blank</groupId>
+            <artifactId>sql-formatter</artifactId>
+            <version>2.0.4</version>
+        </dependency>
     </dependencies>
 
 
