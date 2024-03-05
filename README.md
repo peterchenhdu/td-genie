@@ -40,7 +40,7 @@
 7. 编辑数据 (输入字段信息)
 ![输入图片说明](tdengine/src/main/resources/images/readme/updateDataSelectItem.png)
 ![输入图片说明](tdengine/src/main/resources/images/readme/updateData.png)
-8. 自定义SQL执行(可执行任意SQL，对于查询SQL，可展示查询结果)
+8. 自定义SQL执行(可执行任意SQL，对于查询SQL，可展示查询结果，支持保存SQL、美化SQL)
 ![输入图片说明](tdengine/src/main/resources/images/readme/executeSQL.png)
 9. 资源监控查看(可查看数据库CPU、内存、磁盘使用趋势)
 ![输入图片说明](tdengine/src/main/resources/images/resourceMonitor.png)
