@@ -82,7 +82,6 @@ public class AppStartup extends Application {
         stage.setWidth(Double.parseDouble(ValueUtils.getString(sysConfigProperties.getProperty(WINDOW_WIDTH_PROPERTY), 800)));
         stage.setHeight(Double.parseDouble(ValueUtils.getString(sysConfigProperties.getProperty(WINDOW_HEIGHT_PROPERTY), 600)));
         stage.show();
-
         stage.setOnCloseRequest(event -> {
             System.out.print("监听到窗口关闭" + scene.getRoot());
             // 记录窗口位置和大小到本地存储
@@ -98,13 +97,14 @@ public class AppStartup extends Application {
                 e.printStackTrace();
             }
         });
-
         /*全局样式*/
         scene.getStylesheets().addAll(AppStartup.class.getResource("/css/app.css").toExternalForm());
         scene.getStylesheets().addAll(AppStartup.class.getResource("/css/sql-keyword.css").toExternalForm());
         System.out.println(Double.parseDouble(ValueUtils.getString(AppStartup.sysConfigProperties.getProperty("dividerPositions"), 0.2)));
         ((SplitPane) (scene.lookup("#splitPane"))).setDividerPositions(Double.parseDouble(ValueUtils.getString(AppStartup.sysConfigProperties.getProperty("dividerPositions"), 0.2)));
 
+        com.exe4j.Controller.hide();
+        System.out.println("hide...");
     }
 
 
