@@ -26,4 +26,8 @@ public class AlertUtils {
         alert.setContent(layout);
         alert.show();
     }
+
+    public static void showException(Throwable t, Node rootPane) {
+        show(rootPane, "程序异常：" + t.getMessage());
+    }
 }

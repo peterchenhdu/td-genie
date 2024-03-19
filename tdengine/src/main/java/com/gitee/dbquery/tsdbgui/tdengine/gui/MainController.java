@@ -8,14 +8,6 @@ import com.gitee.dbquery.tsdbgui.tdengine.model.CommonNode;
 import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.DatabaseModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.StableModel;
-import com.gitee.dbquery.tsdbgui.tdengine.store.ApplicationStore;
-import com.gitee.dbquery.tsdbgui.tdengine.store.H2DbUtils;
-import com.gitee.dbquery.tsdbgui.tdengine.util.AlertUtils;
-import com.gitee.dbquery.tsdbgui.tdengine.util.ImageViewUtils;
-import com.gitee.dbquery.tsdbgui.tdengine.util.JavaFxBeanUtils;
-import com.gitee.dbquery.tsdbgui.tdengine.util.TsdbConnectionUtils;
-import com.jfoenix.controls.*;
-import com.gitee.dbquery.tsdbgui.tdengine.util.ObjectUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.db.DbConfigAddDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.db.DbConfigUpdateDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.field.TableFieldDTO;
@@ -25,6 +17,10 @@ import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.stb.StableAddDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.stb.StableUpdateDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.DataBaseUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.SuperTableUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.store.ApplicationStore;
+import com.gitee.dbquery.tsdbgui.tdengine.store.H2DbUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.util.*;
+import com.jfoenix.controls.*;
 import io.datafx.controller.ViewController;
 import io.datafx.controller.context.ApplicationContext;
 import io.datafx.controller.flow.Flow;
@@ -50,7 +46,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.PostConstruct;
@@ -284,6 +279,7 @@ public class MainController {
                 addTab("查询" + (ApplicationStore.getCurrentNode() == null ? System.currentTimeMillis() : ApplicationStore.getCurrentNode().getData().toString()), new ImageView("/images/query.png"), QueryTabController.class, null);
             } catch (Exception e) {
                 e.printStackTrace();
+                AlertUtils.showException(e, rootPane);
             }
         });
 
@@ -302,6 +298,7 @@ public class MainController {
                 addTab("监控" + ApplicationStore.getCurrentNode().getData().toString(), new ImageView("/images/monitor.png"), MonitorController.class, null);
             } catch (Exception e) {
                 e.printStackTrace();
+                AlertUtils.showException(e, rootPane);
             }
         });
 
@@ -337,6 +334,7 @@ public class MainController {
                 H2DbUtils.executeUpdate("delete from t_connection where name='" + ApplicationStore.getCurrentNode().getName() + "';");
             } catch (SQLException e) {
                 e.printStackTrace();
+                AlertUtils.showException(e, rootPane);
             }
             for (TreeItem<CommonNode> treeItem : root.getChildren()) {
                 if (treeItem.getValue().getName().equals(ApplicationStore.getCurrentNode().getName())) {
@@ -357,6 +355,7 @@ public class MainController {
                 addTab("查询" + ApplicationStore.getCurrentNode().getData().toString(), new ImageView("/images/query.png"), QueryTabController.class, null);
             } catch (Exception e) {
                 e.printStackTrace();
+                AlertUtils.showException(e, rootPane);
             }
         });
 
@@ -523,6 +522,7 @@ public class MainController {
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+            AlertUtils.showException(e, rootPane);
         }
     }
 
@@ -540,6 +540,7 @@ public class MainController {
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
+                AlertUtils.showException(e, rootPane);
             }
         }
 
@@ -548,7 +549,7 @@ public class MainController {
         dialog.show(rootPane);
     }
 
-    public <T> void addTab(String title, Node icon, Class<T> controllerClass, Object userData) {
+    public <T> void addTab(String title, Node icon, Class<T> controllerClass, Object userData) throws FlowException {
         FlowHandler flowHandler = new Flow(controllerClass).createHandler();
         Tab tab = ApplicationStore.getTabsMap().get(title);
 
@@ -564,6 +565,7 @@ public class MainController {
                 tab.setContent(node);
             } catch (FlowException e) {
                 e.printStackTrace();
+                AlertUtils.showException(e, rootPane);
             }
             tabPane.getTabs().add(tab);
             ApplicationStore.getTabsMap().put(title, tab);
@@ -572,7 +574,9 @@ public class MainController {
                 try {
                     flowHandler.getCurrentViewContext().destroy();
                 } catch (IllegalAccessException | InvocationTargetException e) {
+
                     log.error(e.getMessage(), e);
+                    AlertUtils.showException(e, rootPane);
                 }
             });
         }
