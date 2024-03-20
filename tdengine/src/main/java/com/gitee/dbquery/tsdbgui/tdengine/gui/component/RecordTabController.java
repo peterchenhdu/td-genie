@@ -1,9 +1,10 @@
 package com.gitee.dbquery.tsdbgui.tdengine.gui.component;
 
 import com.gitee.dbquery.tsdbgui.tdengine.model.StableModel;
+import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.ConnectionDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.QueryRstDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.field.TableFieldDTO;
-import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.ConnectionUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.RestConnectionUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.SuperTableUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.TsDataUpdateUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.store.ApplicationStore;
@@ -39,7 +40,6 @@ import javafx.util.Callback;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.sql.Connection;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -98,12 +98,12 @@ public class RecordTabController {
     private void updateRecordSaveButton() {
         StableModel stableModel = (StableModel) ApplicationStore.getCurrentNode().getData();
 
-        if ("0".equals(stableModel.getDb().getDatabaseResDTO().getUpdate())) {
+        if ("0".equals(stableModel.getDb().getDatabaseResDTO().get("update"))) {
             AlertUtils.show(root, "当前数据库不允许修改数据(update=0)");
             return;
         }
 
-        Connection connection = TsdbConnectionUtils.getConnection(stableModel.getDb().getConnectionModel());
+        ConnectionDTO connection = TsdbConnectionUtils.getConnection(stableModel.getDb().getConnectionModel());
 
         List<List<Object>> dataList = new ArrayList<>();
         List<Object> data = new ArrayList<>();
@@ -122,7 +122,7 @@ public class RecordTabController {
 
 
         List<TableFieldDTO> fieldList = SuperTableUtils.getStableField(connection, stableModel.getDb().getName(),
-                stableModel.getStb().getName());
+                stableModel.getStb().get("name").toString() );
 
 
 
@@ -130,7 +130,7 @@ public class RecordTabController {
             String tbName = dataList.get(0).remove(0).toString();
             List<String> fList = fieldList.stream().filter(d-> !d.getIsTag()).map(TableFieldDTO::getName).collect(Collectors.toList());
             TsDataUpdateUtils.batchInsertAutoCreateTable(connection, stableModel.getDb().getName(), tbName,
-                    stableModel.getDb().getName(), stableModel.getStb().getName(),
+                    stableModel.getDb().getName(), stableModel.getStb().get("name").toString() ,
                     dataList.get(0).subList(fList.size(), dataList.get(0).size()),
                     Collections.singletonList(dataList.get(0).subList(0, fList.size())));
         } else {
@@ -188,9 +188,9 @@ public class RecordTabController {
         editItem.setOnAction(event -> {
             updateRecordPane.getChildren().clear();
             StableModel stableModel = (StableModel) ApplicationStore.getCurrentNode().getData();
-            Connection connection = TsdbConnectionUtils.getConnection(stableModel.getDb().getConnectionModel());
+            ConnectionDTO connection = TsdbConnectionUtils.getConnection(stableModel.getDb().getConnectionModel());
 
-            List<TableFieldDTO> fieldList = SuperTableUtils.getStableField(connection, stableModel.getDb().getName(), stableModel.getStb().getName());
+            List<TableFieldDTO> fieldList = SuperTableUtils.getStableField(connection, stableModel.getDb().getName(), stableModel.getStb().get("name").toString() );
 
 
 
@@ -229,9 +229,9 @@ public class RecordTabController {
         addItem.setOnAction(event -> {
             updateRecordPane.getChildren().clear();
             StableModel stableModel = (StableModel) ApplicationStore.getCurrentNode().getData();
-            Connection connection = TsdbConnectionUtils.getConnection(stableModel.getDb().getConnectionModel());
+            ConnectionDTO connection = TsdbConnectionUtils.getConnection(stableModel.getDb().getConnectionModel());
 
-            List<TableFieldDTO> fieldList = SuperTableUtils.getStableField(connection, stableModel.getDb().getName(), stableModel.getStb().getName());
+            List<TableFieldDTO> fieldList = SuperTableUtils.getStableField(connection, stableModel.getDb().getName(), stableModel.getStb().get("name").toString() );
 
             Map<String, Object> recordMap = tableView.getSelectionModel().getSelectedItem();
             Label tbLabel = new Label();
@@ -330,9 +330,9 @@ public class RecordTabController {
         Integer page = (Integer) queryMap.get("page");
         int start = (page - 1) * 1000;
         StableModel stableModel = (StableModel) ApplicationStore.getCurrentNode().getData();
-        Connection connection = TsdbConnectionUtils.getConnection(stableModel.getDb().getConnectionModel());
+        ConnectionDTO connection = TsdbConnectionUtils.getConnection(stableModel.getDb().getConnectionModel());
 
-        List<TableFieldDTO> fieldList = SuperTableUtils.getStableField(connection, stableModel.getDb().getName(), stableModel.getStb().getName());
+        List<TableFieldDTO> fieldList = SuperTableUtils.getStableField(connection, stableModel.getDb().getName(), stableModel.getStb().get("name").toString() );
 
         String whereSql = "";
         if (beginDatePicker.getValue() != null && endDatePicker.getValue() != null) {
@@ -344,8 +344,8 @@ public class RecordTabController {
             whereSql = " where " + fieldList.get(0).getName() + " < " + TimeUtils.LocalDateToLong(endDatePicker.getValue());
         }
 
-        QueryRstDTO queryRstDTO = ConnectionUtils.executeQuery(connection, "select tbname, * from " + stableModel.getDb().getName() + "." +
-                stableModel.getStb().getName() + whereSql + " limit " + start + ", " + 1000);
+        QueryRstDTO queryRstDTO = RestConnectionUtils.executeQuery(connection, "select tbname, * from " + stableModel.getDb().getName() + "." +
+                stableModel.getStb().get("name").toString()  + whereSql + " limit " + start + ", " + 1000);
 
         tableView.getColumns().clear();
 
@@ -370,7 +370,7 @@ public class RecordTabController {
         pageCount.setValue(Integer.MAX_VALUE);
         pagination.setMaxPageIndicatorCount(3);
         pageInformation.setText("每页1000条，当前第" + (pagination.currentPageIndexProperty().get() + 1) + "页，当前页记录数（" + dataModelMapList.size() + "）");
-//            QueryRstDTO countRstDTO = ConnectionUtils.executeQuery(connection, "select count(*) from " + stableModel.getDb().getName() + "." +
+//            QueryRstDTO countRstDTO = RestConnectionUtils.executeQuery(connection, "select count(*) from " + stableModel.getDb().getName() + "." +
 //                    stableModel.getStb().getName() + whereSql);
 //            long total = ObjectUtils.isEmpty(countRstDTO.getDataList()) ? 0 : (long) countRstDTO.getDataList().get(0).get("count(*)");
 //            pageCount.setValue((total / 1000) + 1);

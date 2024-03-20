@@ -17,13 +17,13 @@ public class ConnectionDTO {
 
     private String ip;
 
-    private String port;
-
     private String restfulPort;
 
     private String username;
 
     private String password;
 
+    private String db;
 
+    private String version;
 }

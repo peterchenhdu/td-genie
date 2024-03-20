@@ -1,19 +1,19 @@
 package com.gitee.dbquery.tsdbgui.tdengine.sdk.util;
 
-import com.gitee.dbquery.tsdbgui.tdengine.util.ObjectUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.ConnectionDTO;
+import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.QueryRstDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.field.TableFieldDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.res.StableCreateResDTO;
-import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.res.StableResDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.res.TableFieldResDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.stb.StableAddDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.stb.StableUpdateDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.exception.TableAlreadyExistException;
-import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.ConnectionUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.util.ObjectUtils;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -30,7 +30,7 @@ public class SuperTableUtils {
      * @param connection   连接
      * @param stableAddDTO 建表信息
      */
-    public static void createStable(Connection connection, StableAddDTO stableAddDTO) {
+    public static void createStable(ConnectionDTO connection, StableAddDTO stableAddDTO) {
         List<TableFieldDTO> fieldList = stableAddDTO.getFieldList().stream().filter(f -> !f.getIsTag()).collect(Collectors.toList());
         List<TableFieldDTO> tagList = stableAddDTO.getFieldList().stream().filter(TableFieldDTO::getIsTag).collect(Collectors.toList());
 
@@ -61,7 +61,7 @@ public class SuperTableUtils {
         sql.append(";");
 
         try {
-            ConnectionUtils.executeUpdate(connection, Collections.singletonList(sql.toString()));
+            RestConnectionUtils.executeUpdate(connection, Collections.singletonList(sql.toString()));
         } catch (Exception e) {
             if (e.getMessage() != null && e.getMessage().contains("TDengine ERROR (360)")) {
                 throw new TableAlreadyExistException();
@@ -77,8 +77,8 @@ public class SuperTableUtils {
      * @param dbName     库名
      * @param tbName     表名
      */
-    public static void deleteStable(Connection connection, String dbName, String tbName) {
-        ConnectionUtils.executeUpdate(connection, Collections.singletonList("DROP STABLE IF EXISTS " + dbName + "." + tbName + ";"));
+    public static void deleteStable(ConnectionDTO connection, String dbName, String tbName) {
+        RestConnectionUtils.executeUpdate(connection, Collections.singletonList("DROP STABLE IF EXISTS " + dbName + "." + tbName + ";"));
     }
 
     /**
@@ -88,8 +88,26 @@ public class SuperTableUtils {
      * @param db         库
      * @return 超级表列表
      */
-    public static List<StableResDTO> getAllStable(Connection connection, String db) {
-        return ConnectionUtils.executeQuery(connection, "show " + db + ".stables;", StableResDTO.class);
+    public static QueryRstDTO getAllStable(ConnectionDTO connection, String db) {
+        if(VersionUtils.compareVersion(connection.getVersion(), "3.0") > 0) {
+            QueryRstDTO queryRstDTO =  RestConnectionUtils.executeQuery(connection, "select  stable_name as name, * from INFORMATION_SCHEMA.INS_STABLES where db_name = '"+db+"';");
+
+            if(null!= queryRstDTO) {
+                if(ObjectUtils.isNotEmpty(queryRstDTO.getColumnList())) {
+                    queryRstDTO.getColumnList().remove("stable_name");
+                }
+
+                for(Map<String, Object> map : queryRstDTO.getDataList()) {
+                    if(map.get("stable_name") !=null) {
+                        map.remove("stable_name");
+                    }
+                }
+            }
+
+
+            return queryRstDTO;
+        }
+        return RestConnectionUtils.executeQuery(connection, "show " + db + ".stables;");
     }
 
     /**
@@ -114,10 +132,10 @@ public class SuperTableUtils {
      * @param stb        超级表
      * @return 超级表
      */
-    public static StableResDTO getStable(Connection connection, String db, String stb) {
-        List<StableResDTO> allStb = getAllStable(connection, db);
-        for (StableResDTO stbTmp : allStb) {
-            if (stbTmp.getName().equals(stb)) {
+    public static Map<String, Object> getStable(ConnectionDTO connection, String db, String stb) {
+        QueryRstDTO allStb = getAllStable(connection, db);
+        for (Map<String, Object> stbTmp : allStb.getDataList()) {
+            if (stbTmp.get("name").equals(stb)) {
                 return stbTmp;
             }
         }
@@ -132,8 +150,8 @@ public class SuperTableUtils {
      * @param tbName     表
      * @return 字段列表
      */
-    public static List<TableFieldDTO> getStableField(Connection connection, String dbName, String tbName) {
-        List<TableFieldResDTO> fieldList = ConnectionUtils.executeQuery(connection, "DESCRIBE " + dbName + "." + tbName + ";", TableFieldResDTO.class);
+    public static List<TableFieldDTO> getStableField(ConnectionDTO connection, String dbName, String tbName) {
+        List<TableFieldResDTO> fieldList = RestConnectionUtils.executeQuery(connection, "DESCRIBE " + dbName + "." + tbName + ";", TableFieldResDTO.class);
 
         return fieldList.stream().map(f -> {
             TableFieldDTO tf = new TableFieldDTO();
@@ -153,8 +171,8 @@ public class SuperTableUtils {
      * @param stb        超级表
      * @return SQL
      */
-    public static String getStableSql(Connection connection, String dbName, String stb) {
-        List<StableCreateResDTO> list = ConnectionUtils.executeQuery(connection, "SHOW CREATE STABLE  " + dbName + "." + stb + ";", StableCreateResDTO.class);
+    public static String getStableSql(ConnectionDTO connection, String dbName, String stb) {
+        List<StableCreateResDTO> list = RestConnectionUtils.executeQuery(connection, "SHOW CREATE STABLE  " + dbName + "." + stb + ";", StableCreateResDTO.class);
         return list.get(0).getCreateDbSql();
     }
 
@@ -164,7 +182,7 @@ public class SuperTableUtils {
      * @param connection      连接
      * @param stableUpdateDTO 更新信息
      */
-    public static void updateStable(Connection connection, StableUpdateDTO stableUpdateDTO) {
+    public static void updateStable(ConnectionDTO connection, StableUpdateDTO stableUpdateDTO) {
         List<String> batchSql = new ArrayList<>();
         if (ObjectUtils.isNotEmpty(stableUpdateDTO.getAddList())) {
             stableUpdateDTO.getAddList().forEach(f -> batchSql.add("ALTER STABLE " + stableUpdateDTO.getDb() + "." + stableUpdateDTO.getTb() + " ADD " + (f.getIsTag() ? "TAG " : "COLUMN ") + f.getName() + " " + getFieldType(f) + ";"));
@@ -182,6 +200,6 @@ public class SuperTableUtils {
             stableUpdateDTO.getTagNameChangeMap().forEach((k, v) -> batchSql.add("ALTER STABLE " + stableUpdateDTO.getDb() + "." + stableUpdateDTO.getTb() + " CHANGE  TAG " + k + " " + v + ";"));
         }
 
-        ConnectionUtils.executeUpdate(connection, batchSql);
+        RestConnectionUtils.executeUpdate(connection, batchSql);
     }
 }

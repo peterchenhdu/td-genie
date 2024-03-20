@@ -21,6 +21,7 @@ public class ConnectionModel {
     private String port;
     private String username;
     private String password;
+    private String version;
     private List<DatabaseModel> dbList;
 
     @Override

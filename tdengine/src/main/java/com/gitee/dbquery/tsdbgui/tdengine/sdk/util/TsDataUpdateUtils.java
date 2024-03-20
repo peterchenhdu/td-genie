@@ -1,8 +1,8 @@
 package com.gitee.dbquery.tsdbgui.tdengine.sdk.util;
 
+import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.ConnectionDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.util.DateTimeUtils;
 
-import java.sql.Connection;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -28,14 +28,14 @@ public class TsDataUpdateUtils {
      * @param tagValueList TAG值
      * @param dataList     插入数据列表
      */
-    public static void batchInsertAutoCreateTable(Connection connection, String db, String tb,
+    public static void batchInsertAutoCreateTable(ConnectionDTO connection, String db, String tb,
                                                   String stbDb, String stb,
                                                   List<Object> tagValueList,
                                                   List<List<Object>> dataList) {
 
         StringBuilder sql = new StringBuilder("INSERT INTO " + db + "." + tb + " USING " + stbDb + "." + stb + " TAGS " + getFieldValueSql(tagValueList) + " VALUES ");
         dataList.forEach(d -> sql.append(getFieldValueSql(d)));
-        ConnectionUtils.executeUpdate(connection, Collections.singletonList(sql.toString()));
+        RestConnectionUtils.executeUpdate(connection, Collections.singletonList(sql.toString()));
     }
 
     /**
@@ -46,10 +46,10 @@ public class TsDataUpdateUtils {
      * @param tb         数据表
      * @param dataList   数据列表
      */
-    public static void batchInsertFullColumn(Connection connection, String db, String tb, List<List<Object>> dataList) {
+    public static void batchInsertFullColumn(ConnectionDTO connection, String db, String tb, List<List<Object>> dataList) {
         StringBuilder sql = new StringBuilder("INSERT INTO " + db + "." + tb + " VALUES");
         dataList.forEach(d -> sql.append(getFieldValueSql(d)));
-        ConnectionUtils.executeUpdate(connection, Collections.singletonList(sql.toString()));
+        RestConnectionUtils.executeUpdate(connection, Collections.singletonList(sql.toString()));
     }
 
     /**
@@ -61,7 +61,7 @@ public class TsDataUpdateUtils {
      * @param columnList 指定列
      * @param dataList   数据列表
      */
-    public static void batchInsertSpecifyColumn(Connection connection, String db, String tb,
+    public static void batchInsertSpecifyColumn(ConnectionDTO connection, String db, String tb,
                                                 List<String> columnList,
                                                 List<List<Object>> dataList) {
         StringBuilder columns = new StringBuilder("(");
@@ -73,7 +73,7 @@ public class TsDataUpdateUtils {
 
         StringBuilder sql = new StringBuilder("INSERT INTO " + db + "." + tb + " " + columns + " VALUES ");
         dataList.forEach(d -> sql.append(getFieldValueSql(d)));
-        ConnectionUtils.executeUpdate(connection, Collections.singletonList(sql.toString()));
+        RestConnectionUtils.executeUpdate(connection, Collections.singletonList(sql.toString()));
     }
 
     private static String getFieldValueSql(List<Object> fieldList) {
