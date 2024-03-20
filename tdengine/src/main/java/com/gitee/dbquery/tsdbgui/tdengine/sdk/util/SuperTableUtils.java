@@ -4,7 +4,6 @@ import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.ConnectionDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.QueryRstDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.field.TableFieldDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.res.StableCreateResDTO;
-import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.res.TableFieldResDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.stb.StableAddDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.stb.StableUpdateDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.exception.TableAlreadyExistException;
@@ -151,14 +150,14 @@ public class SuperTableUtils {
      * @return 字段列表
      */
     public static List<TableFieldDTO> getStableField(ConnectionDTO connection, String dbName, String tbName) {
-        List<TableFieldResDTO> fieldList = RestConnectionUtils.executeQuery(connection, "DESCRIBE " + dbName + "." + tbName + ";", TableFieldResDTO.class);
+        QueryRstDTO fieldList = RestConnectionUtils.executeQuery(connection, "DESCRIBE " + dbName + "." + tbName + ";");
 
-        return fieldList.stream().map(f -> {
+        return fieldList.getDataList().stream().map(f -> {
             TableFieldDTO tf = new TableFieldDTO();
-            tf.setLength(f.getLength());
-            tf.setDataType(f.getType());
-            tf.setName(f.getField());
-            tf.setIsTag("TAG".equals(f.getNote()));
+            tf.setLength(f.get("length") == null ? Integer.valueOf((f.get("Length") + "")) :Integer.valueOf( f.get("length").toString()));
+            tf.setDataType(f.get("type") == null ? (f.get("Type") + "") : f.get("type").toString());
+            tf.setName(f.get("field") == null ? (f.get("Field") + "") : f.get("field").toString());
+            tf.setIsTag("TAG".equals(f.get("note")) || "TAG".equals(f.get("Note")));
             return tf;
         }).collect(Collectors.toList());
     }

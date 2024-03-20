@@ -77,11 +77,11 @@
                         <Label GridPane.columnIndex="0" GridPane.rowIndex="2">*IP地址</Label>
                         <JFXTextField fx:id="ipTextField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
                         <Label GridPane.columnIndex="0" GridPane.rowIndex="3">*端口</Label>
-                        <JFXTextField fx:id="portTextField" text="6041" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                        <JFXTextField fx:id="portTextField" promptText="6041" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
                         <Label GridPane.columnIndex="0" GridPane.rowIndex="4">*用户名</Label>
-                        <JFXTextField fx:id="usernameTextField" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                        <JFXTextField fx:id="usernameTextField" promptText="root" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
                         <Label GridPane.columnIndex="0" GridPane.rowIndex="5">*密码</Label>
-                        <JFXTextField fx:id="passwordTextField" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                        <JFXTextField fx:id="passwordTextField" promptText="taosdata" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
                     </children>
                 </GridPane>
             </body>
@@ -111,8 +111,6 @@
                         <JFXTextField fx:id="createDbDays" text="3650" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
                         <Label GridPane.columnIndex="0" GridPane.rowIndex="4">*VNODE内存块数目</Label>
                         <JFXTextField fx:id="createDbBlocks" text="6" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
-                        <Label GridPane.columnIndex="0" GridPane.rowIndex="5">*文件压缩标志位</Label>
-                        <JFXTextField fx:id="createDbComp" text="2" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
                     </children>
                 </GridPane>
             </body>

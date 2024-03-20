@@ -32,46 +32,21 @@ public class DataBaseUtils {
     public static void createDatabase(ConnectionDTO connection, DbConfigAddDTO dbConfigAddDTO) {
         String createSql = "CREATE DATABASE " + dbConfigAddDTO.getDbName();
         if (ObjectUtils.isNotEmpty(dbConfigAddDTO.getBlocks())) {
-            createSql += " blocks " + dbConfigAddDTO.getBlocks();
+            if(VersionUtils.compareVersion(connection.getVersion(), "3.0") > 0) {
+                createSql += " BUFFER " + dbConfigAddDTO.getBlocks();
+            } else {
+                createSql += " blocks " + dbConfigAddDTO.getBlocks();
+            }
+
         }
-        if (ObjectUtils.isNotEmpty(dbConfigAddDTO.getCache())) {
-            createSql += " cache " + dbConfigAddDTO.getCache();
-        }
-        if (ObjectUtils.isNotEmpty(dbConfigAddDTO.getCacheLast())) {
-            createSql += " cacheLast " + dbConfigAddDTO.getCacheLast();
-        }
-        if (ObjectUtils.isNotEmpty(dbConfigAddDTO.getComp())) {
-            createSql += " comp " + dbConfigAddDTO.getComp();
-        }
-        if (ObjectUtils.isNotEmpty(dbConfigAddDTO.getDays())) {
-            createSql += " days " + dbConfigAddDTO.getDays();
-        }
-        if (ObjectUtils.isNotEmpty(dbConfigAddDTO.getFsync())) {
-            createSql += " fsync " + dbConfigAddDTO.getFsync();
-        }
+
         if (ObjectUtils.isNotEmpty(dbConfigAddDTO.getKeep())) {
             createSql += " keep " + dbConfigAddDTO.getKeep();
         }
-        if (ObjectUtils.isNotEmpty(dbConfigAddDTO.getMaxRows())) {
-            createSql += " maxRows " + dbConfigAddDTO.getMaxRows();
-        }
-        if (ObjectUtils.isNotEmpty(dbConfigAddDTO.getMinRows())) {
-            createSql += " minRows " + dbConfigAddDTO.getMinRows();
-        }
-        if (ObjectUtils.isNotEmpty(dbConfigAddDTO.getPrecision())) {
-            createSql += " precision '" + dbConfigAddDTO.getPrecision() + "'";
-        }
-        if (ObjectUtils.isNotEmpty(dbConfigAddDTO.getQuorum())) {
-            createSql += " quorum " + dbConfigAddDTO.getQuorum();
-        }
-        if (ObjectUtils.isNotEmpty(dbConfigAddDTO.getUpdate())) {
-            createSql += " update " + dbConfigAddDTO.getUpdate();
-        }
+
+
         if (ObjectUtils.isNotEmpty(dbConfigAddDTO.getReplica())) {
             createSql += " replica " + dbConfigAddDTO.getReplica();
-        }
-        if (ObjectUtils.isNotEmpty(dbConfigAddDTO.getWalLevel())) {
-            createSql += " wal " + dbConfigAddDTO.getWalLevel();
         }
         createSql = createSql + ";";
 

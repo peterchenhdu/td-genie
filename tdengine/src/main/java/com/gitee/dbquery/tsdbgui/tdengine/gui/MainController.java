@@ -147,8 +147,7 @@ public class MainController {
     private JFXTextField createDbDays;
     @FXML
     private JFXTextField createDbBlocks;
-    @FXML
-    private JFXTextField createDbComp;
+
 
     @FXML
     private JFXTextField tableName0_TextField;
@@ -528,6 +527,11 @@ public class MainController {
     }
 
     private void showAddConnectionDialog() {
+        nameTextField.clear();
+        ipTextField.clear();
+        portTextField.clear();
+        usernameTextField.clear();
+        passwordTextField.clear();
         if (!"新建连接".equals(dialogTitle.getText())) {
             try {
                 ConnectionModel connectionModel = (ConnectionModel) ApplicationStore.getCurrentNode().getData();
@@ -688,8 +692,7 @@ public class MainController {
         if ("新建数据库".equals(createDbDialogTitle.getText())) {
             DbConfigAddDTO dbConfigAddDTO = new DbConfigAddDTO();
             dbConfigAddDTO.setDbName(createDbName.getText());
-            dbConfigAddDTO.setDays(createDbDays.getText());
-            dbConfigAddDTO.setComp(createDbComp.getText());
+            dbConfigAddDTO.setKeep(createDbDays.getText());
             dbConfigAddDTO.setBlocks(createDbBlocks.getText());
             dbConfigAddDTO.setReplica(createDbReplica.getText());
             DataBaseUtils.createDatabase(connection, dbConfigAddDTO);
@@ -710,7 +713,6 @@ public class MainController {
             DbConfigUpdateDTO dbConfigAddDTO = new DbConfigUpdateDTO();
             dbConfigAddDTO.setDbName(createDbName.getText());
 //            dbConfigAddDTO.setDays(createDbDays.getText());
-            dbConfigAddDTO.setComp(createDbComp.getText());
             dbConfigAddDTO.setBlocks(createDbBlocks.getText());
             dbConfigAddDTO.setReplica(createDbReplica.getText());
             DataBaseUtils.updateDatabase(connection, dbConfigAddDTO);

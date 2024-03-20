@@ -385,7 +385,7 @@ public class QueryTabController {
             return;
         }
 
-        if (sql.toUpperCase().startsWith("SELECT")) {
+//        if (sql.toUpperCase().startsWith("SELECT")) {
             executeResultTabPane.getSelectionModel().select(1);
 
 
@@ -395,7 +395,11 @@ public class QueryTabController {
             QueryRstDTO queryRstDTO = null;
             long queryStart = System.currentTimeMillis();
             try {
-                queryRstDTO = RestConnectionUtils.executeQuery(connection, "select * from (" + sql.replaceAll(";", "") + ") limit " + start + ", " + 1000);
+                if(sql.toUpperCase().startsWith("SELECT")) {
+                    queryRstDTO = RestConnectionUtils.executeQuery(connection, "select * from (" + sql.replaceAll(";", "") + ") limit " + start + ", " + 1000);
+                } else {
+                    queryRstDTO = RestConnectionUtils.executeQuery(connection, sql.replaceAll(";", ""));
+                }
                 executeStatus.setText("OK");
             } catch (Exception e) {
                 executeStatus.setText(e.getMessage());
@@ -434,18 +438,18 @@ public class QueryTabController {
 //            QueryRstDTO countRstDTO = RestConnectionUtils.executeQuery(connection, "select count(*) from (" + sqlEditArea.getText().replaceAll(";", "") + ")");
 //            long total = ObjectUtils.isEmpty(countRstDTO.getDataList()) ? 0 : (long) countRstDTO.getDataList().get(0).get("count(*)");
 //            pageCount.setValue((total / 1000) + 1);
-        } else {
-            executeResultTabPane.getSelectionModel().select(0);
-            long start = System.currentTimeMillis();
-            try {
-                RestConnectionUtils.executeUpdate(connection, Collections.singletonList(sql));
-                executeStatus.setText("OK");
-            } catch (Exception e) {
-                executeStatus.setText(e.getMessage());
-            }
-            executeCost.setText((System.currentTimeMillis() - start) + "ms");
-
-        }
+//        } else {
+//            executeResultTabPane.getSelectionModel().select(0);
+//            long start = System.currentTimeMillis();
+//            try {
+//                RestConnectionUtils.executeUpdate(connection, Collections.singletonList(sql));
+//                executeStatus.setText("OK");
+//            } catch (Exception e) {
+//                executeStatus.setText(e.getMessage());
+//            }
+//            executeCost.setText((System.currentTimeMillis() - start) + "ms");
+//
+//        }
     }
 
 
