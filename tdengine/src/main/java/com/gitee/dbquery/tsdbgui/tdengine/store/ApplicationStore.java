@@ -2,6 +2,7 @@ package com.gitee.dbquery.tsdbgui.tdengine.store;
 
 import com.gitee.dbquery.tsdbgui.tdengine.model.CommonNode;
 import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
+import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.RestConnectionUtils;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TreeItem;
 import lombok.Data;
@@ -54,6 +55,12 @@ public class ApplicationStore {
             connectionDTO.setUsername(con.get("USERNAME").toString());
             connectionDTO.setPassword(con.get("PASSWORD").toString());
             connectionDTO.setName(con.get("NAME").toString());
+            if(con.get("VERSION") == null) {
+                connectionDTO.setVersion(RestConnectionUtils.getServerVersion(connectionDTO));
+            } else {
+                connectionDTO.setVersion(con.get("VERSION").toString());
+            }
+
             return connectionDTO;
         }).collect(Collectors.toList());
     }

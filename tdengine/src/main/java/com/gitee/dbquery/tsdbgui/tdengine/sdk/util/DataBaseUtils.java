@@ -1,18 +1,18 @@
 package com.gitee.dbquery.tsdbgui.tdengine.sdk.util;
 
+import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.ConnectionDTO;
+import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.QueryRstDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.db.DbConfigAddDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.db.DbConfigUpdateDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.res.DatabaseCreateResDTO;
-import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.res.DatabaseResDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.exception.DatabaseAlreadyExistException;
 import com.gitee.dbquery.tsdbgui.tdengine.util.ObjectUtils;
-import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 数据库工具类
@@ -29,7 +29,7 @@ public class DataBaseUtils {
      * @param connection     数据连接
      * @param dbConfigAddDTO 数据库配置
      */
-    public static void createDatabase(Connection connection, DbConfigAddDTO dbConfigAddDTO) {
+    public static void createDatabase(ConnectionDTO connection, DbConfigAddDTO dbConfigAddDTO) {
         String createSql = "CREATE DATABASE " + dbConfigAddDTO.getDbName();
         if (ObjectUtils.isNotEmpty(dbConfigAddDTO.getBlocks())) {
             createSql += " blocks " + dbConfigAddDTO.getBlocks();
@@ -76,7 +76,7 @@ public class DataBaseUtils {
         createSql = createSql + ";";
 
         try {
-            ConnectionUtils.executeUpdate(connection, Collections.singletonList(createSql));
+            RestConnectionUtils.executeUpdate(connection, Collections.singletonList(createSql));
         } catch (Exception e) {
             if (e.getMessage() != null && e.getMessage().contains("TDengine ERROR (381)")) {
                 throw new DatabaseAlreadyExistException();
@@ -91,8 +91,8 @@ public class DataBaseUtils {
      * @param connection 连接
      * @param dbName     库名
      */
-    public static void deleteDatabase(Connection connection, String dbName) {
-        ConnectionUtils.executeUpdate(connection, Collections.singletonList("DROP DATABASE IF EXISTS " + dbName + ";"));
+    public static void deleteDatabase(ConnectionDTO connection, String dbName) {
+        RestConnectionUtils.executeUpdate(connection, Collections.singletonList("DROP DATABASE IF EXISTS " + dbName + ";"));
     }
 
     /**
@@ -101,8 +101,11 @@ public class DataBaseUtils {
      * @param connection 连接
      * @return 数据库列表
      */
-    public static List<DatabaseResDTO> getAllDatabase(Connection connection) {
-        return ConnectionUtils.executeQuery(connection, "show databases;", DatabaseResDTO.class);
+    public static QueryRstDTO getAllDatabase(ConnectionDTO connection) {
+        if(VersionUtils.compareVersion(connection.getVersion(), "3.0") > 0) {
+            return RestConnectionUtils.executeQuery(connection, "select  * from INFORMATION_SCHEMA.INS_DATABASES ;");
+        }
+        return RestConnectionUtils.executeQuery(connection, "show databases;");
     }
 
     /**
@@ -112,10 +115,10 @@ public class DataBaseUtils {
      * @param dbName     数据库名
      * @return 数据库
      */
-    public static DatabaseResDTO getDatabase(Connection connection, String dbName) {
-        List<DatabaseResDTO> allDb = getAllDatabase(connection);
-        for (DatabaseResDTO db : allDb) {
-            if (db.getName().equals(dbName)) {
+    public static Map<String, Object> getDatabase(ConnectionDTO connection, String dbName) {
+        QueryRstDTO allDb = getAllDatabase(connection);
+        for (Map<String, Object> db : allDb.getDataList()) {
+            if (db.get("name").equals(dbName)) {
                 return db;
             }
         }
@@ -129,8 +132,8 @@ public class DataBaseUtils {
      * @param dbName     数据库名
      * @return CREATE语句
      */
-    public static String getDatabaseCreateSql(Connection connection, String dbName) {
-        List<DatabaseCreateResDTO> list = ConnectionUtils.executeQuery(connection, "SHOW CREATE DATABASE " + dbName + ";", DatabaseCreateResDTO.class);
+    public static String getDatabaseCreateSql(ConnectionDTO connection, String dbName) {
+        List<DatabaseCreateResDTO> list = RestConnectionUtils.executeQuery(connection, "SHOW CREATE DATABASE " + dbName + ";", DatabaseCreateResDTO.class);
         return list.get(0).getCreateDbSql();
     }
 
@@ -147,31 +150,31 @@ public class DataBaseUtils {
      * @param connection        连接
      * @param dbConfigUpdateDTO 数据库配置
      */
-    public static void updateDatabase(Connection connection, DbConfigUpdateDTO dbConfigUpdateDTO) {
-        DatabaseResDTO databaseResDTO = getDatabase(connection, dbConfigUpdateDTO.getDbName());
+    public static void updateDatabase(ConnectionDTO connection, DbConfigUpdateDTO dbConfigUpdateDTO) {
+        Map<String, Object> databaseResDTO = getDatabase(connection, dbConfigUpdateDTO.getDbName());
         if (databaseResDTO == null) {
             throw new RuntimeException("database not exist...");
         }
         List<String> sqlList = new ArrayList<>();
-        if (needUpdate(databaseResDTO.getReplica(), dbConfigUpdateDTO.getReplica())) {
-            sqlList.add("ALTER DATABASE " + dbConfigUpdateDTO.getDbName() + " replica " + dbConfigUpdateDTO.getReplica() + ";");
-        }
-        if (needUpdate(databaseResDTO.getQuorum(), dbConfigUpdateDTO.getQuorum())) {
-            sqlList.add("ALTER DATABASE " + dbConfigUpdateDTO.getDbName() + " quorum " + dbConfigUpdateDTO.getQuorum() + ";");
-        }
-        if (needUpdate(databaseResDTO.getKeep(), dbConfigUpdateDTO.getKeep())) {
-            sqlList.add("ALTER DATABASE " + dbConfigUpdateDTO.getDbName() + " keep " + dbConfigUpdateDTO.getKeep() + ";");
-        }
-        if (needUpdate(databaseResDTO.getBlocks(), dbConfigUpdateDTO.getBlocks())) {
-            sqlList.add("ALTER DATABASE " + dbConfigUpdateDTO.getDbName() + " blocks " + dbConfigUpdateDTO.getBlocks() + ";");
-        }
-        if (needUpdate(databaseResDTO.getComp(), dbConfigUpdateDTO.getComp())) {
-            sqlList.add("ALTER DATABASE " + dbConfigUpdateDTO.getDbName() + " comp " + dbConfigUpdateDTO.getComp() + ";");
-        }
-        if (needUpdate(databaseResDTO.getCacheLast(), dbConfigUpdateDTO.getCacheLast())) {
-            sqlList.add("ALTER DATABASE " + dbConfigUpdateDTO.getDbName() + " cacheLast " + dbConfigUpdateDTO.getCacheLast() + ";");
-        }
+//        if (needUpdate(databaseResDTO.getReplica(), dbConfigUpdateDTO.getReplica())) {
+//            sqlList.add("ALTER DATABASE " + dbConfigUpdateDTO.getDbName() + " replica " + dbConfigUpdateDTO.getReplica() + ";");
+//        }
+//        if (needUpdate(databaseResDTO.getQuorum(), dbConfigUpdateDTO.getQuorum())) {
+//            sqlList.add("ALTER DATABASE " + dbConfigUpdateDTO.getDbName() + " quorum " + dbConfigUpdateDTO.getQuorum() + ";");
+//        }
+//        if (needUpdate(databaseResDTO.getKeep(), dbConfigUpdateDTO.getKeep())) {
+//            sqlList.add("ALTER DATABASE " + dbConfigUpdateDTO.getDbName() + " keep " + dbConfigUpdateDTO.getKeep() + ";");
+//        }
+//        if (needUpdate(databaseResDTO.getBlocks(), dbConfigUpdateDTO.getBlocks())) {
+//            sqlList.add("ALTER DATABASE " + dbConfigUpdateDTO.getDbName() + " blocks " + dbConfigUpdateDTO.getBlocks() + ";");
+//        }
+//        if (needUpdate(databaseResDTO.getComp(), dbConfigUpdateDTO.getComp())) {
+//            sqlList.add("ALTER DATABASE " + dbConfigUpdateDTO.getDbName() + " comp " + dbConfigUpdateDTO.getComp() + ";");
+//        }
+//        if (needUpdate(databaseResDTO.getCacheLast(), dbConfigUpdateDTO.getCacheLast())) {
+//            sqlList.add("ALTER DATABASE " + dbConfigUpdateDTO.getDbName() + " cacheLast " + dbConfigUpdateDTO.getCacheLast() + ";");
+//        }
 
-        ConnectionUtils.executeUpdate(connection, sqlList);
+        RestConnectionUtils.executeUpdate(connection, sqlList);
     }
 }

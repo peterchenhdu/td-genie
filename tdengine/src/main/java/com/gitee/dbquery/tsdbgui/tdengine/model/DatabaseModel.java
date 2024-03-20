@@ -1,12 +1,10 @@
 package com.gitee.dbquery.tsdbgui.tdengine.model;
 
-import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.res.DatabaseResDTO;
-import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.res.StableResDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * DatabaseModel
@@ -19,7 +17,7 @@ import java.util.List;
 @Data
 public class DatabaseModel {
     private String name;
-    private DatabaseResDTO databaseResDTO;
+    private Map<String, Object> databaseResDTO;
     private ConnectionModel connectionModel;
 
     @Override

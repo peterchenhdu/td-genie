@@ -5,7 +5,7 @@ import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.DatabaseModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.StableModel;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.QueryRstDTO;
-import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.ConnectionUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.RestConnectionUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.store.ApplicationStore;
 import com.gitee.dbquery.tsdbgui.tdengine.util.DateTimeUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.util.ObjectUtils;
@@ -85,7 +85,7 @@ public class MonitorController {
             return;
         }
 
-        QueryRstDTO rst = ConnectionUtils.executeQuery(TsdbConnectionUtils.getConnection(connectionModel),
+        QueryRstDTO rst = RestConnectionUtils.executeQuery(TsdbConnectionUtils.getConnection(connectionModel),
                 "select  avg(cpu_taosd) as avg_cpu_taosd,  avg(cpu_system) as avg_cpu_system,  avg(cpu_cores) as avg_cpu_cores,avg(mem_taosd) as avg_mem_taosd,avg(mem_system) as avg_mem_system,  avg(mem_total) as avg_mem_total, avg(disk_used) as avg_disk_used,  avg(disk_total) as avg_disk_total from log.dn where ts > '" + DateTimeUtils.format(LocalDateTime.now().minusDays(1)) + "' interval(10m);");
         for (Map<String, Object> map : rst.getDataList()) {
             cpuSeries.getData().add(new XYChart.Data(map.get("ts").toString().substring(11, 16), map.get("avg_cpu_taosd")));

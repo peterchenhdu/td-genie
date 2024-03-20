@@ -1,9 +1,10 @@
 package com.gitee.dbquery.tsdbgui.tdengine.model;
 
-import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.res.StableResDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Map;
 
 /**
  * TableModel
@@ -15,11 +16,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class StableModel {
-    private StableResDTO stb;
+    private Map<String, Object> stb;
     private DatabaseModel db;
 
     @Override
     public String toString() {
-        return stb.getName() + "@" + db.getName() + "@" + db.getConnectionModel().getName();
+        return stb.get("name") + "@" + db.getName() + "@" + db.getConnectionModel().getName();
     }
 }

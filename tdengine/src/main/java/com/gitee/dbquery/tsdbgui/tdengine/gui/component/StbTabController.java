@@ -4,16 +4,15 @@ import com.gitee.dbquery.tsdbgui.tdengine.common.enums.NodeTypeEnum;
 import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.DatabaseModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.StableModel;
-import com.gitee.dbquery.tsdbgui.tdengine.store.ApplicationStore;
-import com.gitee.dbquery.tsdbgui.tdengine.util.TsdbConnectionUtils;
-import com.gitee.dbquery.tsdbgui.tdengine.util.TableUtils;
-import com.gitee.dbquery.tsdbgui.tdengine.util.ObjectUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.ConnectionDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.QueryRstDTO;
-import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.res.DatabaseResDTO;
-import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.res.StableResDTO;
-import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.ConnectionUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.DataBaseUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.RestConnectionUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.SuperTableUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.store.ApplicationStore;
+import com.gitee.dbquery.tsdbgui.tdengine.util.ObjectUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.util.TableUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.util.TsdbConnectionUtils;
 import io.datafx.controller.ViewController;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ListProperty;
@@ -34,9 +33,7 @@ import javafx.scene.layout.VBox;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.sql.Connection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -110,176 +107,42 @@ public class StbTabController {
 
 
         if (ApplicationStore.getCurrentNode().getType() == NodeTypeEnum.CONNECTION) {
-            TableColumn<Map<String, Object>, String> dbNameColumn = new TableColumn<>();
-            dbNameColumn.setId("nameColumn");
-            dbNameColumn.setText("数据库名");
-            dbNameColumn.setCellValueFactory(new MapValueFactory("name"));
-
-            TableColumn<Map<String, Object>, String> daysColumn = new TableColumn<>();
-            daysColumn.setId("daysColumn");
-            daysColumn.setText("days");
-            daysColumn.setCellValueFactory(new MapValueFactory("days"));
-
-            TableColumn<Map<String, Object>, String> keepColumn = new TableColumn<>();
-            keepColumn.setId("keepColumn");
-            keepColumn.setText("keep");
-            keepColumn.setCellValueFactory(new MapValueFactory("keep"));
-
-            TableColumn<Map<String, Object>, String> cacheColumn = new TableColumn<>();
-            cacheColumn.setId("cacheColumn");
-            cacheColumn.setText("cache(MB)");
-            cacheColumn.setCellValueFactory(new MapValueFactory("cache"));
-
-            TableColumn<Map<String, Object>, String> blocksColumn = new TableColumn<>();
-            blocksColumn.setId("blocksColumn");
-            blocksColumn.setText("blocks");
-            blocksColumn.setCellValueFactory(new MapValueFactory("blocks"));
-
-            TableColumn<Map<String, Object>, String> quorumColumn = new TableColumn<>();
-            quorumColumn.setId("quorumColumn");
-            quorumColumn.setText("quorum");
-            quorumColumn.setCellValueFactory(new MapValueFactory("quorum"));
-
-            TableColumn<Map<String, Object>, String> compColumn = new TableColumn<>();
-            compColumn.setId("compColumn");
-            compColumn.setText("comp");
-            compColumn.setCellValueFactory(new MapValueFactory("comp"));
-
-            TableColumn<Map<String, Object>, String> walLevelColumn = new TableColumn<>();
-            walLevelColumn.setId("walLevelColumn");
-            walLevelColumn.setText("walLevelColumn");
-            walLevelColumn.setCellValueFactory(new MapValueFactory("walLevel"));
-
-            TableColumn<Map<String, Object>, String> fsyncColumn = new TableColumn<>();
-            fsyncColumn.setId("fsyncColumn");
-            fsyncColumn.setText("fsync");
-            fsyncColumn.setCellValueFactory(new MapValueFactory("fsync"));
-
-            TableColumn<Map<String, Object>, String> replicaColumn = new TableColumn<>();
-            replicaColumn.setId("replicaColumn");
-            replicaColumn.setText("replica");
-            replicaColumn.setCellValueFactory(new MapValueFactory("replica"));
-
-            TableColumn<Map<String, Object>, String> updateColumn = new TableColumn<>();
-            updateColumn.setId("updateColumn");
-            updateColumn.setText("update");
-            updateColumn.setCellValueFactory(new MapValueFactory("update"));
-
-            TableColumn<Map<String, Object>, String> cacheLastColumn = new TableColumn<>();
-            cacheLastColumn.setId("cacheLastColumn");
-            cacheLastColumn.setText("cacheLast");
-            cacheLastColumn.setCellValueFactory(new MapValueFactory("cacheLast"));
-
-            TableColumn<Map<String, Object>, String> minRowsColumn = new TableColumn<>();
-            minRowsColumn.setId("minRowsColumn");
-            minRowsColumn.setText("minRows");
-            minRowsColumn.setCellValueFactory(new MapValueFactory("minRows"));
-
-            TableColumn<Map<String, Object>, String> maxRowsColumn = new TableColumn<>();
-            maxRowsColumn.setId("maxRowsColumn");
-            maxRowsColumn.setText("maxRows");
-            maxRowsColumn.setCellValueFactory(new MapValueFactory("maxRows"));
-
-            TableColumn<Map<String, Object>, String> precisionColumn = new TableColumn<>();
-            precisionColumn.setId("precisionColumn");
-            precisionColumn.setText("precision");
-            precisionColumn.setCellValueFactory(new MapValueFactory("precision"));
-
-            tableView.getColumns().add(dbNameColumn);
-            tableView.getColumns().add(daysColumn);
-            tableView.getColumns().add(keepColumn);
-            tableView.getColumns().add(cacheColumn);
-            tableView.getColumns().add(blocksColumn);
-            tableView.getColumns().add(quorumColumn);
-            tableView.getColumns().add(compColumn);
-            tableView.getColumns().add(walLevelColumn);
-            tableView.getColumns().add(fsyncColumn);
-            tableView.getColumns().add(replicaColumn);
-            tableView.getColumns().add(cacheLastColumn);
-            tableView.getColumns().add(minRowsColumn);
-            tableView.getColumns().add(maxRowsColumn);
-            tableView.getColumns().add(precisionColumn);
-
             ConnectionModel connectionModel = (ConnectionModel) ApplicationStore.getCurrentNode().getData();
+            QueryRstDTO dbList = DataBaseUtils.getAllDatabase(TsdbConnectionUtils.getConnection(connectionModel));
 
+            for(String column : dbList.getColumnList()) {
+                TableColumn<Map<String, Object>, String> dbNameColumn = new TableColumn<>();
+                dbNameColumn.setId("name_" + column);
+                dbNameColumn.setText(column);
+                dbNameColumn.setCellValueFactory(new MapValueFactory(column));
+                tableView.getColumns().add(dbNameColumn);
+            }
 
-            List<DatabaseResDTO> dbList = DataBaseUtils.getAllDatabase(TsdbConnectionUtils.getConnection(connectionModel));
-
-            dbList.forEach(db -> {
-                Map<String, Object> testMap = new HashMap<>();
-                testMap.put("name", db.getName());
-                testMap.put("days", db.getDays());
-                testMap.put("keep", db.getKeep());
-                testMap.put("cache", db.getCache());
-                testMap.put("blocks", db.getBlocks());
-                testMap.put("quorum", db.getQuorum());
-                testMap.put("comp", db.getComp());
-                testMap.put("walLevel", db.getWalLevel());
-                testMap.put("fsync", db.getFsync());
-                testMap.put("replica", db.getReplica());
-                testMap.put("update", db.getUpdate());
-                testMap.put("cacheLast", db.getCacheLast());
-                testMap.put("minRows", db.getMinRows());
-                testMap.put("maxRows", db.getMaxRows());
-                testMap.put("precision", db.getPrecision());
-                dataModelMapList.add(testMap);
-            });
+            dataModelMapList.addAll(dbList.getDataList());
 
             centPane.getChildren().removeAll(queryBox);
         } else if (ApplicationStore.getCurrentNode().getType() == NodeTypeEnum.DB) {
-            TableColumn<Map<String, Object>, String> dbNameColumn = new TableColumn<>();
-            dbNameColumn.setId("nameColumn");
-            dbNameColumn.setText("超级表");
-            dbNameColumn.setCellValueFactory(new MapValueFactory("name"));
-
-            TableColumn<Map<String, Object>, String> createdTimeColumn = new TableColumn<>();
-            createdTimeColumn.setId("createdTimeColumn");
-            createdTimeColumn.setText("createdTime");
-            createdTimeColumn.setCellValueFactory(new MapValueFactory("createdTime"));
-
-            TableColumn<Map<String, Object>, String> columnsColumn = new TableColumn<>();
-            columnsColumn.setId("columnsColumn");
-            columnsColumn.setText("columns");
-            columnsColumn.setCellValueFactory(new MapValueFactory("columns"));
-
-            TableColumn<Map<String, Object>, String> tagsColumn = new TableColumn<>();
-            tagsColumn.setId("tagsColumn");
-            tagsColumn.setText("tags");
-            tagsColumn.setCellValueFactory(new MapValueFactory("tags"));
-
-            TableColumn<Map<String, Object>, String> tablesColumn = new TableColumn<>();
-            tablesColumn.setId("tablesColumn");
-            tablesColumn.setText("tables");
-            tablesColumn.setCellValueFactory(new MapValueFactory("tables"));
-
-            tableView.getColumns().add(dbNameColumn);
-            tableView.getColumns().add(createdTimeColumn);
-            tableView.getColumns().add(columnsColumn);
-            tableView.getColumns().add(tagsColumn);
-            tableView.getColumns().add(tablesColumn);
-
 
             DatabaseModel databaseModel = (DatabaseModel) ApplicationStore.getCurrentNode().getData();
-            Connection connection = TsdbConnectionUtils.getConnection(databaseModel.getConnectionModel());
+            ConnectionDTO connection = TsdbConnectionUtils.getConnection(databaseModel.getConnectionModel());
 
-            List<StableResDTO> stbList = SuperTableUtils.getAllStable(connection, ApplicationStore.getCurrentNode().getName());
+            QueryRstDTO stbList = SuperTableUtils.getAllStable(connection, ApplicationStore.getCurrentNode().getName());
+            for(String column : stbList.getColumnList()) {
+                TableColumn<Map<String, Object>, String> dbNameColumn = new TableColumn<>();
+                dbNameColumn.setId("name_" + column);
+                dbNameColumn.setText(column);
+                dbNameColumn.setCellValueFactory(new MapValueFactory(column));
+                tableView.getColumns().add(dbNameColumn);
+            }
 
-            stbList.forEach(db -> {
-                Map<String, Object> testMap = new HashMap<>();
-                testMap.put("name", db.getName());
-                testMap.put("createdTime", db.getCreatedTime());
-                testMap.put("columns", db.getColumns());
-                testMap.put("tags", db.getTags());
-                testMap.put("tables", db.getTables());
-                dataModelMapList.add(testMap);
-            });
+            dataModelMapList.addAll(stbList.getDataList());
 
             centPane.getChildren().removeAll(queryBox);
         } else if (ApplicationStore.getCurrentNode().getType() == NodeTypeEnum.STB) {
             StableModel stableModel = (StableModel) ApplicationStore.getCurrentNode().getData();
-            Connection connection = TsdbConnectionUtils.getConnection(stableModel.getDb().getConnectionModel());
-            QueryRstDTO queryRstDTO = ConnectionUtils.executeQuery(connection, "select * from " + stableModel.getDb().getName() + "." +
-                    stableModel.getStb().getName() + " limit 1, 10");
+            ConnectionDTO connection = TsdbConnectionUtils.getConnection(stableModel.getDb().getConnectionModel());
+            QueryRstDTO queryRstDTO = RestConnectionUtils.executeQuery(connection, "select * from " + stableModel.getDb().getName() + "." +
+                    stableModel.getStb().get("name") + " limit 1, 10");
 
             queryRstDTO.getColumnList().forEach(column -> {
                 TableColumn<Map<String, Object>, String> tmpColumn = new TableColumn<>();
@@ -319,9 +182,9 @@ public class StbTabController {
             Integer page = (Integer) queryMap.get("page");
             int start = (page - 1) * 1000;
             StableModel stableModel = (StableModel) ApplicationStore.getCurrentNode().getData();
-            Connection connection = TsdbConnectionUtils.getConnection(stableModel.getDb().getConnectionModel());
-            QueryRstDTO queryRstDTO = ConnectionUtils.executeQuery(connection, "select * from " + stableModel.getDb().getName() + "." +
-                    stableModel.getStb().getName() + " limit " + start + ", " + 1000);
+            ConnectionDTO connection = TsdbConnectionUtils.getConnection(stableModel.getDb().getConnectionModel());
+            QueryRstDTO queryRstDTO = RestConnectionUtils.executeQuery(connection, "select * from " + stableModel.getDb().getName() + "." +
+                    stableModel.getStb().get("name") + " limit " + start + ", " + 1000);
 
             tableView.getColumns().clear();
             queryRstDTO.getColumnList().forEach(column -> {
@@ -343,8 +206,8 @@ public class StbTabController {
             });
 
 
-            QueryRstDTO countRstDTO = ConnectionUtils.executeQuery(connection, "select count(*) from " + stableModel.getDb().getName() + "." +
-                    stableModel.getStb().getName());
+            QueryRstDTO countRstDTO = RestConnectionUtils.executeQuery(connection, "select count(*) from " + stableModel.getDb().getName() + "." +
+                    stableModel.getStb().get("name") );
             long total = ObjectUtils.isEmpty(countRstDTO.getDataList()) ? 0 : (long) countRstDTO.getDataList().get(0).get("count(*)");
             pageCount.setValue((total / 1000) + 1);
         }

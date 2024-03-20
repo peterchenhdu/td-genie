@@ -8,14 +8,15 @@ import com.gitee.dbquery.tsdbgui.tdengine.model.CommonNode;
 import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.DatabaseModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.StableModel;
+import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.ConnectionDTO;
+import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.QueryRstDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.db.DbConfigAddDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.db.DbConfigUpdateDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.field.TableFieldDTO;
-import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.res.DatabaseResDTO;
-import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.res.StableResDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.stb.StableAddDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.stb.StableUpdateDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.DataBaseUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.RestConnectionUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.SuperTableUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.store.ApplicationStore;
 import com.gitee.dbquery.tsdbgui.tdengine.store.H2DbUtils;
@@ -52,7 +53,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -209,9 +209,9 @@ public class MainController {
         TreeItem<CommonNode> connectionItem = new TreeItem<>(new CommonNode(connectionModel.getName(), NodeTypeEnum.CONNECTION, connectionModel), ImageViewUtils.getImageViewByType(NodeTypeEnum.CONNECTION));
 
 
-        Connection connection = TsdbConnectionUtils.getConnection(connectionModel);
+        ConnectionDTO connection = TsdbConnectionUtils.getConnection(connectionModel);
 
-        List<DatabaseResDTO> dbList = new ArrayList<>();
+        QueryRstDTO dbList ;
         try {
             dbList = DataBaseUtils.getAllDatabase(connection);
         } catch (Exception e) {
@@ -219,14 +219,14 @@ public class MainController {
         }
 
 
-        for (DatabaseResDTO db : dbList) {
-            List<StableResDTO> tbList = SuperTableUtils.getAllStable(connection, db.getName());
-            DatabaseModel databaseModel = new DatabaseModel(db.getName(), db, connectionModel);
-            TreeItem<CommonNode> dbNode = new TreeItem<>(new CommonNode(db.getName(), NodeTypeEnum.DB, databaseModel), ImageViewUtils.getImageViewByType(NodeTypeEnum.DB));
+        for (Map<String, Object> db : dbList.getDataList()) {
+            QueryRstDTO tbList = SuperTableUtils.getAllStable(connection, db.get("name").toString());
+            DatabaseModel databaseModel = new DatabaseModel(db.get("name").toString(), db, connectionModel);
+            TreeItem<CommonNode> dbNode = new TreeItem<>(new CommonNode(db.get("name").toString(), NodeTypeEnum.DB, databaseModel), ImageViewUtils.getImageViewByType(NodeTypeEnum.DB));
             connectionItem.getChildren().add(dbNode);
 
-            for (StableResDTO tb : tbList) {
-                TreeItem<CommonNode> tbNode = new TreeItem<>(new CommonNode(tb.getName(), NodeTypeEnum.STB, new StableModel(tb, databaseModel)), ImageViewUtils.getImageViewByType(NodeTypeEnum.STB));
+            for (Map<String, Object> tb : tbList.getDataList()) {
+                TreeItem<CommonNode> tbNode = new TreeItem<>(new CommonNode(tb.get("name").toString(), NodeTypeEnum.STB, new StableModel(tb, databaseModel)), ImageViewUtils.getImageViewByType(NodeTypeEnum.STB));
                 dbNode.getChildren().add(tbNode);
             }
         }
@@ -374,11 +374,12 @@ public class MainController {
             createDbDialogTitle.setText("编辑数据库");
             createDbName.setDisable(true);
             DatabaseModel databaseModel = (DatabaseModel) ApplicationStore.getCurrentNode().getData();
-            createDbName.setText(databaseModel.getDatabaseResDTO().getName());
-            createDbComp.setText(databaseModel.getDatabaseResDTO().getComp());
-            createDbBlocks.setText(databaseModel.getDatabaseResDTO().getBlocks());
-            createDbDays.setText(databaseModel.getDatabaseResDTO().getDays());
-            createDbReplica.setText(databaseModel.getDatabaseResDTO().getReplica());
+            //TODO 动态
+//            createDbName.setText(databaseModel.getDatabaseResDTO().getName());
+//            createDbComp.setText(databaseModel.getDatabaseResDTO().getComp());
+//            createDbBlocks.setText(databaseModel.getDatabaseResDTO().getBlocks());
+//            createDbDays.setText(databaseModel.getDatabaseResDTO().getDays());
+//            createDbReplica.setText(databaseModel.getDatabaseResDTO().getReplica());
             createDbDialog.setTransitionType(JFXDialog.DialogTransition.TOP);
             createDbDialog.show(rootPane);
         });
@@ -390,9 +391,9 @@ public class MainController {
 
             createTbPane.getChildren().remove(6, createTbPane.getChildren().size());
             StableModel stableModel = (StableModel) ApplicationStore.getCurrentNode().getData();
-            tableName0_TextField.setText(stableModel.getStb().getName());
+            tableName0_TextField.setText(stableModel.getStb().get("name").toString());
             tableName0_TextField.setDisable(true);
-            List<TableFieldDTO> fields = SuperTableUtils.getStableField(TsdbConnectionUtils.getConnection(stableModel.getDb().getConnectionModel()), stableModel.getDb().getName(), stableModel.getStb().getName());
+            List<TableFieldDTO> fields = SuperTableUtils.getStableField(TsdbConnectionUtils.getConnection(stableModel.getDb().getConnectionModel()), stableModel.getDb().getName(), stableModel.getStb().get("name").toString());
 
             for (int i = 0; i < fields.size(); i++) {
                 JFXTextField nameTextField = new JFXTextField();
@@ -610,7 +611,7 @@ public class MainController {
             sql.append(dbSql + ";\n");
         } else if (ApplicationStore.getCurrentNode().getType().equals(NodeTypeEnum.STB)) {
             StableModel databaseModel = (StableModel) ApplicationStore.getCurrentNode().getData();
-            String dbSql = SuperTableUtils.getStableSql(TsdbConnectionUtils.getConnection(databaseModel.getDb().getConnectionModel()), databaseModel.getDb().getName(), databaseModel.getStb().getName());
+            String dbSql = SuperTableUtils.getStableSql(TsdbConnectionUtils.getConnection(databaseModel.getDb().getConnectionModel()), databaseModel.getDb().getName(), databaseModel.getStb().get("name").toString());
             sql.append(dbSql + ";\n");
         } else {
             //do nothing
@@ -629,14 +630,7 @@ public class MainController {
         System.out.println("save Connection...");
 
         if ("新建连接".equals(dialogTitle.getText())) {
-            Map<String, Object> dataMap = new HashMap<>();
-            dataMap.put("name", nameTextField.getText());
-            dataMap.put("ip", ipTextField.getText());
-            dataMap.put("port", portTextField.getText());
-            dataMap.put("username", usernameTextField.getText());
-            dataMap.put("password", passwordTextField.getText());
 
-            H2DbUtils.insertByHashMap("t_connection", Collections.singletonList(dataMap));
 
             ConnectionModel connectionModel = new ConnectionModel();
             connectionModel.setName(nameTextField.getText());
@@ -644,7 +638,17 @@ public class MainController {
             connectionModel.setPort(portTextField.getText());
             connectionModel.setUsername(usernameTextField.getText());
             connectionModel.setPassword(passwordTextField.getText());
+            connectionModel.setVersion(RestConnectionUtils.getServerVersion(connectionModel));
 
+            Map<String, Object> dataMap = new HashMap<>();
+            dataMap.put("name", nameTextField.getText());
+            dataMap.put("ip", ipTextField.getText());
+            dataMap.put("port", portTextField.getText());
+            dataMap.put("username", usernameTextField.getText());
+            dataMap.put("password", passwordTextField.getText());
+            dataMap.put("version", connectionModel.getVersion());
+
+            H2DbUtils.insertByHashMap("t_connection", Collections.singletonList(dataMap));
             root.getChildren().add(getConnectionTreeItem(connectionModel));
 
         } else {
@@ -660,6 +664,7 @@ public class MainController {
             selectedConnectionModel.setPort(portTextField.getText());
             selectedConnectionModel.setUsername(usernameTextField.getText());
             selectedConnectionModel.setPassword(passwordTextField.getText());
+            selectedConnectionModel.setVersion(RestConnectionUtils.getServerVersion(selectedConnectionModel));
         }
         dialog.close();
     }
@@ -679,7 +684,7 @@ public class MainController {
         } else {
             connectionModel = ((DatabaseModel) ApplicationStore.getCurrentNode().getData()).getConnectionModel();
         }
-        Connection connection = TsdbConnectionUtils.getConnection(connectionModel);
+        ConnectionDTO connection = TsdbConnectionUtils.getConnection(connectionModel);
         if ("新建数据库".equals(createDbDialogTitle.getText())) {
             DbConfigAddDTO dbConfigAddDTO = new DbConfigAddDTO();
             dbConfigAddDTO.setDbName(createDbName.getText());
@@ -712,10 +717,11 @@ public class MainController {
 
             ApplicationStore.getCurrentNode().setName(createDbName.getText());
             Event.fireEvent(ApplicationStore.getCurrentTreeItem(), new TreeItem.TreeModificationEvent<CommonNode>(TreeItem.valueChangedEvent(), ApplicationStore.getCurrentTreeItem(), ApplicationStore.getCurrentTreeItem().getValue()));
-            databaseModel.getDatabaseResDTO().setName(createDbName.getText());
-            databaseModel.getDatabaseResDTO().setComp(createDbComp.getText());
-            databaseModel.getDatabaseResDTO().setBlocks(createDbBlocks.getText());
-            databaseModel.getDatabaseResDTO().setReplica(createDbReplica.getText());
+//TODO 动态
+//            databaseModel.getDatabaseResDTO().setName(createDbName.getText());
+//            databaseModel.getDatabaseResDTO().setComp(createDbComp.getText());
+//            databaseModel.getDatabaseResDTO().setBlocks(createDbBlocks.getText());
+//            databaseModel.getDatabaseResDTO().setReplica(createDbReplica.getText());
         }
         createDbDialog.close();
     }
@@ -739,7 +745,7 @@ public class MainController {
         } else {
             databaseModel = ((StableModel) ApplicationStore.getCurrentNode().getData()).getDb();
         }
-        Connection connection = TsdbConnectionUtils.getConnection(databaseModel.getConnectionModel());
+        ConnectionDTO connection = TsdbConnectionUtils.getConnection(databaseModel.getConnectionModel());
         if ("新建数据表".equals(createTbDialogTitle.getText())) {
 
 

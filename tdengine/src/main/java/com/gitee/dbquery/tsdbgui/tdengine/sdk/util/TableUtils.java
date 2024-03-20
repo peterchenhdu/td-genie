@@ -1,6 +1,6 @@
 package com.gitee.dbquery.tsdbgui.tdengine.sdk.util;
 
-import com.gitee.dbquery.tsdbgui.tdengine.util.ObjectUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.ConnectionDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.field.TableFieldDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.res.TableCreateResDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.res.TableFieldResDTO;
@@ -9,9 +9,8 @@ import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.tb.TableAddByStableDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.tb.TableAddDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.tb.TableUpdateDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.exception.TableAlreadyExistException;
-import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.ConnectionUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.util.ObjectUtils;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,7 +30,7 @@ public class TableUtils {
      * @param connection   连接
      * @param stableAddDTO 建表信息
      */
-    public static void createTable(Connection connection, TableAddDTO stableAddDTO) {
+    public static void createTable(ConnectionDTO connection, TableAddDTO stableAddDTO) {
         List<TableFieldDTO> fieldList = stableAddDTO.getFieldList().stream().filter(f -> !f.getIsTag()).collect(Collectors.toList());
         List<TableFieldDTO> tagList = stableAddDTO.getFieldList().stream().filter(TableFieldDTO::getIsTag).collect(Collectors.toList());
 
@@ -62,7 +61,7 @@ public class TableUtils {
         sql.append(";");
 
         try {
-            ConnectionUtils.executeUpdate(connection, Collections.singletonList(sql.toString()));
+            RestConnectionUtils.executeUpdate(connection, Collections.singletonList(sql.toString()));
         } catch (Exception e) {
             if (e.getMessage() != null && e.getMessage().contains("TDengine ERROR (360)")) {
                 throw new TableAlreadyExistException();
@@ -77,7 +76,7 @@ public class TableUtils {
      * @param connection 连接
      * @param dtoList    建表信息
      */
-    public static void createTableUsingStable(Connection connection, List<TableAddByStableDTO> dtoList) {
+    public static void createTableUsingStable(ConnectionDTO connection, List<TableAddByStableDTO> dtoList) {
         StringBuilder sb = new StringBuilder("CREATE TABLE ");
         for (TableAddByStableDTO dto : dtoList) {
             sb.append(dto.getDbName()).append(".").append(dto.getTableName()).append(" USING ").append(dto.getDbName()).append(".").append(dto.getStableName());
@@ -89,7 +88,7 @@ public class TableUtils {
             });
             sb.append(tags.substring(0, tags.length() - 1)).append(") TAGS ").append(tagValues.substring(0, tagValues.length() - 1)).append(") ");
         }
-        ConnectionUtils.executeUpdate(connection, Collections.singletonList(sb.toString() + ";"));
+        RestConnectionUtils.executeUpdate(connection, Collections.singletonList(sb.toString() + ";"));
     }
 
     /**
@@ -99,8 +98,8 @@ public class TableUtils {
      * @param dbName     库名
      * @param tbName     表名
      */
-    public static void deleteTable(Connection connection, String dbName, String tbName) {
-        ConnectionUtils.executeUpdate(connection, Collections.singletonList("DROP TABLE IF EXISTS " + dbName + "." + tbName + ";"));
+    public static void deleteTable(ConnectionDTO connection, String dbName, String tbName) {
+        RestConnectionUtils.executeUpdate(connection, Collections.singletonList("DROP TABLE IF EXISTS " + dbName + "." + tbName + ";"));
     }
 
     /**
@@ -110,8 +109,8 @@ public class TableUtils {
      * @param db         库
      * @return 表列表
      */
-    public static List<TableResDTO> getAllTable(Connection connection, String db) {
-        return ConnectionUtils.executeQuery(connection, "show " + db + ".tables;", TableResDTO.class);
+    public static List<TableResDTO> getAllTable(ConnectionDTO connection, String db) {
+        return RestConnectionUtils.executeQuery(connection, "show " + db + ".tables;", TableResDTO.class);
     }
 
     /**
@@ -136,7 +135,7 @@ public class TableUtils {
      * @param tb         表
      * @return 表
      */
-    public static TableResDTO getStable(Connection connection, String db, String tb) {
+    public static TableResDTO getStable(ConnectionDTO connection, String db, String tb) {
         List<TableResDTO> allStb = getAllTable(connection, db);
         for (TableResDTO stbTmp : allStb) {
             if (stbTmp.getName().equals(tb)) {
@@ -154,8 +153,8 @@ public class TableUtils {
      * @param tbName     表
      * @return 字段列表
      */
-    public static List<TableFieldDTO> getTableField(Connection connection, String dbName, String tbName) {
-        List<TableFieldResDTO> fieldList = ConnectionUtils.executeQuery(connection, "DESCRIBE " + dbName + "." + tbName + ";", TableFieldResDTO.class);
+    public static List<TableFieldDTO> getTableField(ConnectionDTO connection, String dbName, String tbName) {
+        List<TableFieldResDTO> fieldList = RestConnectionUtils.executeQuery(connection, "DESCRIBE " + dbName + "." + tbName + ";", TableFieldResDTO.class);
 
         return fieldList.stream().map(f -> {
             TableFieldDTO tf = new TableFieldDTO();
@@ -175,8 +174,8 @@ public class TableUtils {
      * @param tb         超级表
      * @return SQL
      */
-    public static String getTableSql(Connection connection, String dbName, String tb) {
-        List<TableCreateResDTO> list = ConnectionUtils.executeQuery(connection, "SHOW CREATE TABLE  " + dbName + "." + tb + ";", TableCreateResDTO.class);
+    public static String getTableSql(ConnectionDTO connection, String dbName, String tb) {
+        List<TableCreateResDTO> list = RestConnectionUtils.executeQuery(connection, "SHOW CREATE TABLE  " + dbName + "." + tb + ";", TableCreateResDTO.class);
         return list.get(0).getCreateDbSql();
     }
 
@@ -186,7 +185,7 @@ public class TableUtils {
      * @param connection      连接
      * @param stableUpdateDTO 更新信息
      */
-    public static void updateTable(Connection connection, TableUpdateDTO stableUpdateDTO) {
+    public static void updateTable(ConnectionDTO connection, TableUpdateDTO stableUpdateDTO) {
         List<String> batchSql = new ArrayList<>();
         if (ObjectUtils.isNotEmpty(stableUpdateDTO.getAddList())) {
             stableUpdateDTO.getAddList().forEach(f -> batchSql.add("ALTER TABLE " + stableUpdateDTO.getDb() + "." + stableUpdateDTO.getTb() + " ADD " + ("COLUMN ") + f.getName() + " " + getFieldType(f) + ";"));
@@ -204,6 +203,6 @@ public class TableUtils {
             stableUpdateDTO.getTagNameChangeMap().forEach((k, v) -> batchSql.add("ALTER TABLE " + stableUpdateDTO.getDb() + "." + stableUpdateDTO.getTb() + " SET  TAG " + k + " = '" + v + "';"));
         }
 
-        ConnectionUtils.executeUpdate(connection, batchSql);
+        RestConnectionUtils.executeUpdate(connection, batchSql);
     }
 }

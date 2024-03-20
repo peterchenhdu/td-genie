@@ -6,8 +6,9 @@ import com.gitee.dbquery.tsdbgui.tdengine.model.CommonNode;
 import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.DatabaseModel;
 import com.gitee.dbquery.tsdbgui.tdengine.model.StableModel;
+import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.ConnectionDTO;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.QueryRstDTO;
-import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.ConnectionUtils;
+import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.RestConnectionUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.store.ApplicationStore;
 import com.gitee.dbquery.tsdbgui.tdengine.util.AlertUtils;
 import com.gitee.dbquery.tsdbgui.tdengine.util.ObjectUtils;
@@ -50,7 +51,6 @@ import org.reactfx.Subscription;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.File;
-import java.sql.Connection;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
@@ -362,7 +362,7 @@ public class QueryTabController {
         String connectionName = connectionComboBox.getSelectionModel().getSelectedItem();
         String dbName = dbComboBox.getSelectionModel().getSelectedItem();
         ConnectionModel connectionModel = getConnectionModel(connectionName);
-        Connection connection = null;
+        ConnectionDTO connection = null;
         if (null == dbName) {
             connection = TsdbConnectionUtils.getConnection(connectionModel);
         } else {
@@ -380,7 +380,7 @@ public class QueryTabController {
 
     }
 
-    private void processSingleSql(Map<String, Object> queryMap, String sql, Connection connection) {
+    private void processSingleSql(Map<String, Object> queryMap, String sql, ConnectionDTO connection) {
         if(ObjectUtils.isEmpty(sql)) {
             return;
         }
@@ -395,45 +395,50 @@ public class QueryTabController {
             QueryRstDTO queryRstDTO = null;
             long queryStart = System.currentTimeMillis();
             try {
-                queryRstDTO = ConnectionUtils.executeQuery(connection, "select * from (" + sql.replaceAll(";", "") + ") limit " + start + ", " + 1000);
+                queryRstDTO = RestConnectionUtils.executeQuery(connection, "select * from (" + sql.replaceAll(";", "") + ") limit " + start + ", " + 1000);
                 executeStatus.setText("OK");
             } catch (Exception e) {
                 executeStatus.setText(e.getMessage());
                 tableView.getColumns().clear();
+                executeResultTabPane.getSelectionModel().select(0);
+                return;
             }
             executeCost.setText((System.currentTimeMillis() - queryStart) + "ms");
 
-            tableView.getColumns().clear();
-            queryRstDTO.getColumnList().forEach(column -> {
-                TableColumn<Map<String, Object>, String> tmpColumn = new TableColumn<>();
-                tmpColumn.setId(column + "Column");
-                tmpColumn.setText(column);
-                tmpColumn.setCellValueFactory(new MapValueFactory(column));
-                tableView.getColumns().add(tmpColumn);
-            });
-
-            dataModelMapList.clear();
-            queryRstDTO.getDataList().forEach(db -> {
-                db.forEach((k, v) -> {
-                    if (v instanceof Byte[] || v instanceof byte[]) {
-                        db.put(k, new String((byte[]) v));
-                    }
+            if(null != queryRstDTO) {
+                tableView.getColumns().clear();
+                queryRstDTO.getColumnList().forEach(column -> {
+                    TableColumn<Map<String, Object>, String> tmpColumn = new TableColumn<>();
+                    tmpColumn.setId(column + "Column");
+                    tmpColumn.setText(column);
+                    tmpColumn.setCellValueFactory(new MapValueFactory(column));
+                    tableView.getColumns().add(tmpColumn);
                 });
-                dataModelMapList.add(db);
-            });
+
+                dataModelMapList.clear();
+                queryRstDTO.getDataList().forEach(db -> {
+                    db.forEach((k, v) -> {
+                        if (v instanceof Byte[] || v instanceof byte[]) {
+                            db.put(k, new String((byte[]) v));
+                        }
+                    });
+                    dataModelMapList.add(db);
+                });
+            }
+
 
             pageCount.setValue(Integer.MAX_VALUE);
             pagination.setMaxPageIndicatorCount(3);
             pageInformation.setText("每页1000条，当前第" + (pagination.currentPageIndexProperty().get() + 1) + "页，当前页记录数（" + dataModelMapList.size() + "）");
 
-//            QueryRstDTO countRstDTO = ConnectionUtils.executeQuery(connection, "select count(*) from (" + sqlEditArea.getText().replaceAll(";", "") + ")");
+//            QueryRstDTO countRstDTO = RestConnectionUtils.executeQuery(connection, "select count(*) from (" + sqlEditArea.getText().replaceAll(";", "") + ")");
 //            long total = ObjectUtils.isEmpty(countRstDTO.getDataList()) ? 0 : (long) countRstDTO.getDataList().get(0).get("count(*)");
 //            pageCount.setValue((total / 1000) + 1);
         } else {
             executeResultTabPane.getSelectionModel().select(0);
             long start = System.currentTimeMillis();
             try {
-                int[] executeUpdateRst = ConnectionUtils.executeUpdate(connection, Collections.singletonList(sql));
+                RestConnectionUtils.executeUpdate(connection, Collections.singletonList(sql));
                 executeStatus.setText("OK");
             } catch (Exception e) {
                 executeStatus.setText(e.getMessage());

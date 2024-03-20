@@ -2,30 +2,30 @@ package com.gitee.dbquery.tsdbgui.tdengine.util;
 
 import com.gitee.dbquery.tsdbgui.tdengine.model.ConnectionModel;
 import com.gitee.dbquery.tsdbgui.tdengine.sdk.dto.ConnectionDTO;
-import com.gitee.dbquery.tsdbgui.tdengine.sdk.util.ConnectionUtils;
-
-import java.sql.Connection;
 
 /**
  * @author 风一样的码农
  * @since 1.0.0 2024/2/1 21:18
  **/
 public class TsdbConnectionUtils {
-    public static Connection getConnection(ConnectionModel connectionModel) {
+    public static ConnectionDTO getConnection(ConnectionModel connectionModel) {
         ConnectionDTO connectionDTO = new ConnectionDTO();
         connectionDTO.setIp(connectionModel.getIp());
         connectionDTO.setRestfulPort(connectionModel.getPort());
         connectionDTO.setUsername(connectionModel.getUsername());
         connectionDTO.setPassword(connectionModel.getPassword());
-        return ConnectionUtils.getConnection(connectionDTO);
+        connectionDTO.setVersion(connectionModel.getVersion());
+        return connectionDTO;
     }
 
-    public static Connection getConnectionWithDB(ConnectionModel connectionModel, String db) {
+    public static ConnectionDTO getConnectionWithDB(ConnectionModel connectionModel, String db) {
         ConnectionDTO connectionDTO = new ConnectionDTO();
         connectionDTO.setIp(connectionModel.getIp());
         connectionDTO.setRestfulPort(connectionModel.getPort());
         connectionDTO.setUsername(connectionModel.getUsername());
         connectionDTO.setPassword(connectionModel.getPassword());
-        return ConnectionUtils.getConnection(connectionDTO, db);
+        connectionDTO.setVersion(connectionModel.getVersion());
+        connectionDTO.setDb(db);
+        return connectionDTO;
     }
 }
