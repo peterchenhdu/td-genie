@@ -42,6 +42,7 @@ public class ApplicationStore {
             fieldMap.put("port", String.class);
             fieldMap.put("username", String.class);
             fieldMap.put("password", String.class);
+            fieldMap.put("version", String.class);
             H2DbUtils.createTable("t_connection", fieldMap);
         }
     }
