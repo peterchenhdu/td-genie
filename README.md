@@ -26,7 +26,7 @@ Td-Genie是一款功能全面、操作简便的TDengine时序数据库图形界�
 
 #### 安装教程
 
-1.  从发行版中下载最新版本，解压，双击执行td-genie.exe文件即可
+1.  从发行版中下载最新版本，解压，双击执行td-genie.exe文件即可(https://gitee.com/dbquery/td-genie/releases)
 
 #### 使用说明
 
