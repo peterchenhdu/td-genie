@@ -7,7 +7,7 @@
 ----
 
 #### 介绍
-免费开源的TDengine时序数据库图形用户界面工具，td-genie V2.0.0目前支持的TDengine版本列表如下：
+td-genie是一款功能全面、操作简便的TDengine时序数据库图形界面工具，V2.0.0目前支持的TDengine Server版本列表如下：
 1. TDengine2.x版本（2.6.0.34已测试）
 2. TDengine3.x版本（3.2.3.0已测试）
 
