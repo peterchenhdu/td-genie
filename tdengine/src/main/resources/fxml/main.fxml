@@ -106,11 +106,11 @@
                         <Label GridPane.columnIndex="0" GridPane.rowIndex="1">*库名称</Label>
                         <JFXTextField fx:id="createDbName" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
                         <Label GridPane.columnIndex="0" GridPane.rowIndex="2">*副本个数</Label>
-                        <JFXTextField fx:id="createDbReplica" text="1" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                        <JFXTextField fx:id="createDbReplica" promptText="1"  GridPane.columnIndex="1" GridPane.rowIndex="2"/>
                         <Label GridPane.columnIndex="0" GridPane.rowIndex="3">*数据保留天数</Label>
-                        <JFXTextField fx:id="createDbDays" text="3650" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                        <JFXTextField fx:id="createDbDays" promptText="3650" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
                         <Label GridPane.columnIndex="0" GridPane.rowIndex="4">*VNODE内存块数目</Label>
-                        <JFXTextField fx:id="createDbBlocks" text="6" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                        <JFXTextField fx:id="createDbBlocks" promptText="6" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
                     </children>
                 </GridPane>
             </body>
@@ -181,7 +181,7 @@
         <JFXDialogLayout prefWidth="600">
             <heading>
                 <HBox>
-                    <Label>关于TSDB-GUI</Label>
+                    <Label>关于td-genie</Label>
                 </HBox>
             </heading>
             <body>
@@ -189,22 +189,22 @@
                     <children>
                         <HBox GridPane.rowIndex="1">
                             <Label prefWidth="100">软件说明：</Label>
-                            <JFXTextField editable="false" prefWidth="400">通用时序数据库管理工具</JFXTextField>
+                            <JFXTextField editable="false" prefWidth="400">Tdengine时序数据库图形用户界面工具</JFXTextField>
                         </HBox>
                         <HBox GridPane.rowIndex="2">
                             <Label prefWidth="100">软件版本：</Label>
-                            <JFXTextField editable="false" prefWidth="400">V1.0.2</JFXTextField>
+                            <JFXTextField editable="false" prefWidth="400">V2.0.0</JFXTextField>
                         </HBox>
                         <HBox GridPane.rowIndex="3">
                             <Label prefWidth="100">问题反馈1：</Label>
                             <JFXTextField editable="false" prefWidth="400">
-                                https://gitee.com/dbquery/tsdb-gui
+                                https://gitee.com/dbquery/td-genie
                             </JFXTextField>
                         </HBox>
                         <HBox GridPane.rowIndex="4">
                             <Label prefWidth="100">问题反馈2：</Label>
                             <JFXTextField editable="false" prefWidth="400">
-                                https://github.com/peterchenhdu/tsdb-gui
+                                https://github.com/peterchenhdu/td-genie
                             </JFXTextField>
                         </HBox>
                     </children>

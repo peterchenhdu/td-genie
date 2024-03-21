@@ -1,4 +1,4 @@
-# tsdb-gui
+# td-genie
 
 #### Description
 时序数据库图形用户界面工具
