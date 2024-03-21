@@ -236,6 +236,40 @@ public class MainController {
 
     @PostConstruct
     public void init() throws SQLException {
+
+        ContextMenu contextMenu = new ContextMenu();
+        MenuItem closeAllMenuItem = new MenuItem("全部关闭");
+        closeAllMenuItem.setOnAction(event -> {
+            tabPane.getTabs().clear();
+            ApplicationStore.getTabsMap().clear();
+        });
+        MenuItem closeOtherMenuItem = new MenuItem("关闭其它");
+        closeOtherMenuItem.setOnAction(event -> {
+            for (Tab tab:tabPane.getTabs()){
+                if(tab.selectedProperty().getValue()){
+                    tabPane.getTabs().clear();
+                    ApplicationStore.getTabsMap().clear();
+                    tabPane.getTabs().add(tab);
+                    ApplicationStore.getTabsMap().put(tab.getText(), tab);
+                    break;
+                }
+            }
+        });
+        MenuItem closeCurrentMenuItem = new MenuItem("关闭选中");
+        closeCurrentMenuItem.setOnAction(event -> {
+            for (Tab tab:tabPane.getTabs()){
+                if(tab.selectedProperty().getValue()){
+                    tabPane.getTabs().remove(tab);
+                    ApplicationStore.getTabsMap().remove(tab.getText());
+                    break;
+                }
+            }
+        });
+        contextMenu.getItems().addAll(closeCurrentMenuItem, closeOtherMenuItem, closeAllMenuItem);
+
+        tabPane.setContextMenu(contextMenu);
+
+
         aboutMenuItem.setOnAction((ActionEvent t) -> {
             aboutDialog.setTransitionType(JFXDialog.DialogTransition.TOP);
             aboutDialog.show(rootPane);
