@@ -207,6 +207,10 @@ public class QueryTabController {
     @PostConstruct
     public void init() {
 
+        rootPane.setOnContextMenuRequested(event -> {
+            event.consume(); // 标记事件已被处理，防止默认的上下文菜单显示
+        });
+
         // add line numbers to the left of area
         sqlEditArea.setParagraphGraphicFactory(LineNumberFactory.get(sqlEditArea));
         // recompute the syntax highlighting 500 ms after user stops editing area

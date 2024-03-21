@@ -61,6 +61,9 @@ public class MonitorController {
 
     @PostConstruct
     private void init() {
+        rootPane.setOnContextMenuRequested(event -> {
+            event.consume(); // 标记事件已被处理，防止默认的上下文菜单显示
+        });
 
         // LineChart Data
         XYChart.Series<String, Number> cpuSeries = new XYChart.Series();

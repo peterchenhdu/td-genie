@@ -154,6 +154,10 @@ public class RecordTabController {
 
     @PostConstruct
     public void init() {
+        root.setOnContextMenuRequested(event -> {
+            event.consume(); // 标记事件已被处理，防止默认的上下文菜单显示
+        });
+
 // enable copy/paste
         TableUtils.installCopyPasteHandler(tableView);
         tableView.getSelectionModel().setCellSelectionEnabled(true);
