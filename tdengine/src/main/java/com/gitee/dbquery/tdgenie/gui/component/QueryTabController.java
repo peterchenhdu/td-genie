@@ -199,7 +199,7 @@ public class QueryTabController {
 
         FileUtil.writeString(sqlEditArea.getText(), file, "utf-8");
 
-        AlertUtils.show(rootPane, "保存成功!保存路径:\n" + exportFilePath);
+        AlertUtils.show("保存成功!保存路径:\n" + exportFilePath);
 
 
     }

@@ -1,6 +1,7 @@
 package com.gitee.dbquery.tdgenie.gui.component;
 
 import com.gitee.dbquery.tdgenie.sdk.util.RestConnectionUtils;
+import com.gitee.dbquery.tdgenie.util.AlertUtils;
 import com.gitee.dbquery.tdgenie.util.DateTimeUtils;
 import com.gitee.dbquery.tdgenie.util.ObjectUtils;
 import com.gitee.dbquery.tdgenie.util.TsdbConnectionUtils;
@@ -20,6 +21,7 @@ import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.scene.chart.XYChart;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 
 import javax.annotation.PostConstruct;
@@ -29,6 +31,9 @@ import java.util.Map;
 
 @ViewController(value = "/fxml/component/monitor.fxml", title = "资源监控", iconPath = "")
 public class MonitorController {
+
+    @FXML
+    private StackPane rootPane;
 
     public static final Color BACKGROUND_DARK = Color.rgb(39, 49, 66); // #2a2a2a
     public static final Color BACKGROUND_LIGHT = Color.rgb(255, 255, 255); // #2a2a2a
@@ -115,8 +120,14 @@ public class MonitorController {
                     "WHERE " +
                     "ts > '" + DateTimeUtils.format(LocalDateTime.now().minusDays(1)) + "' INTERVAL ( 10m );";
         }
+        QueryRstDTO rst;
+        try {
+            rst = RestConnectionUtils.executeQuery(TsdbConnectionUtils.getConnection(connectionModel),sql);
+        } catch (Exception e) {
+            AlertUtils.showException(e, rootPane);
+            return;
+        }
 
-        QueryRstDTO rst = RestConnectionUtils.executeQuery(TsdbConnectionUtils.getConnection(connectionModel),sql);
         for (Map<String, Object> map : rst.getDataList()) {
             cpuSeries.getData().add(new XYChart.Data(map.get("ts").toString().substring(11, 16), map.get("avg_cpu_taosd")));
             memSeries.getData().add(new XYChart.Data(map.get("ts").toString().substring(11, 16), map.get("avg_mem_taosd")));

@@ -290,7 +290,7 @@ public class MainController {
             }
 
             if (ApplicationStore.getCurrentNode() == null) {
-                AlertUtils.show(rootPane, "请先选择一个节点对象！");
+                AlertUtils.show("请先选择一个节点对象！");
                 return;
             }
 
@@ -691,7 +691,7 @@ public class MainController {
 
         FileUtil.writeString(sql.toString(), file, "utf-8");
 
-        AlertUtils.show(rootPane, "导出成功!保存路径:\n" + exportFilePath);
+        AlertUtils.show("导出成功!保存路径:\n" + exportFilePath);
 
 
     }
