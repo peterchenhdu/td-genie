@@ -100,7 +100,7 @@ public class RecordTabController {
         StableModel stableModel = (StableModel) ApplicationStore.getCurrentNode().getData();
 
         if ("0".equals(stableModel.getDb().getDatabaseResDTO().get("update"))) {
-            AlertUtils.show(root, "当前数据库不允许修改数据(update=0)");
+            AlertUtils.show("当前数据库不允许修改数据(update=0)");
             return;
         }
 

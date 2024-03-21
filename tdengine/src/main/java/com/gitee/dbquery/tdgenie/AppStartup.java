@@ -42,6 +42,7 @@ public class AppStartup extends Application {
     private static final String WINDOW_WIDTH_PROPERTY = "windowWidth";
     private static final String WINDOW_HEIGHT_PROPERTY = "windowHeight";
     public static Double dividerPositions;
+    public static Scene scene;
     private ApplicationContext applicationContext = ApplicationContext.getInstance();
     public static Properties sysConfigProperties = new Properties();
 
@@ -73,7 +74,7 @@ public class AppStartup extends Application {
         wfxDecorator.setCustomMaximize(true);
         wfxDecorator.setGraphic(new SVGGlyph(""));
 
-        Scene scene = new Scene(wfxDecorator);
+        scene = new Scene(wfxDecorator);
         stage.setTitle("td-genie");
         scene.setFill(Color.TRANSPARENT);
         stage.setScene(scene);
