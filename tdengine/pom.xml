@@ -3,9 +3,9 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>tsdb-gui</artifactId>
+        <artifactId>td-genie</artifactId>
         <groupId>com.gitee.dbquery</groupId>
-        <version>1.0.2</version>
+        <version>2.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -22,10 +22,6 @@
 
 
     <dependencies>
-
-
-
-
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
@@ -104,11 +100,6 @@
             <artifactId>lombok</artifactId>
             <version>1.18.16</version>
         </dependency>
-        <dependency>
-            <groupId>com.taosdata.jdbc</groupId>
-            <artifactId>taos-jdbcdriver</artifactId>
-            <version>2.0.39</version>
-        </dependency>
 
         <dependency>
             <groupId>org.fxmisc.richtext</groupId>
@@ -145,7 +136,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>2.3.7.RELEASE</version>
                 <configuration>
-                    <mainClass>com.gitee.dbquery.tsdbgui.tdengine.AppStartup</mainClass>
+                    <mainClass>com.gitee.dbquery.tdgenie.AppStartup</mainClass>
                     <skip>false</skip>
                     <includeSystemScope>true</includeSystemScope>
                 </configuration>
