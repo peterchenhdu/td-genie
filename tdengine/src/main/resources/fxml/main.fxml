@@ -23,6 +23,25 @@
                         <MenuItem fx:id="exitMenuItem" mnemonicParsing="false" text="退出"/>
                     </items>
                 </Menu>
+                <Menu mnemonicParsing="false" text="工具">
+                    <items>
+                        <MenuItem fx:id="createQueryMenuItem" mnemonicParsing="false" text="新建查询"/>
+                    </items>
+                </Menu>
+
+                <Menu mnemonicParsing="false" text="监控">
+                    <items>
+                        <MenuItem fx:id="connectionMonitorMenuItem" mnemonicParsing="false" text="连接监控"/>
+                        <MenuItem fx:id="queryMonitorMenuItem" mnemonicParsing="false" text="查询监控"/>
+                        <MenuItem fx:id="resourceMonitorMenuItem" mnemonicParsing="false" text="资源监控"/>
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="系统">
+                    <items>
+                        <MenuItem fx:id="clusterQueryMenuItem" mnemonicParsing="false" text="集群查看"/>
+                        <MenuItem fx:id="userQueryMenuItem" mnemonicParsing="false" text="用户查看"/>
+                    </items>
+                </Menu>
                 <Menu mnemonicParsing="false" text="帮助">
                     <items>
                         <MenuItem fx:id="aboutMenuItem" mnemonicParsing="false" text="关于"/>
@@ -48,6 +67,42 @@
                     <Image url="/images/query.png"/>
                 </ImageView>
                 <Text>新建查询</Text>
+            </VBox>
+            <VBox alignment="CENTER" fx:id="clusterBox" styleClass="tool-box">
+                <padding>
+                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                </padding>
+                <ImageView fitHeight="20.0" fitWidth="20.0" nodeOrientation="INHERIT" pickOnBounds="true">
+                    <Image url="/images/cluster.png"/>
+                </ImageView>
+                <Text>集群查看</Text>
+            </VBox>
+            <VBox alignment="CENTER" fx:id="userQueryBox" styleClass="tool-box">
+                <padding>
+                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                </padding>
+                <ImageView fitHeight="20.0" fitWidth="20.0" nodeOrientation="INHERIT" pickOnBounds="true">
+                    <Image url="/images/user_query.png"/>
+                </ImageView>
+                <Text>用户查看</Text>
+            </VBox>
+            <VBox alignment="CENTER" fx:id="connectionsBox" styleClass="tool-box">
+                <padding>
+                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                </padding>
+                <ImageView fitHeight="20.0" fitWidth="20.0" nodeOrientation="INHERIT" pickOnBounds="true">
+                    <Image url="/images/connections.png"/>
+                </ImageView>
+                <Text>连接监控</Text>
+            </VBox>
+            <VBox alignment="CENTER" fx:id="queryMonitorBox" styleClass="tool-box">
+                <padding>
+                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                </padding>
+                <ImageView fitHeight="20.0" fitWidth="20.0" nodeOrientation="INHERIT" pickOnBounds="true">
+                    <Image url="/images/query_monitor.png"/>
+                </ImageView>
+                <Text>查询监控</Text>
             </VBox>
             <VBox alignment="CENTER" fx:id="monitorBox" styleClass="tool-box">
                 <padding>
@@ -193,7 +248,7 @@
                         </HBox>
                         <HBox GridPane.rowIndex="2">
                             <Label prefWidth="100">软件版本：</Label>
-                            <JFXTextField editable="false" prefWidth="400">V2.0.0</JFXTextField>
+                            <JFXTextField editable="false" prefWidth="400">V2.1.0</JFXTextField>
                         </HBox>
                         <HBox GridPane.rowIndex="3">
                             <Label prefWidth="100">问题反馈1：</Label>
