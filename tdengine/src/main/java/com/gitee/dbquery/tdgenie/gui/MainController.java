@@ -82,14 +82,40 @@ public class MainController {
     @FXML
     private VBox createConnectionBox;
     @FXML
+    private VBox connectionsBox;
+    @FXML
+    private VBox queryMonitorBox;
+    @FXML
+    private VBox userQueryBox;
+    @FXML
     private VBox queryBox;
     @FXML
     private VBox monitorBox;
     @FXML
+    private VBox clusterBox;
+    @FXML
     private MenuItem exitMenuItem;
+    @FXML
+    @ActionTrigger("createQueryAction")
+    private MenuItem createQueryMenuItem;
     @FXML
     @ActionTrigger("aboutAction")
     private MenuItem aboutMenuItem;
+    @FXML
+    @ActionTrigger("clusterQueryAction")
+    private MenuItem clusterQueryMenuItem;
+    @FXML
+    @ActionTrigger("userQueryAction")
+    private MenuItem userQueryMenuItem;
+    @FXML
+    @ActionTrigger("resourceMonitorAction")
+    private MenuItem resourceMonitorMenuItem;
+    @FXML
+    @ActionTrigger("connectionMonitorAction")
+    private MenuItem connectionMonitorMenuItem;
+    @FXML
+    @ActionTrigger("queryMonitorAction")
+    private MenuItem queryMonitorMenuItem;
     @FXML
     private JFXDialog dialog;
     @FXML
@@ -243,7 +269,7 @@ public class MainController {
             tabPane.getTabs().clear();
             ApplicationStore.getTabsMap().clear();
         });
-        MenuItem closeOtherMenuItem = new MenuItem("关闭其它");
+        MenuItem closeOtherMenuItem = new MenuItem("关闭未选中");
         closeOtherMenuItem.setOnAction(event -> {
             for (Tab tab:tabPane.getTabs()){
                 if(tab.selectedProperty().getValue()){
@@ -309,12 +335,7 @@ public class MainController {
             if (!t.getButton().equals(MouseButton.PRIMARY)) {
                 return;
             }
-            try {
-                addTab("查询" + (ApplicationStore.getCurrentNode() == null ? System.currentTimeMillis() : ApplicationStore.getCurrentNode().getData().toString()), new ImageView("/images/query.png"), QueryTabController.class, null);
-            } catch (Exception e) {
-                e.printStackTrace();
-                AlertUtils.showException(e, rootPane);
-            }
+            createQueryAction();
         });
 
         monitorBox.setOnMouseClicked((MouseEvent t) -> {
@@ -322,18 +343,45 @@ public class MainController {
             if (!t.getButton().equals(MouseButton.PRIMARY)) {
                 return;
             }
+            resourceMonitorAction();
+        });
 
-            if (ApplicationStore.getCurrentNode() == null) {
-                AlertUtils.show("请先选择一个节点对象！");
+        clusterBox.setOnMouseClicked((MouseEvent t) -> {
+            System.out.println("clusterBox点击");
+            if (!t.getButton().equals(MouseButton.PRIMARY)) {
                 return;
             }
 
-            try {
-                addTab("监控" + ApplicationStore.getCurrentNode().getData().toString(), new ImageView("/images/monitor.png"), MonitorController.class, null);
-            } catch (Exception e) {
-                e.printStackTrace();
-                AlertUtils.showException(e, rootPane);
+
+            clusterQueryAction();
+        });
+
+        userQueryBox.setOnMouseClicked((MouseEvent t) -> {
+            System.out.println("userQueryBox点击");
+            if (!t.getButton().equals(MouseButton.PRIMARY)) {
+                return;
             }
+
+            userQueryAction();
+
+        });
+        queryMonitorBox.setOnMouseClicked((MouseEvent t) -> {
+            System.out.println("queryMonitorBox点击");
+            if (!t.getButton().equals(MouseButton.PRIMARY)) {
+                return;
+            }
+
+
+            queryMonitorAction();
+        });
+        connectionsBox.setOnMouseClicked((MouseEvent t) -> {
+            System.out.println("connectionsBox点击");
+            if (!t.getButton().equals(MouseButton.PRIMARY)) {
+                return;
+            }
+
+
+           connectionMonitorAction();
         });
 
         leftTreeView.setMinWidth(100);
@@ -586,7 +634,7 @@ public class MainController {
             if (clickNodeData.getType().equals(NodeTypeEnum.CONNECTION)) {
                 nodeClickMenu.getItems().addAll(createQueryMenuItem, createConnectionMenuItem, updateConnectionMenuItem, deleteConnectionMenuItem, createDbMenuItem);
             } else if (clickNodeData.getType().equals(NodeTypeEnum.DB)) {
-                nodeClickMenu.getItems().addAll(exportSQLMenuItem, createQueryMenuItem, createDbMenuItem, updateDbMenuItem, createTbMenuItem, delDbMenuItem);
+                nodeClickMenu.getItems().addAll(exportSQLMenuItem, createQueryMenuItem, createDbMenuItem, updateDbMenuItem, delDbMenuItem, createTbMenuItem);
             } else {
                 nodeClickMenu.getItems().addAll(exportSQLMenuItem, createQueryMenuItem, createTbMenuItem, updateTbMenuItem, delTbMenuItem);
             }
@@ -1015,10 +1063,74 @@ public class MainController {
         nextRowIndex++;
     }
 
+    @ActionMethod("createQueryAction")
+    public void createQueryAction() {
+        try {
+            addTab("数据查询", new ImageView("/images/query.png"), QueryTabController.class, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            AlertUtils.showException(e, rootPane);
+        }
+    }
     @ActionMethod("aboutAction")
     public void about() {
         aboutDialog.setTransitionType(JFXDialog.DialogTransition.TOP);
         aboutDialog.show(rootPane);
+    }
+    @ActionMethod("clusterQueryAction")
+    public void clusterQueryAction() {
+        try {
+            addTab("集群查看", new ImageView("/images/cluster.png"), ClusterQueryController.class, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            AlertUtils.showException(e, rootPane);
+        }
+    }
+    @ActionMethod("userQueryAction")
+    public void userQueryAction() {
+        try {
+            addTab("用户查看", new ImageView("/images/user_query.png"), UserQueryController.class, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            AlertUtils.showException(e, rootPane);
+        }
+    }
+
+    @ActionMethod("resourceMonitorAction")
+    public void resourceMonitorAction() {
+
+
+        if (ApplicationStore.getCurrentNode() == null) {
+            AlertUtils.show("请先选择一个连接节点！");
+            return;
+        }
+
+        try {
+            addTab("监控" + ApplicationStore.getCurrentNode().getData().toString(), new ImageView("/images/monitor.png"), MonitorController.class, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            AlertUtils.showException(e, rootPane);
+        }
+    }
+
+    @ActionMethod("connectionMonitorAction")
+    public void connectionMonitorAction() {
+        try {
+            addTab("连接监控", new ImageView("/images/connections.png"), ConnectionMonitorController.class, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            AlertUtils.showException(e, rootPane);
+        }
+    }
+
+    @ActionMethod("queryMonitorAction")
+    public void queryMonitorAction() {
+        try {
+            addTab("查询监控", new ImageView("/images/query_monitor.png"), QueryMonitorController.class, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            AlertUtils.showException(e, rootPane);
+        }
     }
 
     @PreDestroy

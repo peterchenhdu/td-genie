@@ -1,6 +1,5 @@
 package com.gitee.dbquery.tdgenie.gui.component;
 
-import com.gitee.dbquery.tdgenie.util.*;
 import com.gitee.dbquery.tdgenie.model.StableModel;
 import com.gitee.dbquery.tdgenie.sdk.dto.ConnectionDTO;
 import com.gitee.dbquery.tdgenie.sdk.dto.QueryRstDTO;
@@ -163,9 +162,49 @@ public class RecordTabController {
         tableView.getSelectionModel().setCellSelectionEnabled(true);
         tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        MenuItem copyItem = new MenuItem("复制");
-        MenuItem editItem = new MenuItem("编辑");
-        MenuItem addItem = new MenuItem("新建");
+
+        MenuItem addItem = new MenuItem("新建记录");
+        MenuItem editItem = new MenuItem("编辑该行记录");
+        MenuItem copyItem = new MenuItem("复制单元格内容");
+        MenuItem copyInsertItem = new MenuItem("复制为Insert语句");
+        copyInsertItem.setOnAction(event -> {
+            StableModel stableModel = (StableModel) ApplicationStore.getCurrentNode().getData();
+            ConnectionDTO connection = TsdbConnectionUtils.getConnection(stableModel.getDb().getConnectionModel());
+            List<TableFieldDTO> fieldList = SuperTableUtils.getStableField(connection, stableModel.getDb().getName(), stableModel.getStb().get("name").toString() );
+
+            Map<String, Object> recordMap = tableView.getSelectionModel().getSelectedItem();
+
+            String tbName = recordMap.get("tbname").toString();
+
+
+            StringBuilder sb = new StringBuilder("INSERT INTO `"+stableModel.getDb().getName()+"`.`"+tbName+"` (");
+
+            for(TableFieldDTO field:fieldList) {
+                if(!field.getIsTag()) {
+                    sb.append("`").append(field.getName()).append("`,");
+                }
+            }
+            sb.deleteCharAt(sb.length() - 1);
+            sb.append(") VALUES (");
+
+            for(TableFieldDTO field:fieldList) {
+                if(!field.getIsTag()) {
+                    if(field.getDataType().equals("TIMESTAMP") || field.getDataType().equals("NCHAR")) {
+                        sb.append("'" + recordMap.get(field.getName()) + "',");
+                    } else {
+                        sb.append( recordMap.get(field.getName()) + ",");
+                    }
+                }
+            }
+            sb.deleteCharAt(sb.length() - 1);
+            sb.append(");");
+            final ClipboardContent content = new ClipboardContent();
+            content.putString(sb.toString());
+            Clipboard.getSystemClipboard().setContent(content);
+        });
+
+
+
         copyItem.setOnAction(event -> {
             ObservableList<TablePosition> posList = tableView.getSelectionModel().getSelectedCells();
             int old_r = -1;
@@ -268,7 +307,7 @@ public class RecordTabController {
         });
 
         ContextMenu menu = new ContextMenu();
-        menu.getItems().addAll(copyItem, editItem, addItem);
+        menu.getItems().addAll(addItem, editItem, copyItem, copyInsertItem);
         tableView.setContextMenu(menu);
 
         FilteredList<Map<String, Object>> filteredData = new FilteredList<>(dataModelMapList, p -> true);

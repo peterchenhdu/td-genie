@@ -1,13 +1,13 @@
 <p align="center">
 	<img alt="logo" src="https://gitee.com/dbquery/td-genie/raw/master/tdengine/src/main/resources/images/logo.png" width="150" height="150">
 </p>
-<h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">Td-Genie v2.0.0</h1>
+<h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">Td-Genie v2.1.0</h1>
 <p align="center">免费开源的TDengine时序数据库图形用户界面工具，为用户提供直观、易用的数据库管理和操作体验！</p>
 
 ----
 
 #### 介绍
-Td-Genie是一款功能全面、操作简便的TDengine时序数据库图形界面工具，V2.0.0目前支持的TDengine Server版本列表如下：
+Td-Genie是一款功能全面、操作简便的TDengine时序数据库图形界面工具，V2.1.0目前支持的TDengine Server版本列表如下：
 1. TDengine2.x版本（2.6.0.34已测试）
 2. TDengine3.x版本（3.2.3.0已测试）
 
@@ -16,7 +16,7 @@ Td-Genie是一款功能全面、操作简便的TDengine时序数据库图形界�
 2. 数据库维护（新增、修改、查询、删除）
 3. 超级表维护（新增、修改、查询、删除）
 4. 超级表数据查询（支持按时间查询，自动分页展示）
-5. 数据操作（新增、更新、复制）
+5. 数据操作（新增、更新、复制字段值，复制为Insert语句）
 6. 自定义SQL执行(可执行更新SQL或查询SQL，可展示查询结果、执行耗时、错误信息等) 
 7. 资源监控查看(可查看数据库CPU、内存、磁盘使用趋势) 
 8. 库表DDL导出（数据库创建SQL、表创建SQL）
