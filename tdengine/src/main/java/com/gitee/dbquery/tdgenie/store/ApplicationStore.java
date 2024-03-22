@@ -28,7 +28,7 @@ public class ApplicationStore {
     private static HashMap<String, Tab> tabsMap = new HashMap<>();
 
 
-    public static void connectionTbCheck() throws SQLException {
+    public static void connectionTbExistCheck() throws SQLException {
         List<String> tableNameList = new ArrayList<>();
         List<Map<String, Object>> tables = H2DbUtils.query("show tables;");
         for (Map<String, Object> tb : tables) {

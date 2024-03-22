@@ -9,7 +9,6 @@ import com.gitee.dbquery.tdgenie.model.ConnectionModel;
 import com.gitee.dbquery.tdgenie.model.DatabaseModel;
 import com.gitee.dbquery.tdgenie.model.StableModel;
 import com.gitee.dbquery.tdgenie.sdk.dto.ConnectionDTO;
-import com.gitee.dbquery.tdgenie.sdk.dto.QueryRstDTO;
 import com.gitee.dbquery.tdgenie.sdk.dto.db.DbConfigAddDTO;
 import com.gitee.dbquery.tdgenie.sdk.dto.db.DbConfigUpdateDTO;
 import com.gitee.dbquery.tdgenie.sdk.dto.field.TableFieldDTO;
@@ -78,6 +77,7 @@ public class MainController {
     @FXML
     private GridPane createTbPane;
     @FXML
+    @ActionTrigger("createConnectionAction")
     private MenuItem createConnectionMenuItem;
     @FXML
     private VBox createConnectionBox;
@@ -88,12 +88,13 @@ public class MainController {
     @FXML
     private VBox userQueryBox;
     @FXML
-    private VBox queryBox;
+    private VBox createQueryBox;
     @FXML
-    private VBox monitorBox;
+    private VBox resourceMonitorBox;
     @FXML
     private VBox clusterBox;
     @FXML
+    @ActionTrigger("exitAction")
     private MenuItem exitMenuItem;
     @FXML
     @ActionTrigger("createQueryAction")
@@ -183,163 +184,37 @@ public class MainController {
 
     private TreeItem<CommonNode> root;
 
-    static void deleteRow(GridPane grid, final int row) {
-        Set<Node> deleteNodes = new HashSet<>();
-        for (Node child : grid.getChildren()) {
-            // get index from child
-            Integer rowIndex = GridPane.getRowIndex(child);
-
-            // handle null values for index=0
-            int r = rowIndex == null ? 0 : rowIndex;
-
-            if (r > row) {
-                // decrement rows for rows after the deleted row
-                GridPane.setRowIndex(child, r - 1);
-            } else if (r == row) {
-                // collect matching rows for deletion
-                deleteNodes.add(child);
-            }
-        }
-
-        // remove nodes from row
-        grid.getChildren().removeAll(deleteNodes);
-    }
-
-    static void deleteRowV2(GridPane grid, final JFXButton delButton) {
-        Set<Node> deleteNodes = new HashSet<>();
-        boolean matchFlag = false;
-        for (Node child : grid.getChildren()) {
-            // get index from child
-            Integer rowIndex = GridPane.getRowIndex(child);
-
-            // handle null values for index=0
-            int r = rowIndex == null ? 0 : rowIndex;
 
 
-            if (matchFlag && !child.getId().contains(delButton.getId().split("_")[0] + "_")) {//you bug TODO
-                // decrement rows for rows after the deleted row
-                GridPane.setRowIndex(child, r - 1);
-            }
-            if (child.getId().contains(delButton.getId().split("_")[0] + "_")) {
-                // collect matching rows for deletion
-                deleteNodes.add(child);
-                matchFlag = true;
-            }
-        }
-
-        // remove nodes from row
-        grid.getChildren().removeAll(deleteNodes);
-    }
-
-    private TreeItem<CommonNode> getConnectionTreeItem(ConnectionModel connectionModel) {
-        TreeItem<CommonNode> connectionItem = new TreeItem<>(new CommonNode(connectionModel.getName(), NodeTypeEnum.CONNECTION, connectionModel), ImageViewUtils.getImageViewByType(NodeTypeEnum.CONNECTION));
 
 
-        ConnectionDTO connection = TsdbConnectionUtils.getConnection(connectionModel);
 
-        QueryRstDTO dbList ;
-        try {
-            dbList = DataBaseUtils.getAllDatabase(connection);
-        } catch (Exception e) {
-            return connectionItem;
-        }
-
-
-        for (Map<String, Object> db : dbList.getDataList()) {
-            QueryRstDTO tbList = SuperTableUtils.getAllStable(connection, db.get("name").toString());
-            DatabaseModel databaseModel = new DatabaseModel(db.get("name").toString(), db, connectionModel);
-            TreeItem<CommonNode> dbNode = new TreeItem<>(new CommonNode(db.get("name").toString(), NodeTypeEnum.DB, databaseModel), ImageViewUtils.getImageViewByType(NodeTypeEnum.DB));
-            connectionItem.getChildren().add(dbNode);
-
-            for (Map<String, Object> tb : tbList.getDataList()) {
-                TreeItem<CommonNode> tbNode = new TreeItem<>(new CommonNode(tb.get("name").toString(), NodeTypeEnum.STB, new StableModel(tb, databaseModel)), ImageViewUtils.getImageViewByType(NodeTypeEnum.STB));
-                dbNode.getChildren().add(tbNode);
-            }
-        }
-
-        return connectionItem;
-    }
 
     @PostConstruct
     public void init() throws SQLException {
-
-        ContextMenu contextMenu = new ContextMenu();
-        MenuItem closeAllMenuItem = new MenuItem("全部关闭");
-        closeAllMenuItem.setOnAction(event -> {
-            tabPane.getTabs().clear();
-            ApplicationStore.getTabsMap().clear();
-        });
-        MenuItem closeOtherMenuItem = new MenuItem("关闭未选中");
-        closeOtherMenuItem.setOnAction(event -> {
-            for (Tab tab:tabPane.getTabs()){
-                if(tab.selectedProperty().getValue()){
-                    tabPane.getTabs().clear();
-                    ApplicationStore.getTabsMap().clear();
-                    tabPane.getTabs().add(tab);
-                    ApplicationStore.getTabsMap().put(tab.getText(), tab);
-                    break;
-                }
-            }
-        });
-        MenuItem closeCurrentMenuItem = new MenuItem("关闭选中");
-        closeCurrentMenuItem.setOnAction(event -> {
-            for (Tab tab:tabPane.getTabs()){
-                if(tab.selectedProperty().getValue()){
-                    tabPane.getTabs().remove(tab);
-                    ApplicationStore.getTabsMap().remove(tab.getText());
-                    break;
-                }
-            }
-        });
-        contextMenu.getItems().addAll(closeCurrentMenuItem, closeOtherMenuItem, closeAllMenuItem);
-
-        tabPane.setContextMenu(contextMenu);
-
-
-        aboutMenuItem.setOnAction((ActionEvent t) -> {
-            aboutDialog.setTransitionType(JFXDialog.DialogTransition.TOP);
-            aboutDialog.show(rootPane);
-        });
-
-        exitMenuItem.setOnAction((event) -> System.exit(0));
-
-        ApplicationStore.connectionTbCheck();
-
-        splitPane.getDividers().get(0).positionProperty().addListener(
-                (o, oldPos, newPos) -> {
-                    System.out.println(o);
-                    AppStartup.dividerPositions = newPos.doubleValue();
-                });
-
-
         ApplicationContext.getInstance().register(this, MainController.class);
 
-
-        createConnectionMenuItem.setOnAction((ActionEvent t) -> {
-            System.out.println("菜单点击");
-            dialogTitle.setText("新建连接");
-            showAddConnectionDialog();
-        });
+        //connection tb exist check
+        ApplicationStore.connectionTbExistCheck();
+        tabPane.setContextMenu(ContextMenuUtils.generateTabPaneContextMenu(tabPane));
+        //记录最后一次dividerPositions
+        splitPane.getDividers().get(0).positionProperty().addListener((o, oldPos, newPos) -> AppStartup.dividerPositions = newPos.doubleValue());
 
         createConnectionBox.setOnMouseClicked((MouseEvent t) -> {
-            System.out.println("createConnectionBox点击");
             if (!t.getButton().equals(MouseButton.PRIMARY)) {
                 return;
             }
-            dialogTitle.setText("新建连接");
-            showAddConnectionDialog();
+            createConnectionAction();
         });
 
-        queryBox.setOnMouseClicked((MouseEvent t) -> {
-            System.out.println("queryBox点击");
+        createQueryBox.setOnMouseClicked((MouseEvent t) -> {
             if (!t.getButton().equals(MouseButton.PRIMARY)) {
                 return;
             }
             createQueryAction();
         });
 
-        monitorBox.setOnMouseClicked((MouseEvent t) -> {
-            System.out.println("queryBox点击");
+        resourceMonitorBox.setOnMouseClicked((MouseEvent t) -> {
             if (!t.getButton().equals(MouseButton.PRIMARY)) {
                 return;
             }
@@ -393,7 +268,7 @@ public class MainController {
 
         List<ConnectionModel> connectionNodeList = ApplicationStore.getConnectionList();
         for (ConnectionModel connectionModel : connectionNodeList) {
-            root.getChildren().add(getConnectionTreeItem(connectionModel));
+            root.getChildren().add(TreeUtils.generateConnectionTree(connectionModel));
         }
 
 
@@ -566,7 +441,7 @@ public class MainController {
                 delButton.setId(nextRowIndex + "_delButton");
                 delButton.setOnAction((ActionEvent tt) -> {
                     System.out.println("删除 - 点击");
-                    deleteRowV2(createTbPane, ((JFXButton) tt.getTarget()));
+                    GridPaneUtils.deleteFieldRow(createTbPane, ((JFXButton) tt.getTarget()));
                     nextRowIndex--;
                 });
 
@@ -802,7 +677,7 @@ public class MainController {
             dataMap.put("version", connectionModel.getVersion());
 
             H2DbUtils.insertByHashMap("t_connection", Collections.singletonList(dataMap));
-            root.getChildren().add(getConnectionTreeItem(connectionModel));
+            root.getChildren().add(TreeUtils.generateConnectionTree(connectionModel));
 
         } else {
             ConnectionModel selectedConnectionModel = (ConnectionModel) ApplicationStore.getCurrentNode().getData();
@@ -1053,7 +928,7 @@ public class MainController {
         delButton.setUserData(nextRowIndex);
         delButton.setOnAction((ActionEvent t) -> {
             System.out.println("删除 - 点击");
-            deleteRowV2(createTbPane, ((JFXButton) t.getTarget()));
+            GridPaneUtils.deleteFieldRow(createTbPane, ((JFXButton) t.getTarget()));
             nextRowIndex--;
         });
 
@@ -1073,9 +948,20 @@ public class MainController {
         }
     }
     @ActionMethod("aboutAction")
-    public void about() {
+    public void aboutAction() {
         aboutDialog.setTransitionType(JFXDialog.DialogTransition.TOP);
         aboutDialog.show(rootPane);
+    }
+
+    @ActionMethod("createConnectionAction")
+    private void createConnectionAction() {
+        dialogTitle.setText("新建连接");
+        showAddConnectionDialog();
+    }
+
+    @ActionMethod("exitAction")
+    public void exitAction() {
+        System.exit(0);
     }
     @ActionMethod("clusterQueryAction")
     public void clusterQueryAction() {
