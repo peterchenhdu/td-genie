@@ -1,11 +1,11 @@
 <p align="center">
 	<img alt="logo" src="https://gitee.com/dbquery/td-genie/raw/master/tdengine/src/main/resources/images/logo.png" width="150" height="150">
 </p>
+
 <h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">Td-Genie v2.1.0</h1>
 <p align="center">免费开源的TDengine时序数据库图形用户界面工具，为用户提供直观、易用的数据库管理和操作体验！</p>
-
 ----
-简体中文 | [English](README.en.md)
+简体中文|[English](README.en.md)
 #### 介绍
 Td-Genie是一款功能全面、操作简便的TDengine时序数据库图形界面工具，V2.1.0目前支持的TDengine Server版本列表如下：
 1. TDengine2.x版本（2.6.0.34已测试）
