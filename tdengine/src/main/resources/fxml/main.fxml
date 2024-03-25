@@ -59,7 +59,7 @@
                 </ImageView>
                 <Text>新建连接</Text>
             </VBox>
-            <VBox alignment="CENTER" fx:id="queryBox" styleClass="tool-box">
+            <VBox alignment="CENTER" fx:id="createQueryBox" styleClass="tool-box">
                 <padding>
                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
                 </padding>
@@ -104,7 +104,7 @@
                 </ImageView>
                 <Text>查询监控</Text>
             </VBox>
-            <VBox alignment="CENTER" fx:id="monitorBox" styleClass="tool-box">
+            <VBox alignment="CENTER" fx:id="resourceMonitorBox" styleClass="tool-box">
                 <padding>
                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
                 </padding>
