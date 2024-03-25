@@ -7,6 +7,7 @@
 
 ----
 English | [简体中文](README.md)
+
 #### Description
 Td-Genie is a comprehensive and easy-to-use graphical interface tool for TDengine time-series database. The current V2.1.0 version supports the following TDengine Server versions:
 
