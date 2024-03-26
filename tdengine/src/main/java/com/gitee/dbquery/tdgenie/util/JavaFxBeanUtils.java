@@ -10,7 +10,7 @@ import javafx.collections.ObservableList;
  * @since 2024/2/20
  **/
 public class JavaFxBeanUtils {
-    public static ObservableList getTrueFalseObservableList() {
+    public static ObservableList<String> getTrueFalseObservableList() {
         ObservableList<String> innerList = FXCollections.observableArrayList();
         ListProperty<String> dataValues = new SimpleListProperty<>(innerList);
         dataValues.add("true");
@@ -18,7 +18,7 @@ public class JavaFxBeanUtils {
         return innerList;
     }
 
-    public static ObservableList getDataTypeObservableList() {
+    public static ObservableList<String> getDataTypeObservableList() {
         ObservableList<String> innerList = FXCollections.observableArrayList();
         ListProperty<String> dataValues = new SimpleListProperty<>(innerList);
         dataValues.add("TINYINT");

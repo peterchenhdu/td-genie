@@ -153,4 +153,12 @@ public class DataBaseUtils {
 
         RestConnectionUtils.executeUpdate(connection, sqlList);
     }
+
+    public static String getBufferParamCode(String version) {
+        if (VersionUtils.compareVersion(version, "3.0") > 0) {
+            return "buffer";
+        } else {
+            return "blocks";
+        }
+    }
 }

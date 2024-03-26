@@ -127,7 +127,7 @@ public class MonitorController {
         try {
             rst = RestConnectionUtils.executeQuery(TsdbConnectionUtils.getConnection(connectionModel),sql);
         } catch (Exception e) {
-            AlertUtils.showException(e, rootPane);
+            AlertUtils.showException(e);
             return;
         }
 

@@ -115,8 +115,8 @@
             </VBox>
         </HBox>
         <SplitPane fx:id="splitPane" VBox.vgrow="ALWAYS">
-            <JFXTreeView fx:id="leftTreeView" style="-fx-background-color: #ffffff;"/>
-            <JFXTabPane fx:id="tabPane"/>
+            <JFXTreeView fx:id="leftTreeView"  minWidth="100" style="-fx-background-color: #ffffff;"/>
+            <JFXTabPane fx:id="tabPane" minWidth="300"/>
         </SplitPane>
     </VBox>
     <JFXDialog fx:id="dialog" overlayClose="true">
@@ -226,8 +226,8 @@
             </body>
             <actions>
                 <JFXButton fx:id="addFieldButton" text="新增字段"/>
-                <JFXButton fx:id="createTBSaveButton" buttonType="RAISED" text="保存"/>
-                <JFXButton fx:id="createTBCancelButton" buttonType="RAISED" text="取消"/>
+                <JFXButton fx:id="createTbSaveButton" buttonType="RAISED" text="保存"/>
+                <JFXButton fx:id="createTbCancelButton" buttonType="RAISED" text="取消"/>
             </actions>
         </JFXDialogLayout>
     </JFXDialog>

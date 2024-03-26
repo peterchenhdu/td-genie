@@ -1,6 +1,8 @@
 package com.gitee.dbquery.tdgenie;
 
 import com.gitee.dbquery.tdgenie.gui.MainController;
+import com.gitee.dbquery.tdgenie.store.ApplicationStore;
+import com.gitee.dbquery.tdgenie.util.PropertiesUtils;
 import com.gitee.dbquery.tdgenie.util.ValueUtils;
 import com.jfoenix.controls.JFXDecorator;
 import com.jfoenix.svg.SVGGlyph;
@@ -25,6 +27,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import static com.gitee.dbquery.tdgenie.common.constant.ConfigConstants.*;
+
 
 /**
  * 启动类
@@ -37,11 +41,7 @@ public class AppStartup extends Application {
 
     @FXMLViewFlowContext
     private ViewFlowContext flowContext;
-    private static final String WINDOW_X_PROPERTY = "windowX";
-    private static final String WINDOW_Y_PROPERTY = "windowY";
-    private static final String WINDOW_WIDTH_PROPERTY = "windowWidth";
-    private static final String WINDOW_HEIGHT_PROPERTY = "windowHeight";
-    public static Double dividerPositions;
+
     public static Scene scene;
     private ApplicationContext applicationContext = ApplicationContext.getInstance();
     public static Properties sysConfigProperties = new Properties();
@@ -78,20 +78,19 @@ public class AppStartup extends Application {
         stage.setTitle("td-genie");
         scene.setFill(Color.TRANSPARENT);
         stage.setScene(scene);
-        stage.setX(Double.parseDouble(ValueUtils.getString(sysConfigProperties.getProperty(WINDOW_X_PROPERTY), 100)));
-        stage.setY(Double.parseDouble(ValueUtils.getString(sysConfigProperties.getProperty(WINDOW_Y_PROPERTY), 100)));
-        stage.setWidth(Double.parseDouble(ValueUtils.getString(sysConfigProperties.getProperty(WINDOW_WIDTH_PROPERTY), 800)));
-        stage.setHeight(Double.parseDouble(ValueUtils.getString(sysConfigProperties.getProperty(WINDOW_HEIGHT_PROPERTY), 600)));
+        stage.setX(PropertiesUtils.getDouble(sysConfigProperties, WINDOW_X_PROPERTY, 100.));
+        stage.setY(PropertiesUtils.getDouble(sysConfigProperties, WINDOW_Y_PROPERTY, 100.));
+        stage.setWidth(PropertiesUtils.getDouble(sysConfigProperties, WINDOW_WIDTH_PROPERTY, 800.));
+        stage.setHeight(PropertiesUtils.getDouble(sysConfigProperties, WINDOW_HEIGHT_PROPERTY, 600.));
         stage.show();
         stage.setOnCloseRequest(event -> {
-            System.out.print("监听到窗口关闭" + scene.getRoot());
             // 记录窗口位置和大小到本地存储
             Properties windowProperties = new Properties();
             windowProperties.put(WINDOW_X_PROPERTY, stage.getX() + "");
             windowProperties.put(WINDOW_Y_PROPERTY, stage.getY() + "");
             windowProperties.put(WINDOW_WIDTH_PROPERTY, stage.getWidth() + "");
             windowProperties.put(WINDOW_HEIGHT_PROPERTY, stage.getHeight() + "");
-            windowProperties.put("dividerPositions", dividerPositions + "");
+            windowProperties.put(DIVIDER_POSITIONS, ApplicationStore.getMainPaneLastDividerPositions().toString());
             try {
                 windowProperties.store(new FileOutputStream(System.getProperty("user.home") + "/windowState.properties"), "");
             } catch (IOException e) {
