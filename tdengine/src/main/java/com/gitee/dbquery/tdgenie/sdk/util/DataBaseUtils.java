@@ -32,18 +32,12 @@ public class DataBaseUtils {
     public static void createDatabase(ConnectionDTO connection, DbConfigAddDTO dbConfigAddDTO) {
         String createSql = "CREATE DATABASE " + dbConfigAddDTO.getDbName();
         if (ObjectUtils.isNotEmpty(dbConfigAddDTO.getBlocks())) {
-            if(VersionUtils.compareVersion(connection.getVersion(), "3.0") > 0) {
-                createSql += " BUFFER " + dbConfigAddDTO.getBlocks();
-            } else {
-                createSql += " blocks " + dbConfigAddDTO.getBlocks();
-            }
-
+            createSql += " " + getBufferParamCode(connection.getVersion()) + " " + dbConfigAddDTO.getBlocks();
         }
 
         if (ObjectUtils.isNotEmpty(dbConfigAddDTO.getKeep())) {
             createSql += " keep " + dbConfigAddDTO.getKeep();
         }
-
 
         if (ObjectUtils.isNotEmpty(dbConfigAddDTO.getReplica())) {
             createSql += " replica " + dbConfigAddDTO.getReplica();
