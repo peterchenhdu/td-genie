@@ -61,7 +61,7 @@ public class TabUtils {
 
     public static <T> void addTab(JFXTabPane tabPane, String title, Node icon, Class<T> controllerClass) {
         try {
-            addTab(tabPane, title, icon, controllerClass);
+            addTab(tabPane, title, icon, controllerClass, null);
         } catch (Exception e) {
             AlertUtils.showException(e);
         }
