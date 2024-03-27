@@ -388,8 +388,8 @@ public class RecordTabController {
             whereSql = " where " + fieldList.get(0).getName() + " < " + TimeUtils.LocalDateToLong(endDatePicker.getValue());
         }
 
-        QueryRstDTO queryRstDTO = RestConnectionUtils.executeQuery(connection, "select tbname, * from " + stableModel.getDb().getName() + "." +
-                stableModel.getStb().get("name").toString()  + whereSql + " limit " + start + ", " + 1000);
+        QueryRstDTO queryRstDTO = RestConnectionUtils.executeQuery(connection, "select tbname, * from `" + stableModel.getDb().getName() + "`.`" +
+                stableModel.getStb().get("name").toString() +"`" + whereSql + " limit " + start + ", " + 1000);
 
         tableView.getColumns().clear();
 

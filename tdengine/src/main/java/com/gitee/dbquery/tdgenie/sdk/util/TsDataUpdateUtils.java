@@ -33,7 +33,7 @@ public class TsDataUpdateUtils {
                                                   List<Object> tagValueList,
                                                   List<List<Object>> dataList) {
 
-        StringBuilder sql = new StringBuilder("INSERT INTO " + db + "." + tb + " USING " + stbDb + "." + stb + " TAGS " + getFieldValueSql(tagValueList) + " VALUES ");
+        StringBuilder sql = new StringBuilder("INSERT INTO `" + db + "`.`" + tb + "` USING `" + stbDb + "`.`" + stb + "` TAGS " + getFieldValueSql(tagValueList) + " VALUES ");
         dataList.forEach(d -> sql.append(getFieldValueSql(d)));
         RestConnectionUtils.executeUpdate(connection, Collections.singletonList(sql.toString()));
     }
@@ -47,7 +47,7 @@ public class TsDataUpdateUtils {
      * @param dataList   数据列表
      */
     public static void batchInsertFullColumn(ConnectionDTO connection, String db, String tb, List<List<Object>> dataList) {
-        StringBuilder sql = new StringBuilder("INSERT INTO " + db + "." + tb + " VALUES");
+        StringBuilder sql = new StringBuilder("INSERT INTO `" + db + "`.`" + tb + "` VALUES");
         dataList.forEach(d -> sql.append(getFieldValueSql(d)));
         RestConnectionUtils.executeUpdate(connection, Collections.singletonList(sql.toString()));
     }
@@ -71,7 +71,7 @@ public class TsDataUpdateUtils {
         columns.deleteCharAt(columns.length() - 1);
         columns.append(")");
 
-        StringBuilder sql = new StringBuilder("INSERT INTO " + db + "." + tb + " " + columns + " VALUES ");
+        StringBuilder sql = new StringBuilder("INSERT INTO `" + db + "`.`" + tb + "` " + columns + " VALUES ");
         dataList.forEach(d -> sql.append(getFieldValueSql(d)));
         RestConnectionUtils.executeUpdate(connection, Collections.singletonList(sql.toString()));
     }

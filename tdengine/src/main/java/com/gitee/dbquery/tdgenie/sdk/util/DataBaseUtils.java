@@ -30,7 +30,7 @@ public class DataBaseUtils {
      * @param dbConfigAddDTO 数据库配置
      */
     public static void createDatabase(ConnectionDTO connection, DbConfigAddDTO dbConfigAddDTO) {
-        String createSql = "CREATE DATABASE " + dbConfigAddDTO.getDbName();
+        String createSql = "CREATE DATABASE `" + dbConfigAddDTO.getDbName() + "`";
         if (ObjectUtils.isNotEmpty(dbConfigAddDTO.getBlocks())) {
             if(VersionUtils.compareVersion(connection.getVersion(), "3.0") > 0) {
                 createSql += " BUFFER " + dbConfigAddDTO.getBlocks();
@@ -67,7 +67,7 @@ public class DataBaseUtils {
      * @param dbName     库名
      */
     public static void deleteDatabase(ConnectionDTO connection, String dbName) {
-        RestConnectionUtils.executeUpdate(connection, Collections.singletonList("DROP DATABASE IF EXISTS " + dbName + ";"));
+        RestConnectionUtils.executeUpdate(connection, Collections.singletonList("DROP DATABASE IF EXISTS `" + dbName + "`;"));
     }
 
     /**
@@ -108,7 +108,7 @@ public class DataBaseUtils {
      * @return CREATE语句
      */
     public static String getDatabaseCreateSql(ConnectionDTO connection, String dbName) {
-        List<DatabaseCreateResDTO> list = RestConnectionUtils.executeQuery(connection, "SHOW CREATE DATABASE " + dbName + ";", DatabaseCreateResDTO.class);
+        List<DatabaseCreateResDTO> list = RestConnectionUtils.executeQuery(connection, "SHOW CREATE DATABASE `" + dbName + "`;", DatabaseCreateResDTO.class);
         return list.get(0).getCreateDbSql();
     }
 
@@ -132,20 +132,20 @@ public class DataBaseUtils {
         }
         List<String> sqlList = new ArrayList<>();
         if (needUpdate(databaseResDTO.get("replica"), dbConfigUpdateDTO.getReplica())) {
-            sqlList.add("ALTER DATABASE " + dbConfigUpdateDTO.getDbName() + " replica " + dbConfigUpdateDTO.getReplica() + ";");
+            sqlList.add("ALTER DATABASE `" + dbConfigUpdateDTO.getDbName() + "` replica " + dbConfigUpdateDTO.getReplica() + ";");
         }
 
         if (needUpdate(databaseResDTO.get("keep"), dbConfigUpdateDTO.getKeep())) {
-            sqlList.add("ALTER DATABASE " + dbConfigUpdateDTO.getDbName() + " keep " + dbConfigUpdateDTO.getKeep() + ";");
+            sqlList.add("ALTER DATABASE `" + dbConfigUpdateDTO.getDbName() + "` keep " + dbConfigUpdateDTO.getKeep() + ";");
         }
 
         if(VersionUtils.compareVersion(connection.getVersion(), "3.0") > 0) {
             if (needUpdate(databaseResDTO.get("buffer"), dbConfigUpdateDTO.getBlocks())) {
-                sqlList.add("ALTER DATABASE " + dbConfigUpdateDTO.getDbName() + " BUFFER " + dbConfigUpdateDTO.getBlocks() + ";");
+                sqlList.add("ALTER DATABASE `" + dbConfigUpdateDTO.getDbName() + "` BUFFER " + dbConfigUpdateDTO.getBlocks() + ";");
             }
         } else {
             if (needUpdate(databaseResDTO.get("blocks"), dbConfigUpdateDTO.getBlocks())) {
-                sqlList.add("ALTER DATABASE " + dbConfigUpdateDTO.getDbName() + " blocks " + dbConfigUpdateDTO.getBlocks() + ";");
+                sqlList.add("ALTER DATABASE `" + dbConfigUpdateDTO.getDbName() + "` blocks " + dbConfigUpdateDTO.getBlocks() + ";");
             }
 
         }

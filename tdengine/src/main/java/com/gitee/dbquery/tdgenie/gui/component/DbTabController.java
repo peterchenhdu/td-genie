@@ -143,8 +143,8 @@ public class DbTabController {
         } else if (ApplicationStore.getCurrentNode().getType() == NodeTypeEnum.STB) {
             StableModel stableModel = (StableModel) ApplicationStore.getCurrentNode().getData();
             ConnectionDTO connection = TsdbConnectionUtils.getConnection(stableModel.getDb().getConnectionModel());
-            QueryRstDTO queryRstDTO = RestConnectionUtils.executeQuery(connection, "select * from " + stableModel.getDb().getName() + "." +
-                    stableModel.getStb().get("name") + " limit 1, 10");
+            QueryRstDTO queryRstDTO = RestConnectionUtils.executeQuery(connection, "select * from `" + stableModel.getDb().getName() + "`.`" +
+                    stableModel.getStb().get("name") + "` limit 1, 10");
 
             queryRstDTO.getColumnList().forEach(column -> {
                 TableColumn<Map<String, Object>, String> tmpColumn = new TableColumn<>();
@@ -185,8 +185,8 @@ public class DbTabController {
             int start = (page - 1) * 1000;
             StableModel stableModel = (StableModel) ApplicationStore.getCurrentNode().getData();
             ConnectionDTO connection = TsdbConnectionUtils.getConnection(stableModel.getDb().getConnectionModel());
-            QueryRstDTO queryRstDTO = RestConnectionUtils.executeQuery(connection, "select * from " + stableModel.getDb().getName() + "." +
-                    stableModel.getStb().get("name") + " limit " + start + ", " + 1000);
+            QueryRstDTO queryRstDTO = RestConnectionUtils.executeQuery(connection, "select * from `" + stableModel.getDb().getName() + "`.`" +
+                    stableModel.getStb().get("name") + "` limit " + start + ", " + 1000);
 
             tableView.getColumns().clear();
             queryRstDTO.getColumnList().forEach(column -> {
@@ -208,8 +208,8 @@ public class DbTabController {
             });
 
 
-            QueryRstDTO countRstDTO = RestConnectionUtils.executeQuery(connection, "select count(*) from " + stableModel.getDb().getName() + "." +
-                    stableModel.getStb().get("name") );
+            QueryRstDTO countRstDTO = RestConnectionUtils.executeQuery(connection, "select count(*) from `" + stableModel.getDb().getName() + "`.`" +
+                    stableModel.getStb().get("name") + "`") ;
             long total = ObjectUtils.isEmpty(countRstDTO.getDataList()) ? 0 : (long) countRstDTO.getDataList().get(0).get("count(*)");
             pageCount.setValue((total / 1000) + 1);
         }
