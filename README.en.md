@@ -2,14 +2,14 @@
 	<img alt="logo" src="https://gitee.com/dbquery/td-genie/raw/master/tdengine/src/main/resources/images/logo.png" width="150" height="150">
 </p>
 
-<h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">Td-Genie v2.1.0</h1>
+<h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">Td-Genie v2.1.1</h1>
 <p align="center">A free and open-source time-series database management tools for TDengine, offers a graphical user interface tool that provides users with an intuitive and easy-to-use experience for database management and operations!</p>
 
 ----
 English | [简体中文](README.md)
 
 #### Description
-Td-Genie is a comprehensive and easy-to-use graphical interface tool for TDengine time-series database. The current V2.1.0 version supports the following TDengine Server versions:
+Td-Genie is a comprehensive and easy-to-use graphical interface tool for TDengine time-series database. The current V2.1.1 version supports the following TDengine Server versions:
 
 1. TDengine 2.x version (including 2.6.0.34, which has been tested)
 2. TDengine 3.x version (including 3.2.3.0, which has been tested)
