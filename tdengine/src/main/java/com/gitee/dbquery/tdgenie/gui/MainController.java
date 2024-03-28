@@ -516,17 +516,16 @@ public class MainController {
     }
 
     private void showAddConnectionDialog() {
-        CommonNode currentNode = ApplicationStore.getCurrentNode();
-        if (null == currentNode) {
-            return;
-        }
-
         nameTextField.clear();
         ipTextField.clear();
         portTextField.clear();
         usernameTextField.clear();
         passwordTextField.clear();
         if (!"新建连接".equals(dialogTitle.getText())) {
+            CommonNode currentNode = ApplicationStore.getCurrentNode();
+            if (null == currentNode) {
+                return;
+            }
             ConnectionModel connectionModel = (ConnectionModel) currentNode.getData();
             List<Map<String, Object>> rst = ConnectionDAO.queryByName(connectionModel.getName());
             if (ObjectUtils.isNotEmpty(rst)) {
