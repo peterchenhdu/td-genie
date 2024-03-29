@@ -199,13 +199,17 @@ public class QueryTabController {
 
         FileUtil.writeString(sqlEditArea.getText(), file, "utf-8");
 
-        AlertUtils.show(rootPane, "保存成功!保存路径:\n" + exportFilePath);
+        AlertUtils.show("保存成功!保存路径:\n" + exportFilePath);
 
 
     }
 
     @PostConstruct
     public void init() {
+
+        rootPane.setOnContextMenuRequested(event -> {
+            event.consume(); // 标记事件已被处理，防止默认的上下文菜单显示
+        });
 
         // add line numbers to the left of area
         sqlEditArea.setParagraphGraphicFactory(LineNumberFactory.get(sqlEditArea));
@@ -254,7 +258,7 @@ public class QueryTabController {
         connectionComboBox.valueProperty().addListener(
                 (observable, oldValue, newValue) -> {
                     System.out.println(newValue);
-
+                    dbComboBox.getItems().clear();
                     for (TreeItem<CommonNode> node : ApplicationStore.getConnectionTree().getChildren()) {
                         if (node.getValue().getName().equals(newValue)) {
                             node.getChildren().forEach(d -> {

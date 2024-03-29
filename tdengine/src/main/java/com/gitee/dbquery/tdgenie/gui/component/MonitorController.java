@@ -1,16 +1,17 @@
 package com.gitee.dbquery.tdgenie.gui.component;
 
-import com.gitee.dbquery.tdgenie.sdk.util.RestConnectionUtils;
-import com.gitee.dbquery.tdgenie.util.DateTimeUtils;
-import com.gitee.dbquery.tdgenie.util.ObjectUtils;
-import com.gitee.dbquery.tdgenie.util.TsdbConnectionUtils;
 import com.gitee.dbquery.tdgenie.common.enums.NodeTypeEnum;
 import com.gitee.dbquery.tdgenie.model.ConnectionModel;
 import com.gitee.dbquery.tdgenie.model.DatabaseModel;
 import com.gitee.dbquery.tdgenie.model.StableModel;
 import com.gitee.dbquery.tdgenie.sdk.dto.QueryRstDTO;
+import com.gitee.dbquery.tdgenie.sdk.util.RestConnectionUtils;
 import com.gitee.dbquery.tdgenie.sdk.util.VersionUtils;
 import com.gitee.dbquery.tdgenie.store.ApplicationStore;
+import com.gitee.dbquery.tdgenie.util.AlertUtils;
+import com.gitee.dbquery.tdgenie.util.DateTimeUtils;
+import com.gitee.dbquery.tdgenie.util.ObjectUtils;
+import com.gitee.dbquery.tdgenie.util.TsdbConnectionUtils;
 import eu.hansolo.tilesfx.Tile;
 import eu.hansolo.tilesfx.TileBuilder;
 import io.datafx.controller.ViewController;
@@ -20,6 +21,7 @@ import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.scene.chart.XYChart;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 
 import javax.annotation.PostConstruct;
@@ -29,6 +31,9 @@ import java.util.Map;
 
 @ViewController(value = "/fxml/component/monitor.fxml", title = "资源监控", iconPath = "")
 public class MonitorController {
+
+    @FXML
+    private StackPane rootPane;
 
     public static final Color BACKGROUND_DARK = Color.rgb(39, 49, 66); // #2a2a2a
     public static final Color BACKGROUND_LIGHT = Color.rgb(255, 255, 255); // #2a2a2a
@@ -56,6 +61,9 @@ public class MonitorController {
 
     @PostConstruct
     private void init() {
+        rootPane.setOnContextMenuRequested(event -> {
+            event.consume(); // 标记事件已被处理，防止默认的上下文菜单显示
+        });
 
         // LineChart Data
         XYChart.Series<String, Number> cpuSeries = new XYChart.Series();
@@ -86,7 +94,7 @@ public class MonitorController {
             return;
         }
         String sql;
-        if(VersionUtils.compareVersion(connectionModel.getVersion(), "3.0") > 0) {
+        if (VersionUtils.compareVersion(connectionModel.getVersion(), "3.0") > 0) {
             sql = "SELECT _wstart as ts , " +
                     "avg( cpu_engine ) AS avg_cpu_taosd," +
                     "avg( cpu_system ) AS avg_cpu_system," +
@@ -115,8 +123,18 @@ public class MonitorController {
                     "WHERE " +
                     "ts > '" + DateTimeUtils.format(LocalDateTime.now().minusDays(1)) + "' INTERVAL ( 10m );";
         }
+        QueryRstDTO rst;
+        try {
+            rst = RestConnectionUtils.executeQuery(TsdbConnectionUtils.getConnection(connectionModel), sql);
+        } catch (Exception e) {
+            if (e.getMessage().contains("Database not exist")) {
+                AlertUtils.showExceptionMsg("log数据库不存在，请检查taosKeeper是否开启(未开启，则不能获取到监控数据)");
+            } else {
+                AlertUtils.showException(e);
+            }
+            return;
+        }
 
-        QueryRstDTO rst = RestConnectionUtils.executeQuery(TsdbConnectionUtils.getConnection(connectionModel),sql);
         for (Map<String, Object> map : rst.getDataList()) {
             cpuSeries.getData().add(new XYChart.Data(map.get("ts").toString().substring(11, 16), map.get("avg_cpu_taosd")));
             memSeries.getData().add(new XYChart.Data(map.get("ts").toString().substring(11, 16), map.get("avg_mem_taosd")));

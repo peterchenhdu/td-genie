@@ -33,8 +33,8 @@ public class SuperTableUtils {
         List<TableFieldDTO> fieldList = stableAddDTO.getFieldList().stream().filter(f -> !f.getIsTag()).collect(Collectors.toList());
         List<TableFieldDTO> tagList = stableAddDTO.getFieldList().stream().filter(TableFieldDTO::getIsTag).collect(Collectors.toList());
 
-        StringBuilder sql = new StringBuilder("create " + (ObjectUtils.isEmpty(tagList) ? "TABLE " : "STABLE ") + stableAddDTO.getDb() + ".");
-        sql.append(stableAddDTO.getTb()).append(" (");
+        StringBuilder sql = new StringBuilder("create " + (ObjectUtils.isEmpty(tagList) ? "TABLE " : "STABLE ") + "`" +  stableAddDTO.getDb() + "`.`");
+        sql.append(stableAddDTO.getTb()).append("` (");
         fieldList.forEach(field -> {
             sql.append(field.getName()).append(" ").append(getFieldType(field)).append(",");
         });
@@ -77,7 +77,7 @@ public class SuperTableUtils {
      * @param tbName     表名
      */
     public static void deleteStable(ConnectionDTO connection, String dbName, String tbName) {
-        RestConnectionUtils.executeUpdate(connection, Collections.singletonList("DROP STABLE IF EXISTS " + dbName + "." + tbName + ";"));
+        RestConnectionUtils.executeUpdate(connection, Collections.singletonList("DROP STABLE IF EXISTS `" + dbName + "`.`" + tbName + "`;"));
     }
 
     /**
@@ -106,7 +106,7 @@ public class SuperTableUtils {
 
             return queryRstDTO;
         }
-        return RestConnectionUtils.executeQuery(connection, "show " + db + ".stables;");
+        return RestConnectionUtils.executeQuery(connection, "show `" + db + "`.stables;");
     }
 
     /**
@@ -150,7 +150,7 @@ public class SuperTableUtils {
      * @return 字段列表
      */
     public static List<TableFieldDTO> getStableField(ConnectionDTO connection, String dbName, String tbName) {
-        QueryRstDTO fieldList = RestConnectionUtils.executeQuery(connection, "DESCRIBE " + dbName + "." + tbName + ";");
+        QueryRstDTO fieldList = RestConnectionUtils.executeQuery(connection, "DESCRIBE `" + dbName + "`.`" + tbName + "`;");
 
         return fieldList.getDataList().stream().map(f -> {
             TableFieldDTO tf = new TableFieldDTO();
@@ -171,7 +171,7 @@ public class SuperTableUtils {
      * @return SQL
      */
     public static String getStableSql(ConnectionDTO connection, String dbName, String stb) {
-        List<StableCreateResDTO> list = RestConnectionUtils.executeQuery(connection, "SHOW CREATE STABLE  " + dbName + "." + stb + ";", StableCreateResDTO.class);
+        List<StableCreateResDTO> list = RestConnectionUtils.executeQuery(connection, "SHOW CREATE STABLE  `" + dbName + "`.`" + stb + "`;", StableCreateResDTO.class);
         return list.get(0).getCreateDbSql();
     }
 
@@ -184,19 +184,19 @@ public class SuperTableUtils {
     public static void updateStable(ConnectionDTO connection, StableUpdateDTO stableUpdateDTO) {
         List<String> batchSql = new ArrayList<>();
         if (ObjectUtils.isNotEmpty(stableUpdateDTO.getAddList())) {
-            stableUpdateDTO.getAddList().forEach(f -> batchSql.add("ALTER STABLE " + stableUpdateDTO.getDb() + "." + stableUpdateDTO.getTb() + " ADD " + (f.getIsTag() ? "TAG " : "COLUMN ") + f.getName() + " " + getFieldType(f) + ";"));
+            stableUpdateDTO.getAddList().forEach(f -> batchSql.add("ALTER STABLE `" + stableUpdateDTO.getDb() + "`.`" + stableUpdateDTO.getTb() + "` ADD " + (f.getIsTag() ? "TAG " : "COLUMN ") + f.getName() + " " + getFieldType(f) + ";"));
         }
 
         if (ObjectUtils.isNotEmpty(stableUpdateDTO.getDeleteList())) {
-            stableUpdateDTO.getDeleteList().forEach(f -> batchSql.add("ALTER STABLE " + stableUpdateDTO.getDb() + "." + stableUpdateDTO.getTb() + " DROP " + (f.getIsTag() ? "TAG " : "COLUMN ") + f.getName() + ";"));
+            stableUpdateDTO.getDeleteList().forEach(f -> batchSql.add("ALTER STABLE `" + stableUpdateDTO.getDb() + "`.`" + stableUpdateDTO.getTb() + "` DROP " + (f.getIsTag() ? "TAG " : "COLUMN ") + f.getName() + ";"));
         }
 
         if (ObjectUtils.isNotEmpty(stableUpdateDTO.getUpdateList())) {
-            stableUpdateDTO.getUpdateList().forEach(f -> batchSql.add("ALTER STABLE " + stableUpdateDTO.getDb() + "." + stableUpdateDTO.getTb() + " MODIFY  " + (f.getIsTag() ? "TAG " : "COLUMN ") + f.getName() + " " + getFieldType(f) + ";"));
+            stableUpdateDTO.getUpdateList().forEach(f -> batchSql.add("ALTER STABLE `" + stableUpdateDTO.getDb() + "`.`" + stableUpdateDTO.getTb() + "` MODIFY  " + (f.getIsTag() ? "TAG " : "COLUMN ") + f.getName() + " " + getFieldType(f) + ";"));
         }
 
         if (ObjectUtils.isNotEmpty(stableUpdateDTO.getTagNameChangeMap())) {
-            stableUpdateDTO.getTagNameChangeMap().forEach((k, v) -> batchSql.add("ALTER STABLE " + stableUpdateDTO.getDb() + "." + stableUpdateDTO.getTb() + " CHANGE  TAG " + k + " " + v + ";"));
+            stableUpdateDTO.getTagNameChangeMap().forEach((k, v) -> batchSql.add("ALTER STABLE `" + stableUpdateDTO.getDb() + "`.`" + stableUpdateDTO.getTb() + "` CHANGE  TAG " + k + " " + v + ";"));
         }
 
         RestConnectionUtils.executeUpdate(connection, batchSql);
