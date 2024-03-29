@@ -34,4 +34,8 @@ public class AlertUtils {
         log.error(t.toString(), t);
         show("程序异常：" + t.getMessage());
     }
+
+    public static void showExceptionMsg(String msg) {
+        show("程序异常：" + msg);
+    }
 }
