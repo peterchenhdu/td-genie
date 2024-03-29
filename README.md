@@ -19,14 +19,15 @@ Td-Genie是一款功能全面、操作简便的TDengine时序数据库图形界�
 2. 数据库维护（新增、修改、查询、删除）
 3. 超级表维护（新增、修改、查询、删除）
 4. 超级表数据查询（支持按时间查询，自动分页展示）
-5. 数据操作（新增、更新、复制字段值，复制为Insert语句）
-6. 自定义SQL执行(可执行更新SQL或查询SQL，可展示查询结果、执行耗时、错误信息等) 
-7. 资源监控查看(可查看数据库CPU、内存、磁盘使用趋势) 
-8. 库表DDL导出（数据库创建SQL、表创建SQL）
-9. 集群查看（查看数据节点、管理节点）
-10. 用户查看
-11. 连接监控（监控已建立的连接）
-12. 查询监控（监控正在执行的查询SQL）
+5. 普通表数据查看（支持按库、超级表、表名查询，支持查看普通表数据）
+6. 数据操作（新增、更新、复制字段值，复制为Insert语句）
+7. 自定义SQL执行(可执行更新SQL或查询SQL，可展示查询结果、执行耗时、错误信息等) 
+8. 资源监控查看(可查看数据库CPU、内存、磁盘使用趋势) 
+9. 库表DDL导出（数据库创建SQL、表创建SQL）
+10. 集群查看（查看数据节点、管理节点）
+11. 用户查看
+12. 连接监控（监控已建立的连接）
+13. 查询监控（监控正在执行的查询SQL）
 #### 软件架构
 基于JavaFX实现UI功能。
 
@@ -47,24 +48,27 @@ Td-Genie是一款功能全面、操作简便的TDengine时序数据库图形界�
 ![输入图片说明](tdengine/src/main/resources/images/readme/createSTB.png)
 5. 查看超级表数据（查看连接下的所有数据库、数据库下的所有超级表，支持按时间搜索超级表中数据，分页查询，可复制表格中的查询结果）
 ![输入图片说明](tdengine/src/main/resources/images/readme/queryStbRecord.png)
-6. 新增数据（输入字段和Tag信息）
+6. 查看普通表（支持按库、超级表、表名查询，支持查看普通表数据）
+![输入图片说明](tdengine/src/main/resources/images/readme/tableQuery.png)
+![输入图片说明](tdengine/src/main/resources/images/readme/tableDataQuery.png)
+7. 新增数据（输入字段和Tag信息）
 ![输入图片说明](tdengine/src/main/resources/images/readme/insertData.png)
-7. 编辑数据 (输入字段信息)
+8. 编辑数据 (输入字段信息)
 ![输入图片说明](tdengine/src/main/resources/images/readme/updateDataSelectItem.png)
 ![输入图片说明](tdengine/src/main/resources/images/readme/updateData.png)
-8. 自定义SQL执行(可执行任意SQL，对于查询SQL，可展示查询结果，支持保存SQL、美化SQL)
+9. 自定义SQL执行(可执行任意SQL，对于查询SQL，可展示查询结果，支持保存SQL、美化SQL)
 ![输入图片说明](tdengine/src/main/resources/images/readme/executeSQL.png)
-9. 资源监控查看(可查看数据库CPU、内存、磁盘使用趋势)
+10. 资源监控查看(可查看数据库CPU、内存、磁盘使用趋势)
 ![输入图片说明](tdengine/src/main/resources/images/resourceMonitor.png)
-10. 导出库表DDL
+11. 导出库表DDL
 ![输入图片说明](tdengine/src/main/resources/images/readme/exportDDL.png)
-11. 集群查看（查看数据节点、管理节点）
+12. 集群查看（查看数据节点、管理节点）
 ![输入图片说明](tdengine/src/main/resources/images/readme/clusterquery.png)
-12. 用户查看
+13. 用户查看
 ![输入图片说明](tdengine/src/main/resources/images/readme/userquery.png)
-13. 连接监控（监控已建立的连接）
+14. 连接监控（监控已建立的连接）
 ![输入图片说明](tdengine/src/main/resources/images/readme/connectionquery.png)
-14. 查询监控（监控正在执行的查询SQL）
+15. 查询监控（监控正在执行的查询SQL）
 ![输入图片说明](tdengine/src/main/resources/images/readme/querymonitor.png)
 #### 参与贡献
 
