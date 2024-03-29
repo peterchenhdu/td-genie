@@ -258,7 +258,7 @@ public class QueryTabController {
         connectionComboBox.valueProperty().addListener(
                 (observable, oldValue, newValue) -> {
                     System.out.println(newValue);
-
+                    dbComboBox.getItems().clear();
                     for (TreeItem<CommonNode> node : ApplicationStore.getConnectionTree().getChildren()) {
                         if (node.getValue().getName().equals(newValue)) {
                             node.getChildren().forEach(d -> {

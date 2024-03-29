@@ -1,10 +1,10 @@
 package com.gitee.dbquery.tdgenie.util;
 
 import com.gitee.dbquery.tdgenie.store.ApplicationStore;
-import com.jfoenix.controls.JFXTabPane;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 
 /**
  * @author chenpi
@@ -12,7 +12,7 @@ import javafx.scene.control.Tab;
  **/
 public class ContextMenuUtils {
 
-    public static ContextMenu generateTabPaneContextMenu(JFXTabPane tabPane) {
+    public static ContextMenu generateTabPaneContextMenu(TabPane tabPane) {
         ContextMenu contextMenu = new ContextMenu();
         MenuItem closeAllMenuItem = new MenuItem("全部关闭");
         closeAllMenuItem.setOnAction(event -> {

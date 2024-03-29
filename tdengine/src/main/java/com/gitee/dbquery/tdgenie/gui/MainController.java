@@ -68,6 +68,7 @@ public class MainController {
     private JFXTreeView<CommonNode> leftTreeView;
     @FXML
     private JFXTabPane tabPane;
+
     /**
      * 菜单
      */
@@ -111,6 +112,8 @@ public class MainController {
     private VBox clusterBox;
     @FXML
     private VBox userQueryBox;
+    @FXML
+    private VBox tableQueryBox;
     @FXML
     private VBox connectionsBox;
     @FXML
@@ -186,11 +189,16 @@ public class MainController {
     public void init() throws SQLException {
         //注册MainController
         ApplicationContext.getInstance().register(this, MainController.class);
+
         //检查connection表
         ConnectionDAO.connectionTbExistCheck();
         //设置Tab菜单
+
+        ApplicationContext.getInstance().register(tabPane, JFXTabPane.class);
         tabPane.setContextMenu(ContextMenuUtils.generateTabPaneContextMenu(tabPane));
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.ALL_TABS);
+        tabPane.setPrefSize(200, 200); // 设置首选大小
+
         //记录Main pane最后一次的dividerPositions
         splitPane.getDividers().get(0).positionProperty()
                 .addListener((o, oldPos, newPos) -> ApplicationStore.setMainPaneLastDividerPositions(newPos.doubleValue()));
@@ -470,11 +478,17 @@ public class MainController {
             clusterQueryAction();
         });
         userQueryBox.setOnMouseClicked((MouseEvent t) -> {
-            System.out.println("userQueryBox点击");
             if (!t.getButton().equals(MouseButton.PRIMARY)) {
                 return;
             }
             userQueryAction();
+
+        });
+        tableQueryBox.setOnMouseClicked((MouseEvent t) -> {
+            if (!t.getButton().equals(MouseButton.PRIMARY)) {
+                return;
+            }
+            tableQueryAction();
 
         });
         connectionsBox.setOnMouseClicked((MouseEvent t) -> {
@@ -905,6 +919,11 @@ public class MainController {
     @ActionMethod("userQueryAction")
     public void userQueryAction() {
         TabUtils.addTab(tabPane, "用户查看", new ImageView("/images/user_query.png"), UserQueryController.class);
+    }
+
+    @ActionMethod("tableQueryAction")
+    public void tableQueryAction() {
+        TabUtils.addTab(tabPane, "普通表查看", new ImageView("/images/tb.png"), TableQueryController.class);
     }
 
     @ActionMethod("resourceMonitorAction")

@@ -1,6 +1,7 @@
 package com.gitee.dbquery.tdgenie.store;
 
 import com.gitee.dbquery.tdgenie.model.CommonNode;
+import com.gitee.dbquery.tdgenie.model.ConnectionModel;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TreeItem;
 import lombok.Data;
@@ -27,6 +28,15 @@ public class ApplicationStore {
 
     public static void setConnectionTree(TreeItem<CommonNode> connectionTree) {
         ApplicationStore.connectionTree = connectionTree;
+    }
+
+    public static ConnectionModel getConnection(String name) {
+        for(TreeItem<CommonNode> node : connectionTree.getChildren()) {
+            if(node.getValue().getName().equals(name)) {
+                return (ConnectionModel)(node.getValue().getData());
+            }
+        }
+        return null;
     }
 
     public static CommonNode getCurrentNode() {
