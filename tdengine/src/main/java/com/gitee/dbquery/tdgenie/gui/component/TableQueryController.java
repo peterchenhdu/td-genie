@@ -116,6 +116,7 @@ public class TableQueryController {
         connectionComboBox.valueProperty().addListener(
                 (observable, oldValue, newValue) -> {
                     System.out.println(newValue);
+                    tableView.getColumns().clear();
                     dbComboBox.getItems().clear();
                     for (TreeItem<CommonNode> node : ApplicationStore.getConnectionTree().getChildren()) {
                         if (node.getValue().getName().equals(newValue)) {
@@ -130,6 +131,7 @@ public class TableQueryController {
         dbComboBox.valueProperty().addListener(
                 (observable, oldValue, newValue) -> {
                     System.out.println(newValue);
+                    tableView.getColumns().clear();
                     stbComboBox.getItems().clear();
                     for (TreeItem<CommonNode> node : ApplicationStore.getConnectionTree().getChildren()) {
                         if (connectionComboBox.getValue().equals(node.getValue().getName())) {
